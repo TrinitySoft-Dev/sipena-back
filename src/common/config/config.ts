@@ -1,18 +1,18 @@
-import 'dotenv/config';
-import * as joi from 'joi';
+import 'dotenv/config'
+import * as joi from 'joi'
 
 interface ENVIROMENTS {
   DB: {
-    HOST: string;
-    PORT: string;
-    PASSWORD: string;
-    USERNAME: string;
-    DATABASE: string;
-  };
-  PORT: string;
+    HOST: string
+    PORT: string
+    PASSWORD: string
+    USERNAME: string
+    DATABASE: string
+  }
+  PORT: string
+  JWT_SECRET: string
 }
 const envs = joi
-
   .object({
     DB_HOST: joi.string().required(),
     DB_PORT: joi.string().required(),
@@ -20,14 +20,15 @@ const envs = joi
     DB_USERNAME: joi.string().required(),
     DB_DATABASE: joi.string().required(),
     PORT: joi.string().required(),
+    JWT_SECRET: joi.string().required(),
   })
   .unknown()
-  .required();
+  .required()
 
-const { error, value } = envs.validate(process.env);
+const { error, value } = envs.validate(process.env)
 
 if (error) {
-  throw new Error(`Config validation error: ${error.message}`);
+  throw new Error(`Config validation error: ${error.message}`)
 }
 
 export const config: ENVIROMENTS = {
@@ -39,4 +40,5 @@ export const config: ENVIROMENTS = {
     DATABASE: value.DB_DATABASE,
   },
   PORT: value.PORT,
-};
+  JWT_SECRET: value.JWT_SECRET,
+}

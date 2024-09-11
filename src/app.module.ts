@@ -11,6 +11,7 @@ import { Infoworker } from './infoworkers/entities/infoworker.entity'
 import { User } from './users/entities/user.entity'
 import { RolesModule } from './roles/roles.module'
 import { Role } from './roles/entities/role.entity'
+import { JwtModule } from '@nestjs/jwt'
 
 @Module({
   imports: [
@@ -25,6 +26,11 @@ import { Role } from './roles/entities/role.entity'
       synchronize: true,
       logging: true,
       ssl: true,
+    }),
+    JwtModule.register({
+      global: true,
+      secret: config.JWT_SECRET,
+      signOptions: { expiresIn: '1d' },
     }),
     UsersModule,
     InfoworkersModule,

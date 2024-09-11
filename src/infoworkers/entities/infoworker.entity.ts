@@ -52,7 +52,7 @@ export class Infoworker {
   updated_at: Date
 
   @Column({
-    nullable: false,
+    nullable: true,
     type: 'date',
   })
   deleted_at: Date
