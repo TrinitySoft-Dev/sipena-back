@@ -27,4 +27,5 @@ export const exampleWorkerSchema = {
   address: '123456789',
   city: '123456789',
   visa: '123456789',
+  role: 'WORKER',
 }

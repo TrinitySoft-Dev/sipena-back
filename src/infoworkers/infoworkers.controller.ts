@@ -1,7 +1,9 @@
 import { Controller, Get, Post, Body } from '@nestjs/common'
 import { InfoworkersService } from './infoworkers.service'
 import { CreateInfoworkerDto } from './dto/create-infoworker.dto'
+import { ApiTags } from '@nestjs/swagger'
 
+@ApiTags('Infoworkers')
 @Controller('infoworkers')
 export class InfoworkersController {
   constructor(private readonly infoworkersService: InfoworkersService) {}

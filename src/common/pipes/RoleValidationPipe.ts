@@ -1,4 +1,4 @@
-import { CreateUserDto } from '@/users/dto/create-user.dto'
+import { CreateUserDto } from '@/users/dto/worker-user.dto'
 import { ArgumentMetadata, BadRequestException, PipeTransform } from '@nestjs/common'
 import { plainToInstance } from 'class-transformer'
 import { validate } from 'class-validator'

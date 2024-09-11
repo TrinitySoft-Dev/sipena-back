@@ -1,17 +1,23 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
+import { JwtModule } from '@nestjs/jwt'
+
+// Ensure the necessary @nestjs/typeorm package is installed or the path is correctly set
 import { config } from '@/common/config/config'
 
 // modules
 import { UsersModule } from './users/users.module'
 import { InfoworkersModule } from './infoworkers/infoworkers.module'
+import { RolesModule } from './roles/roles.module'
+import { RulesModule } from './rules/rules.module'
+import { RulesConditionsModule } from './rules-conditions/rules-conditions.module'
 
 // entities
 import { Infoworker } from './infoworkers/entities/infoworker.entity'
 import { User } from './users/entities/user.entity'
-import { RolesModule } from './roles/roles.module'
 import { Role } from './roles/entities/role.entity'
-import { JwtModule } from '@nestjs/jwt'
+import { Rule } from './rules/entities/rule.entity'
+import { RulesCondition } from './rules-conditions/entities/rules-condition.entity'
 
 @Module({
   imports: [
@@ -22,7 +28,7 @@ import { JwtModule } from '@nestjs/jwt'
       password: config.DB.PASSWORD,
       username: config.DB.USERNAME,
       database: config.DB.DATABASE,
-      entities: [User, Infoworker, Role],
+      entities: [User, Infoworker, Role, Rule, RulesCondition],
       synchronize: true,
       logging: true,
       ssl: true,
@@ -35,6 +41,8 @@ import { JwtModule } from '@nestjs/jwt'
     UsersModule,
     InfoworkersModule,
     RolesModule,
+    RulesModule,
+    RulesConditionsModule,
   ],
   controllers: [],
   providers: [],

@@ -1,5 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common'
-import { CreateUserDto } from './dto/create-user.dto'
+import { CreateUserDto } from './dto/worker-user.dto'
 import { InjectRepository } from '@nestjs/typeorm'
 import { User } from './entities/user.entity'
 import { Repository } from 'typeorm'
@@ -7,6 +7,7 @@ import * as bcrypt from 'bcrypt'
 import { InfoworkersService } from '@/infoworkers/infoworkers.service'
 import { LoginUserDto } from './dto/login-user.dto'
 import { JwtService } from '@nestjs/jwt'
+import { ClientUserDto } from './dto/client.user.dto'
 
 @Injectable()
 export class UsersService {
@@ -16,7 +17,7 @@ export class UsersService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async create(createUserDto: CreateUserDto) {
+  async create(createUserDto: any) {
     const { email, password, name, last_name, role, ...rest } = createUserDto
 
     const existuser = await this.userRepository.findOne({ where: { email } })

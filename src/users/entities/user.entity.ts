@@ -35,7 +35,7 @@ export class User {
   })
   last_name: string
 
-  @OneToOne(() => Infoworker, infoworker => infoworker.id)
+  @OneToOne(() => Infoworker, infoworker => infoworker.id, { onDelete: 'CASCADE' })
   @JoinColumn()
   infoworker: Infoworker
 

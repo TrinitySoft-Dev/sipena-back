@@ -18,18 +18,19 @@ async function bootstrap() {
 
   app.useGlobalFilters(new HttpExceptionFilter())
   app.useGlobalInterceptors(new ReponseInterceptor())
+  app.setGlobalPrefix('/api')
 
   const config = new DocumentBuilder()
     .setTitle('Backend API')
     .setDescription('Backend API Sipena')
     .setVersion('1.0')
+    .addBearerAuth()
     .addTag('Users')
     .build()
 
   const document = SwaggerModule.createDocument(app, config)
   SwaggerModule.setup('api/docs', app, document)
 
-  app.setGlobalPrefix('/api')
   await app.listen(env.PORT)
 }
 bootstrap()
