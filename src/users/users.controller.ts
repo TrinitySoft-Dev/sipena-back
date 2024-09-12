@@ -35,7 +35,7 @@ export class UsersController {
   create(
     @UploadedFiles(
       new ParseFilePipe({
-        validators: [new MaxFileSizeValidator({ maxSize: 1000 }), new FileTypeValidator({ fileType: 'image/jpeg' })],
+        validators: [new MaxFileSizeValidator({ maxSize: 100000 }), new FileTypeValidator({ fileType: 'image/jpeg' })],
       }),
     )
     files: Express.Multer.File[],
