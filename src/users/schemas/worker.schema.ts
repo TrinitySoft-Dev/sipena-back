@@ -23,9 +23,7 @@ export const exampleWorkerSchema = {
   abn: '123456789',
   birthday: '2000-01-01',
   employment_end_date: '2000-01-01',
-  passport: '123456789',
   address: '123456789',
   city: '123456789',
-  visa: '123456789',
   role: 'WORKER',
 }

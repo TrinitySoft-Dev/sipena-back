@@ -120,19 +120,6 @@ export class CreateUserDto {
   employment_end_date: string
 
   @ApiProperty({
-    description: 'Passport of the user',
-    example: '123456789',
-    required: true,
-    type: String,
-    maxLength: 255,
-    minLength: 5,
-    default: '123456789',
-    nullable: false,
-  })
-  @IsString()
-  passport: string
-
-  @ApiProperty({
     description: 'Address of the user',
     example: '123456789',
     required: true,
@@ -157,19 +144,6 @@ export class CreateUserDto {
   })
   @IsString()
   city: string
-
-  @ApiProperty({
-    description: 'Visa of the user',
-    example: '123456789',
-    required: true,
-    type: String,
-    maxLength: 255,
-    minLength: 5,
-    default: '123456789',
-    nullable: false,
-  })
-  @IsString()
-  visa: string
 
   @ApiProperty({
     description: 'Role of the user',

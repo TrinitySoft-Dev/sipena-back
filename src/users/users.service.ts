@@ -6,6 +6,7 @@ import * as bcrypt from 'bcrypt'
 import { InfoworkersService } from '@/infoworkers/infoworkers.service'
 import { LoginUserDto } from './dto/login-user.dto'
 import { JwtService } from '@nestjs/jwt'
+import { ImagesService } from '@/images/images.service'
 
 @Injectable()
 export class UsersService {
@@ -13,9 +14,10 @@ export class UsersService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     private readonly infoworkerService: InfoworkersService,
     private readonly jwtService: JwtService,
+    private readonly imagesService: ImagesService,
   ) {}
 
-  async create(createUserDto: any) {
+  async create(createUserDto: any, files: Express.Multer.File[]) {
     const { email, password, name, last_name, role, ...rest } = createUserDto
 
     const existuser = await this.userRepository.findOne({ where: { email } })
@@ -23,7 +25,9 @@ export class UsersService {
 
     const hashPassword = await this.encryptPassword(password)
     if (role === 'WORKER') {
-      const infoworker = await this.infoworkerService.create({ ...rest })
+      const [passport, visa] = await this.imagesService.uploadMultiple(files)
+
+      const infoworker = await this.infoworkerService.create({ ...rest, visa, passport })
       await this.userRepository.save({
         email,
         password: hashPassword,

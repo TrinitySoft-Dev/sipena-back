@@ -18,6 +18,7 @@ import { User } from './users/entities/user.entity'
 import { Role } from './roles/entities/role.entity'
 import { Rule } from './rules/entities/rule.entity'
 import { RulesCondition } from './rules-conditions/entities/rules-condition.entity'
+import { ImagesModule } from './images/images.module'
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { RulesCondition } from './rules-conditions/entities/rules-condition.enti
     RolesModule,
     RulesModule,
     RulesConditionsModule,
+    ImagesModule,
   ],
   controllers: [],
   providers: [],
