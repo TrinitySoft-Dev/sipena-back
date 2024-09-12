@@ -40,6 +40,16 @@ export class User {
   infoworker: Infoworker
 
   @Column({
+    type: 'varchar',
+    comment: 'User role',
+    length: 50,
+    nullable: false,
+    enum: ['WORKER', 'CLIENT'],
+    default: 'WORKER',
+  })
+  role: string
+
+  @Column({
     nullable: false,
     type: 'boolean',
     default: false,

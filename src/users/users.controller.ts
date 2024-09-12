@@ -1,10 +1,11 @@
-import { Controller, Post, Body } from '@nestjs/common'
+import { Controller, Post, Body, Query, Get, UseGuards } from '@nestjs/common'
 import { UsersService } from './users.service'
 import { CreateUserDto } from './dto/worker-user.dto'
-import { ApiBody, ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger'
 import { exampleUserSchema, userSchema } from './schemas/users.schema'
 import { LoginUserDto } from './dto/login-user.dto'
 import { ClientUserDto } from './dto/client.user.dto'
+import { AuthGuard } from '@/common/guards/auth.guard'
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -23,5 +24,12 @@ export class UsersController {
   @Post('login')
   login(@Body() loginUserDto: LoginUserDto) {
     return this.usersService.login(loginUserDto)
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @Get('role')
+  findByRole(@Query('role') role: string) {
+    return this.usersService.findByRole(role)
   }
 }
