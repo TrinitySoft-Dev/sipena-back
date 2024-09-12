@@ -3,14 +3,6 @@ import { IsString } from 'class-validator'
 
 export class CreateRulesConditionDto {
   @ApiProperty({
-    description: 'Type of the condition',
-    example: 'and',
-    required: true,
-  })
-  @IsString()
-  condition_type: string
-
-  @ApiProperty({
     description: 'List of the conditions',
     example: [
       {

@@ -1,13 +1,13 @@
 import { RulesCondition } from '@/rules-conditions/entities/rules-condition.entity'
 import { User } from '@/users/entities/user.entity'
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity()
 export class Rule {
   @PrimaryGeneratedColumn()
   id: number
 
-  @OneToMany(() => User, user => user.id, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, user => user.id, { onDelete: 'CASCADE' })
   customer: User
 
   @Column({

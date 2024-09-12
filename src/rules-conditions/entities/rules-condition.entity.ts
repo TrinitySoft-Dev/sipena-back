@@ -1,5 +1,5 @@
 import { Rule } from '@/rules/entities/rule.entity'
-import { Check, Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity()
 export class RulesCondition {
@@ -32,13 +32,4 @@ export class RulesCondition {
     length: 50,
   })
   value: string
-
-  @Column({
-    nullable: false,
-    type: 'varchar',
-    comment: 'Condition type',
-    length: 5,
-  })
-  @Check(`"condition_type" IN ('and', 'or')`)
-  condition_type: string
 }

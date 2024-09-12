@@ -65,6 +65,10 @@ export class UsersService {
     return { token }
   }
 
+  async findById(id: number) {
+    return await this.userRepository.findOne({ where: { id } })
+  }
+
   async encryptPassword(password: string) {
     const salt = await bcrypt.genSalt(10)
     const hash = await bcrypt.hash(password, salt)

@@ -9,5 +9,6 @@ import { InfoworkersModule } from '@/infoworkers/infoworkers.module'
   imports: [TypeOrmModule.forFeature([User]), InfoworkersModule],
   controllers: [UsersController],
   providers: [UsersService],
+  exports: [UsersService],
 })
 export class UsersModule {}

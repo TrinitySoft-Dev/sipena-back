@@ -1,11 +1,10 @@
 import { CreateRulesConditionDto } from '@/rules-conditions/dto/create-rules-condition.dto'
 import { ApiProperty } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
-import { IsArray, IsInt, IsString, ValidateNested } from 'class-validator'
+import { IsArray, IsInt, IsNumber, IsString, ValidateNested } from 'class-validator'
 
 const example = [
   {
-    condition_type: 'and',
     list: [
       {
         field: 'name',
@@ -20,7 +19,6 @@ const example = [
     ],
   },
   {
-    condition_type: 'or',
     list: [
       {
         field: 'name',
@@ -58,8 +56,8 @@ export class CreateRuleDto {
     example: '10',
     required: true,
   })
-  @IsString()
-  rate: string
+  @IsNumber()
+  rate: number
 
   @ApiProperty({
     description: 'Conditions of the rule',
