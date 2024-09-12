@@ -7,8 +7,8 @@ import { LoginUserDto } from './dto/login-user.dto'
 import { ClientUserDto } from './dto/client.user.dto'
 import { AuthGuard } from '@/common/guards/auth.guard'
 
-@ApiTags('Auth')
-@Controller('auth')
+@ApiTags('Users')
+@Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 

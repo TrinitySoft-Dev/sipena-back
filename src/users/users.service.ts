@@ -1,5 +1,4 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common'
-import { CreateUserDto } from './dto/worker-user.dto'
 import { InjectRepository } from '@nestjs/typeorm'
 import { User } from './entities/user.entity'
 import { Repository } from 'typeorm'
@@ -7,7 +6,6 @@ import * as bcrypt from 'bcrypt'
 import { InfoworkersService } from '@/infoworkers/infoworkers.service'
 import { LoginUserDto } from './dto/login-user.dto'
 import { JwtService } from '@nestjs/jwt'
-import { ClientUserDto } from './dto/client.user.dto'
 
 @Injectable()
 export class UsersService {
@@ -70,7 +68,33 @@ export class UsersService {
   }
 
   async findByRole(role: string) {
-    return await this.userRepository.find({ where: { role, active: true } })
+    const res = await this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.infoworker', 'infoworker')
+      .select([
+        'user.id',
+        'user.email',
+        'user.name',
+        'user.last_name',
+        'user.role',
+        'user.active',
+        'user.created_at',
+        'user.updated_at',
+        'user.deleted_at',
+        'infoworker.phone',
+        'infoworker.tfn',
+        'infoworker.abn',
+        'infoworker.birthday',
+        'infoworker.employment_end_date',
+        'infoworker.passport',
+        'infoworker.address',
+        'infoworker.city',
+        'infoworker.active',
+        'infoworker.visa',
+      ])
+      .where('user.role = :role', { role })
+      .getMany()
+    return res
   }
 
   async encryptPassword(password: string) {
