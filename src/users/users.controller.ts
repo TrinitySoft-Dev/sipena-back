@@ -32,15 +32,7 @@ export class UsersController {
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FilesInterceptor('files'))
   @Post('register')
-  create(
-    @UploadedFiles(
-      new ParseFilePipe({
-        validators: [new MaxFileSizeValidator({ maxSize: 1000000 }), new FileTypeValidator({ fileType: 'image/jpeg' })],
-      }),
-    )
-    files: Express.Multer.File[],
-    @Body() createUserDto: CreateUserDto | ClientUserDto,
-  ) {
+  create(@UploadedFiles() files: Express.Multer.File[], @Body() createUserDto: CreateUserDto | ClientUserDto) {
     return this.usersService.create(createUserDto, files)
   }
 
