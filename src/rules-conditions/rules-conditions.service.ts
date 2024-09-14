@@ -19,10 +19,9 @@ export class RulesConditionsService {
     const rulesConditions = []
     for (const item of createRulesConditionDto) {
       for (const condition of item.list) {
-        // Asignar la regla a la condición antes de guardarla
         const conditionEntity = this.rulesConditionRepository.create({
           ...condition,
-          rule, // Asignamos la regla a la condición
+          rule,
         })
         const savedCondition = await this.rulesConditionRepository.save(conditionEntity)
         rulesConditions.push(savedCondition)
