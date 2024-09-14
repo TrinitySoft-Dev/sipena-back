@@ -20,7 +20,7 @@ export class UsersService {
   async create(createUserDto: any, files: Express.Multer.File[]) {
     const { email, password, name, last_name, role, ...rest } = createUserDto
 
-    const existuser = await this.userRepository.findOne({ where: { email } })
+    const existuser = await this.userRepository.findOne({ where: { email, active: true } })
     if (existuser) throw new UnauthorizedException('Email already exists')
 
     const hashPassword = await this.encryptPassword(password)
@@ -54,7 +54,7 @@ export class UsersService {
   async login(loginUserDto: LoginUserDto) {
     const { email, password } = loginUserDto
 
-    const user = await this.userRepository.findOne({ where: { email } })
+    const user = await this.userRepository.findOne({ where: { email, active: true } })
 
     if (!user) throw new UnauthorizedException('Email or password incorrect')
 
@@ -97,6 +97,7 @@ export class UsersService {
         'infoworker.visa',
       ])
       .where('user.role = :role', { role })
+      .andWhere('user.active = :active', { active: true })
       .getMany()
     return res
   }

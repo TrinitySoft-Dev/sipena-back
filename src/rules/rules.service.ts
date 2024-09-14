@@ -5,6 +5,7 @@ import { Rule } from './entities/rule.entity'
 import { Repository } from 'typeorm'
 import { RulesConditionsService } from '@/rules-conditions/rules-conditions.service'
 import { UsersService } from '@/users/users.service'
+import { User } from '@/users/entities/user.entity'
 
 @Injectable()
 export class RulesService {
@@ -27,5 +28,12 @@ export class RulesService {
     await this.ruleRepository.save(rule)
 
     return { message: 'Rule created successfully' }
+  }
+
+  async findByClient(client: number) {
+    return await this.ruleRepository.find({
+      where: { customer: { id: client, active: true } },
+      relations: ['conditions'],
+    })
   }
 }
