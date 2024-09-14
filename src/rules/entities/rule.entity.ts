@@ -2,7 +2,9 @@ import { RulesCondition } from '@/rules-conditions/entities/rules-condition.enti
 import { User } from '@/users/entities/user.entity'
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 
-@Entity()
+@Entity({
+  name: 'rules',
+})
 export class Rule {
   @PrimaryGeneratedColumn()
   id: number
@@ -16,6 +18,16 @@ export class Rule {
     default: false,
   })
   status: boolean
+
+  @Column({
+    nullable: true,
+    type: 'varchar',
+    comment: 'Type of the rule',
+    length: 50,
+    default: 'CONTAINER',
+    enum: ['CONTAINER', 'PRODUCT'],
+  })
+  type: string
 
   @Column({
     nullable: false,
@@ -33,4 +45,31 @@ export class Rule {
 
   @OneToMany(() => RulesCondition, rulesCondition => rulesCondition.rule, { onDelete: 'CASCADE' })
   conditions: RulesCondition[]
+
+  @Column({
+    nullable: false,
+    type: 'boolean',
+    default: true,
+  })
+  acitve: boolean
+
+  @Column({
+    nullable: false,
+    type: 'date',
+    default: () => 'CURRENT_DATE',
+  })
+  created_at: Date
+
+  @Column({
+    nullable: false,
+    type: 'date',
+    default: () => 'CURRENT_DATE',
+  })
+  updated_at: Date
+
+  @Column({
+    nullable: true,
+    type: 'date',
+  })
+  deleted_at: Date
 }

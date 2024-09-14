@@ -1,41 +1,78 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
 
-@Entity()
+@Entity({
+  name: 'info_workers',
+})
 export class Infoworker {
   @PrimaryGeneratedColumn()
   id: number
 
-  @Column()
+  @Column({
+    type: 'varchar',
+    nullable: false,
+    length: 30,
+  })
   phone: string
 
-  @Column()
+  @Column({
+    type: 'varchar',
+    nullable: false,
+    length: 9,
+  })
   tfn: string
 
-  @Column()
+  @Column({
+    type: 'varchar',
+    nullable: false,
+    length: 11,
+  })
   abn: string
 
-  @Column()
-  birthday: string
+  @Column({
+    type: 'date',
+    nullable: false,
+  })
+  birthday: Date
 
-  @Column()
-  employment_end_date: string
+  @Column({
+    type: 'date',
+    nullable: false,
+  })
+  employment_end_date: Date
 
-  @Column()
-  passport: string
+  @Column({
+    type: 'varchar',
+    nullable: false,
+    length: 128,
+  })
+  passport_url: string
 
-  @Column()
+  @Column({
+    type: 'varchar',
+    nullable: false,
+    length: 100,
+  })
   address: string
 
-  @Column()
+  @Column({
+    type: 'varchar',
+    nullable: false,
+    length: 100,
+  })
   city: string
 
   @Column({
+    type: 'varchar',
+    nullable: false,
+    length: 128,
+  })
+  visa_url: string
+
+  @Column({
+    type: 'boolean',
     default: true,
   })
   active: boolean
-
-  @Column()
-  visa: string
 
   @Column({
     nullable: false,

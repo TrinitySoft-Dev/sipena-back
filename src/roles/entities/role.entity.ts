@@ -1,6 +1,8 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
 
-@Entity()
+@Entity({
+  name: 'roles',
+})
 export class Role {
   @PrimaryGeneratedColumn()
   id: number
@@ -10,7 +12,11 @@ export class Role {
   })
   name: string
 
-  @Column()
+  @Column({
+    type: 'varchar',
+    nullable: true,
+    length: 255,
+  })
   description: string
 
   @Column({
