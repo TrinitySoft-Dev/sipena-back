@@ -1,9 +1,10 @@
 import { Controller, Post, Body, UseInterceptors, UploadedFile, UseGuards } from '@nestjs/common'
 import { ImagesService } from './images.service'
 import { FileInterceptor } from '@nestjs/platform-express'
-import { ApiBearerAuth } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { AuthGuard } from '@/common/guards/auth.guard'
 
+@ApiTags('Images')
 @ApiBearerAuth()
 @UseGuards(AuthGuard)
 @Controller('images')
