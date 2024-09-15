@@ -1,5 +1,6 @@
 import { Infoworker } from '@/infoworkers/entities/infoworker.entity'
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
+import { Rule } from '@/rules/entities/rule.entity'
+import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity({
   name: 'users',
@@ -50,6 +51,9 @@ export class User {
     default: 'WORKER',
   })
   role: string
+
+  @OneToMany(() => Rule, rule => rule.id, { onDelete: 'CASCADE' })
+  rules: Rule[]
 
   @Column({
     nullable: false,

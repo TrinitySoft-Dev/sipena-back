@@ -10,6 +10,8 @@ import {
   ParseFilePipe,
   MaxFileSizeValidator,
   FileTypeValidator,
+  Param,
+  Put,
 } from '@nestjs/common'
 import { UsersService } from './users.service'
 import { CreateUserDto } from './dto/worker-user.dto'
@@ -41,6 +43,7 @@ export class UsersController {
   create(
     @UploadedFiles(
       new ParseFilePipe({
+        fileIsRequired: false,
         validators: [
           new MaxFileSizeValidator({ maxSize: 10 * 1024 * 1024 }),
           new FileTypeValidator({ fileType: 'image/jpeg' }),
@@ -63,5 +66,12 @@ export class UsersController {
   @Get('role')
   findByRole(@Query('role') role: string) {
     return this.usersService.findByRole(role)
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @Put(':id')
+  update(@Param('id') id: number, @Body() updateUserDto: CreateUserDto | ClientUserDto) {
+    return this.usersService.update(id, updateUserDto)
   }
 }
