@@ -10,15 +10,21 @@ import { UsersModule } from './users/users.module'
 import { InfoworkersModule } from './infoworkers/infoworkers.module'
 import { RolesModule } from './roles/roles.module'
 import { RulesModule } from './rules/rules.module'
-import { RulesConditionsModule } from './rules-conditions/rules-conditions.module'
+import { ImagesModule } from './images/images.module'
+import { TimesheetModule } from './timesheet/timesheet.module'
+import { ContainerModule } from './container/container.module'
 
 // entities
 import { Infoworker } from './infoworkers/entities/infoworker.entity'
 import { User } from './users/entities/user.entity'
 import { Role } from './roles/entities/role.entity'
 import { Rule } from './rules/entities/rule.entity'
-import { RulesCondition } from './rules-conditions/entities/rules-condition.entity'
-import { ImagesModule } from './images/images.module'
+import { Timesheet } from './timesheet/entities/timesheet.entity'
+import { Container } from './container/entities/container.entity'
+import { ConditionGroupsModule } from './condition_groups/condition_groups.module'
+import { ConditionsModule } from './conditions/conditions.module'
+import { ConditionGroup } from './condition_groups/entities/condition_group.entity'
+import { Condition } from './conditions/entities/condition.entity'
 
 @Module({
   imports: [
@@ -29,7 +35,7 @@ import { ImagesModule } from './images/images.module'
       password: config.DB.PASSWORD,
       username: config.DB.USERNAME,
       database: config.DB.DATABASE,
-      entities: [User, Infoworker, Role, Rule, RulesCondition],
+      entities: [User, Infoworker, Role, Rule, Timesheet, Container, ConditionGroup, Condition],
       synchronize: true,
       logging: true,
       ssl: true,
@@ -43,8 +49,11 @@ import { ImagesModule } from './images/images.module'
     InfoworkersModule,
     RolesModule,
     RulesModule,
-    RulesConditionsModule,
     ImagesModule,
+    TimesheetModule,
+    ContainerModule,
+    ConditionGroupsModule,
+    ConditionsModule,
   ],
   controllers: [],
   providers: [],
