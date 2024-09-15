@@ -1,34 +1,48 @@
-import { CreateRulesConditionDto } from '@/rules-conditions/dto/create-rules-condition.dto'
+import { CreateConditionGroupDto } from '@/condition_groups/dto/create-condition_group.dto'
 import { ApiProperty } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
 import { IsArray, IsInt, IsNumber, IsString, ValidateNested } from 'class-validator'
 
 const example = [
   {
-    list: [
+    conditions: [
       {
-        field: 'name',
-        operator: 'eq',
-        value: 'john',
+        field: 'price',
+        operator: '>=',
+        value: '20',
       },
       {
-        field: 'age',
-        operator: 'eq',
-        value: '20',
+        field: 'price',
+        operator: '<=',
+        value: '50',
       },
     ],
   },
   {
-    list: [
+    conditions: [
       {
-        field: 'name',
-        operator: 'eq',
-        value: 'john',
+        field: 'price',
+        operator: '>',
+        value: '100',
       },
       {
-        field: 'age',
-        operator: 'eq',
-        value: '20',
+        field: 'price',
+        operator: '<',
+        value: '150',
+      },
+    ],
+  },
+  {
+    conditions: [
+      {
+        field: 'price',
+        operator: '>',
+        value: '170',
+      },
+      {
+        field: 'price',
+        operator: '<',
+        value: '200',
       },
     ],
   },
@@ -37,11 +51,11 @@ const example = [
 export class CreateRuleDto {
   @ApiProperty({
     description: 'Customer id of the rule',
-    example: '1',
+    example: 1,
     required: true,
   })
-  @IsString()
-  customer: string
+  @IsNumber()
+  customer_id: number
 
   @ApiProperty({
     description: 'container size of the rule',
@@ -65,5 +79,7 @@ export class CreateRuleDto {
     required: true,
   })
   @IsArray()
-  conditions: CreateRulesConditionDto[]
+  @ValidateNested({ each: true })
+  @Type(() => CreateConditionGroupDto)
+  condition_groups: CreateConditionGroupDto[]
 }

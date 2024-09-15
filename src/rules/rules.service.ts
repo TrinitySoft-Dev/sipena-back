@@ -1,39 +1,45 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { CreateRuleDto } from './dto/create-rule.dto'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Rule } from './entities/rule.entity'
-import { Repository } from 'typeorm'
-import { RulesConditionsService } from '@/rules-conditions/rules-conditions.service'
-import { UsersService } from '@/users/users.service'
-import { User } from '@/users/entities/user.entity'
+import { In, Repository } from 'typeorm'
+import { ConditionGroupsService } from '@/condition_groups/condition_groups.service'
 
 @Injectable()
 export class RulesService {
   constructor(
     @InjectRepository(Rule) private readonly ruleRepository: Repository<Rule>,
-    private readonly rulesConditionsService: RulesConditionsService,
-    private readonly usersService: UsersService,
+    private readonly conditionGroupService: ConditionGroupsService,
   ) {}
 
   async create(createRuleDto: CreateRuleDto) {
-    const { conditions, customer, ...rest } = createRuleDto
+    try {
+      const { customer_id, condition_groups, ...rest } = createRuleDto
 
-    const customerUser = await this.usersService.findById(Number(customer))
-    if (!customerUser) throw new BadRequestException('Invalid customer')
+      return await this.ruleRepository.manager.transaction(async transactionalEntityManager => {
+        const ruleRepository = transactionalEntityManager.getRepository(Rule)
+        const rule = ruleRepository.create({ ...rest })
+        await ruleRepository.save(rule)
 
-    const rule = await this.ruleRepository.save({ ...rest, customer: customerUser })
-    const rulesConditions = await this.rulesConditionsService.createBatch(conditions, rule)
+        const conditions = []
 
-    rule.conditions = rulesConditions
-    await this.ruleRepository.save(rule)
+        for (const groupDto of condition_groups) {
+          const conditionGroup = await this.conditionGroupService.create(groupDto, rule, transactionalEntityManager)
+          conditions.push(conditionGroup)
+        }
 
-    return { message: 'Rule created successfully' }
+        rule.condition_groups = conditions
+
+        await ruleRepository.save(rule)
+
+        return { message: 'Rule created successfully' }
+      })
+    } catch (error) {
+      throw error
+    }
   }
 
-  async findByClient(client: number) {
-    return await this.ruleRepository.find({
-      where: { customer: { id: client, active: true } },
-      relations: ['conditions'],
-    })
+  async findById(id: number | number[]): Promise<Rule[]> {
+    return await this.ruleRepository.find({ where: { id: In(Array.isArray(id) ? id : [id]) } })
   }
 }
