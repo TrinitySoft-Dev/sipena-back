@@ -1,0 +1,4 @@
+export const ROLES_CONST = {
+  CUSTOMER: 'CUSTOMER',
+  WORKER: 'WORKER',
+}
