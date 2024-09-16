@@ -9,7 +9,6 @@ import { JwtService } from '@nestjs/jwt'
 import { ImagesService } from '@/images/images.service'
 import { ROLES_CONST } from '@/common/conts/roles.const'
 import { RulesService } from '@/rules/rules.service'
-import { UpdateUserDto } from './dto/update-user.dto'
 
 @Injectable()
 export class UsersService {
@@ -22,63 +21,59 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: any, files: Express.Multer.File[]) {
-    try {
-      const { email, password, name, last_name, role, ...rest } = createUserDto
+    const { email, password, name, last_name, role, ...rest } = createUserDto
 
-      const existuser = await this.userRepository.findOne({ where: { email, active: true } })
-      if (existuser) throw new UnauthorizedException('Email already exists')
+    const existuser = await this.userRepository.findOne({ where: { email, active: true } })
+    if (existuser) throw new UnauthorizedException('Email already exists')
 
-      const hashPassword = await this.encryptPassword(password)
+    const hashPassword = await this.encryptPassword(password)
 
-      if (role === ROLES_CONST.WORKER) {
-        if (files.length !== 2) throw new BadRequestException('Invalid files')
-        const [passport_url, visa_url] = await this.imagesService.uploadMultiple(files)
+    if (role === ROLES_CONST.WORKER) {
+      if (files.length !== 2) throw new BadRequestException('Invalid files')
+      const [passport_url, visa_url] = await this.imagesService.uploadMultiple(files)
 
-        const infoworker = await this.infoworkerService.create({ ...rest, visa_url, passport_url })
-        await this.userRepository.save({
-          email,
-          password: hashPassword,
-          name,
-          last_name,
-          role,
-          infoworker,
-        })
-
-        return { message: 'User created successfully' }
-      }
-
-      const obj: Partial<User> = {
+      const infoworker = await this.infoworkerService.create({ ...rest, visa_url, passport_url })
+      await this.userRepository.save({
         email,
         password: hashPassword,
         name,
         last_name,
         role,
+        infoworker,
+      })
+
+      return { message: 'User created successfully' }
+    }
+
+    const obj: Partial<User> = {
+      email,
+      password: hashPassword,
+      name,
+      last_name,
+      role,
+    }
+
+    if (role === ROLES_CONST.CUSTOMER) {
+      let { rules } = createUserDto
+      rules = rules?.split(',').map(Number)
+
+      if (rules?.length > 0) {
+        let allRules = await this.rulesService.findById(rules)
+        if (allRules.length !== rules.length) throw new UnauthorizedException('Rules not found')
+
+        obj.rules = allRules
       }
 
-      if (role === ROLES_CONST.CUSTOMER) {
-        let { rules } = createUserDto
-        rules = rules?.split(',').map(Number)
-
-        if (rules?.length > 0) {
-          let allRules = await this.rulesService.findById(rules)
-          if (allRules.length !== rules.length) throw new UnauthorizedException('Rules not found')
-
-          obj.rules = allRules
-        }
-
-        const user = await this.userRepository.save(obj)
-        await this.userRepository.save(user)
-
-        return { message: 'User created successfully' }
-      }
-
-      const user = this.userRepository.create(obj)
+      const user = await this.userRepository.save(obj)
       await this.userRepository.save(user)
 
       return { message: 'User created successfully' }
-    } catch (error) {
-      console.log(error)
     }
+
+    const user = this.userRepository.create(obj)
+    await this.userRepository.save(user)
+
+    return { message: 'User created successfully' }
   }
 
   async login(loginUserDto: LoginUserDto) {
