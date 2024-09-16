@@ -1,6 +1,6 @@
-import { RulesCondition } from '@/rules-conditions/entities/rules-condition.entity'
+import { ConditionGroup } from '@/condition_groups/entities/condition_group.entity'
 import { User } from '@/users/entities/user.entity'
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity({
   name: 'rules',
@@ -9,25 +9,12 @@ export class Rule {
   @PrimaryGeneratedColumn()
   id: number
 
-  @ManyToOne(() => User, user => user.id, { onDelete: 'CASCADE' })
-  customer: User
-
   @Column({
     nullable: false,
     type: 'boolean',
     default: false,
   })
   status: boolean
-
-  @Column({
-    nullable: true,
-    type: 'varchar',
-    comment: 'Type of the rule',
-    length: 50,
-    default: 'CONTAINER',
-    enum: ['CONTAINER', 'PRODUCT'],
-  })
-  type: string
 
   @Column({
     nullable: false,
@@ -43,15 +30,18 @@ export class Rule {
   })
   rate: number
 
-  @OneToMany(() => RulesCondition, rulesCondition => rulesCondition.rule, { onDelete: 'CASCADE' })
-  conditions: RulesCondition[]
+  @ManyToMany(() => User, user => user.rules)
+  users: User[]
+
+  @OneToMany(() => ConditionGroup, group => group.rule, { cascade: true })
+  condition_groups: ConditionGroup[]
 
   @Column({
     nullable: false,
     type: 'boolean',
     default: true,
   })
-  acitve: boolean
+  active: boolean
 
   @Column({
     nullable: false,

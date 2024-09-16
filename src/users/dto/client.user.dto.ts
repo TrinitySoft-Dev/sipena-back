@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsEmail, IsString } from 'class-validator'
+import { IsArray, IsEmail, IsString } from 'class-validator'
 
 export class ClientUserDto {
   @ApiProperty({
@@ -49,4 +49,11 @@ export class ClientUserDto {
   })
   @IsString()
   role: string
+
+  @ApiProperty({
+    description: 'Rules of the user',
+    example: '[1,2,3,4]',
+  })
+  @IsArray()
+  rules: number[]
 }

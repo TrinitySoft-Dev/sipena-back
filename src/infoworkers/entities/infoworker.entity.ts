@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
+import { User } from '@/users/entities/user.entity'
+import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity({
   name: 'info_workers',
@@ -67,6 +68,9 @@ export class Infoworker {
     length: 128,
   })
   visa_url: string
+
+  @OneToOne(() => User, user => user.infoworker)
+  user: User
 
   @Column({
     type: 'boolean',
