@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Rule } from './entities/rule.entity'
 import { In, Repository } from 'typeorm'
 import { ConditionGroupsService } from '@/condition_groups/condition_groups.service'
+import { getAllowedConditionFields } from '@/common/decorators/allowed-fields.decorator'
 
 @Injectable()
 export class RulesService {
@@ -41,5 +42,9 @@ export class RulesService {
 
   async findById(id: number | number[]): Promise<Rule[]> {
     return await this.ruleRepository.find({ where: { id: In(Array.isArray(id) ? id : [id]) } })
+  }
+
+  async allowedFields() {
+    return getAllowedConditionFields()
   }
 }

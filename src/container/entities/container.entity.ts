@@ -1,3 +1,4 @@
+import { ConditionField } from '@/common/decorators/condition-field.decorator'
 import { IsBoolean } from 'class-validator'
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
 
@@ -23,6 +24,7 @@ export class Container {
   })
   work: string
 
+  @ConditionField()
   @Column({
     type: 'integer',
     nullable: false,
@@ -36,18 +38,21 @@ export class Container {
   })
   product: string
 
+  @ConditionField()
   @Column({
     type: 'integer',
     nullable: false,
   })
   skus: number
 
+  @ConditionField()
   @Column({
     type: 'integer',
     nullable: false,
   })
   cartons: number
 
+  @ConditionField()
   @Column({
     type: 'integer',
     nullable: false,
@@ -55,12 +60,14 @@ export class Container {
   })
   pallets: number
 
+  @ConditionField()
   @Column({
     type: 'integer',
     nullable: false,
   })
   weight: number
 
+  @ConditionField()
   @Column({
     type: 'boolean',
     nullable: false,
@@ -68,6 +75,7 @@ export class Container {
   })
   forklift_driver: boolean
 
+  @ConditionField()
   @Column({
     type: 'boolean',
     nullable: false,
@@ -75,6 +83,7 @@ export class Container {
   })
   trash: boolean
 
+  @ConditionField()
   @Column({
     type: 'boolean',
     nullable: false,

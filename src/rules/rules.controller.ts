@@ -15,4 +15,9 @@ export class RulesController {
   async create(@Body() createRuleDto: CreateRuleDto) {
     return await this.rulesService.create(createRuleDto)
   }
+
+  @Get('fields')
+  async allowedFields() {
+    return await this.rulesService.allowedFields()
+  }
 }
