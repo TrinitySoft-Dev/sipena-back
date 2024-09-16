@@ -10,15 +10,17 @@ interface ENVIROMENTS {
     USERNAME: string
     DATABASE: string
   }
-  PORT: string
-  JWT_SECRET: string
-  SIPENA_FILES: string
   AWS: {
     S3_BUCKET: string
     S3_ACCESS_KEY: string
     S3_SECRET_ACCESS_KEY: string
     S3_BUCKET_NAME: string
   }
+  PORT: string
+  JWT_SECRET: string
+  SIPENA_FILES: string
+  SWAGGER_USER: string
+  SWAGGER_PASSWORD: string
 }
 const envs = joi
   .object({
@@ -34,6 +36,8 @@ const envs = joi
     S3_SECRET_ACCESS_KEY: joi.string().required(),
     S3_BUCKET_NAME: joi.string().required(),
     SIPENA_FILES: joi.string().required(),
+    SWAGGER_USER: joi.string().required(),
+    SWAGGER_PASSWORD: joi.string().required(),
   })
   .unknown()
   .required()
@@ -61,4 +65,6 @@ export const config: ENVIROMENTS = {
     S3_SECRET_ACCESS_KEY: value.S3_SECRET_ACCESS_KEY,
     S3_BUCKET_NAME: value.S3_BUCKET_NAME,
   },
+  SWAGGER_USER: value.SWAGGER_USER,
+  SWAGGER_PASSWORD: value.SWAGGER_PASSWORD,
 }

@@ -5,6 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { config as env } from '@/common/config/config'
 import { HttpExceptionFilter } from './common/filters/http-exception.filter'
 import { ReponseInterceptor } from './common/interceptors/response.interceptor'
+import { BasicAuthMiddleware } from './middlewares/swagger-auth.middleware'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
@@ -29,6 +30,9 @@ async function bootstrap() {
     .build()
 
   const document = SwaggerModule.createDocument(app, config)
+
+  app.use('/api/docs', new BasicAuthMiddleware().use)
+
   SwaggerModule.setup('api/docs', app, document, {
     customSiteTitle: 'Sipena API',
     customJs: [
