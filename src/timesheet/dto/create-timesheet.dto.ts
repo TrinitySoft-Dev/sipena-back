@@ -7,7 +7,7 @@ export class TimeSheetDto {
     example: 1,
   })
   @IsNumber()
-  customer: number
+  customer_id: number
 
   @ApiProperty({
     description: 'Day of the timesheet',
@@ -36,6 +36,13 @@ export class TimeSheetDto {
   })
   @IsArray()
   images: string[]
+
+  @ApiProperty({
+    description: 'Workers of the timesheet',
+    example: [1],
+  })
+  @IsArray()
+  workers: number[]
 }
 
 export class ContainerDto {
@@ -149,11 +156,12 @@ export class CreateTimesheetDto {
   @ApiProperty({
     description: 'Timesheet of the timesheet',
     example: {
-      customer: 1,
+      customer_id: 1,
       day: '2021-01-01',
       week: '2021-01-01',
       comment: 'Comment',
       images: ['https://sipena.com/images/1'],
+      workers: [1],
     },
   })
   @IsObject()

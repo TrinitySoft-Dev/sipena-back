@@ -1,6 +1,6 @@
 import { ConditionGroup } from '@/condition_groups/entities/condition_group.entity'
 import { User } from '@/users/entities/user.entity'
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity({
   name: 'rules',
@@ -30,6 +30,9 @@ export class Rule {
   })
   rate: number
 
+  @ManyToMany(() => User, user => user.rules)
+  users: User[]
+
   @OneToMany(() => ConditionGroup, group => group.rule, { cascade: true })
   condition_groups: ConditionGroup[]
 
@@ -38,7 +41,7 @@ export class Rule {
     type: 'boolean',
     default: true,
   })
-  acitve: boolean
+  active: boolean
 
   @Column({
     nullable: false,

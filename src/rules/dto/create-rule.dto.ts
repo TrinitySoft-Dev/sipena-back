@@ -7,12 +7,12 @@ const example = [
   {
     conditions: [
       {
-        field: 'price',
+        field: 'cartons',
         operator: '>=',
-        value: '20',
+        value: '=',
       },
       {
-        field: 'price',
+        field: 'cartons',
         operator: '<=',
         value: '50',
       },
@@ -21,28 +21,14 @@ const example = [
   {
     conditions: [
       {
-        field: 'price',
-        operator: '>',
-        value: '100',
+        field: 'skus',
+        operator: '>=',
+        value: '0',
       },
       {
-        field: 'price',
-        operator: '<',
-        value: '150',
-      },
-    ],
-  },
-  {
-    conditions: [
-      {
-        field: 'price',
-        operator: '>',
-        value: '170',
-      },
-      {
-        field: 'price',
-        operator: '<',
-        value: '200',
+        field: 'skus',
+        operator: '<=',
+        value: '50',
       },
     ],
   },

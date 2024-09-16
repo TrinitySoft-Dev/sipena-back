@@ -1,6 +1,7 @@
 import { Infoworker } from '@/infoworkers/entities/infoworker.entity'
 import { Rule } from '@/rules/entities/rule.entity'
-import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
+import { Timesheet } from '@/timesheet/entities/timesheet.entity'
+import { Column, Entity, JoinColumn, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity({
   name: 'users',
@@ -38,7 +39,7 @@ export class User {
   })
   last_name: string
 
-  @OneToOne(() => Infoworker, infoworker => infoworker.id, { onDelete: 'CASCADE' })
+  @OneToOne(() => Infoworker, infoworker => infoworker.user)
   @JoinColumn()
   infoworker: Infoworker
 
@@ -52,8 +53,25 @@ export class User {
   })
   role: string
 
-  @OneToMany(() => Rule, rule => rule.id, { onDelete: 'CASCADE' })
+  @ManyToMany(() => Rule, rule => rule.users)
+  @JoinTable({
+    name: 'user_rules',
+    joinColumn: {
+      name: 'user_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'rule_id',
+      referencedColumnName: 'id',
+    },
+  })
   rules: Rule[]
+
+  @OneToMany(() => Timesheet, timesheet => timesheet.customer)
+  timesheets: Timesheet[]
+
+  @ManyToMany(() => Timesheet, timesheet => timesheet.workers)
+  assignedTimesheets: Timesheet[]
 
   @Column({
     nullable: false,

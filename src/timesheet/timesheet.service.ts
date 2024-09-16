@@ -5,9 +5,9 @@ import { Timesheet } from './entities/timesheet.entity'
 import { Repository } from 'typeorm'
 import { ContainerService } from '@/container/container.service'
 import { UsersService } from '@/users/users.service'
-import { RulesService } from '@/rules/rules.service'
 import { Rule } from '@/rules/entities/rule.entity'
 import { ROLES_CONST } from '@/common/conts/roles.const'
+import { ConditionsService } from '@/conditions/conditions.service'
 
 @Injectable()
 export class TimesheetService {
@@ -15,29 +15,76 @@ export class TimesheetService {
     @InjectRepository(Timesheet) private readonly timesheetRepository: Repository<Timesheet>,
     private readonly containerService: ContainerService,
     private readonly usersService: UsersService,
-    private readonly rulesService: RulesService,
+    private readonly conditionsService: ConditionsService,
   ) {}
 
   async create(createTimesheetDto: CreateTimesheetDto) {
-    const { timesheet, container } = createTimesheetDto
-    const { customer } = timesheet
+    try {
+      const { timesheet, container } = createTimesheetDto
+      const { customer_id, workers } = timesheet
 
-    const customerUser = await this.getCustomer(customer)
+      const customerUser = await this.getCustomerRelations(customer_id)
 
-    // await this.validateRules(rules, container)
+      const rules = customerUser.rules
+      const rate = await this.validateRules(rules, container)
+
+      const createdContainer = await this.containerService.create(container)
+
+      const workersUsers = await this.usersService.findWorkers(workers)
+      if (workersUsers.length !== workers.length) throw new NotFoundException('Workers not found')
+
+      const timesheetRes = this.timesheetRepository.create({
+        ...timesheet,
+        rate,
+        container: createdContainer,
+        customer: customerUser,
+        workers: workersUsers,
+      })
+
+      await this.timesheetRepository.save(timesheetRes)
+
+      return { message: 'Timesheet created successfully' }
+    } catch (error) {
+      throw error
+    }
   }
 
   async validateRules(rules: Rule[], container: ContainerDto) {
-    // const existRuleProduct = rules.find(rule => rule.type === 'PRODUCT')
-    // if (existRuleProduct) {
-    // }
+    for (const rule of rules) {
+      const conditionGroups = rule.condition_groups
+      let ruleIsValid = false
+      for (const group of conditionGroups) {
+        const conditions = group.conditions
+        let groupIsValid = true
+        for (const condition of conditions) {
+          const conditionResult = this.conditionsService.evalutedConditions(condition, container)
+          if (!conditionResult) {
+            groupIsValid = false
+            break
+          }
+        }
+
+        if (groupIsValid) {
+          ruleIsValid = true
+          break
+        }
+      }
+
+      if (ruleIsValid) {
+        return rule.rate
+      }
+    }
+
+    return 0
   }
 
-  async getCustomer(customer: number) {
+  async getCustomerRelations(customer: number) {
     const resultCustomer = await this.usersService.findOne({
       where: { id: customer, active: true, role: ROLES_CONST.CUSTOMER },
+      relations: ['rules', 'rules.condition_groups', 'rules.condition_groups.conditions'],
     })
     if (!resultCustomer) throw new NotFoundException('Customer not found')
+
     return resultCustomer
   }
 }

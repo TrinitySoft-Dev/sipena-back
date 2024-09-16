@@ -1,6 +1,17 @@
 import { Container } from '@/container/entities/container.entity'
 import { User } from '@/users/entities/user.entity'
-import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm'
 
 @Entity({
   name: 'time_sheets',
@@ -9,8 +20,8 @@ export class Timesheet {
   @PrimaryGeneratedColumn()
   id: number
 
-  @OneToMany(() => User, user => user.id, { onDelete: 'CASCADE' })
-  customer: number
+  @ManyToOne(() => User, user => user.timesheets)
+  customer: User
 
   @Column({
     nullable: false,
@@ -24,14 +35,33 @@ export class Timesheet {
   })
   week: Date
 
-  @OneToOne(() => Container, container => container.id, { onDelete: 'CASCADE' })
+  @OneToOne(() => Container)
+  @JoinColumn()
   container: Container
 
-  @OneToMany(() => User, user => user.id, { onDelete: 'CASCADE' })
+  @ManyToMany(() => User, user => user.assignedTimesheets)
+  @JoinTable({
+    name: 'timesheet_workers',
+    joinColumn: {
+      name: 'timesheet_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'user_id',
+      referencedColumnName: 'id',
+    },
+  })
   workers: User[]
 
   @Column('varchar', { array: true })
   images: string[]
+
+  @Column({
+    nullable: false,
+    type: 'decimal',
+    comment: 'Rate of the timesheet',
+  })
+  rate: number
 
   @Column({
     type: 'varchar',
@@ -48,25 +78,16 @@ export class Timesheet {
   })
   active: boolean
 
-  @Column({
-    nullable: false,
-    type: 'date',
-    default: () => 'CURRENT_DATE',
-    comment: 'Timesheet created at',
-  })
+  @CreateDateColumn({ type: 'timestamp', comment: 'Timesheet created at' })
   created_at: Date
 
-  @Column({
-    nullable: false,
-    type: 'date',
-    default: () => 'CURRENT_DATE',
-    comment: 'Timesheet updated at',
-  })
+  @UpdateDateColumn({ type: 'timestamp', comment: 'Timesheet updated at' })
   updated_at: Date
 
   @Column({
-    type: 'date',
+    type: 'timestamp',
     comment: 'Timesheet deleted at',
+    nullable: true,
   })
   deleted_at: Date
 }

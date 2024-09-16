@@ -1,6 +1,6 @@
 import { ConditionField } from '@/common/decorators/condition-field.decorator'
 import { IsBoolean } from 'class-validator'
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity({
   name: 'containers',
@@ -141,7 +141,7 @@ export class Container {
 
   @Column({
     type: 'date',
-    nullable: false,
+    nullable: true,
   })
   deleted_at: Date
 }
