@@ -8,7 +8,7 @@ import { ReponseInterceptor } from './common/interceptors/response.interceptor'
 import { BasicAuthMiddleware } from './middlewares/swagger-auth.middleware'
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule)
+  const app = await NestFactory.create(AppModule, { cors: true })
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -17,9 +17,6 @@ async function bootstrap() {
     }),
   )
 
-  app.enableCors({
-    origin: '*',
-  })
   app.useGlobalFilters(new HttpExceptionFilter())
   app.useGlobalInterceptors(new ReponseInterceptor())
   app.setGlobalPrefix('/api')
