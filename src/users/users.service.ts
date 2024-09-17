@@ -105,34 +105,39 @@ export class UsersService {
   }
 
   async findByRole(role: string) {
-    const res = await this.userRepository
-      .createQueryBuilder('user')
-      .leftJoinAndSelect('user.infoworker', 'infoworker')
-      .select([
-        'user.id',
-        'user.email',
-        'user.name',
-        'user.last_name',
-        'user.role',
-        'user.active',
-        'user.created_at',
-        'user.updated_at',
-        'user.deleted_at',
-        'infoworker.phone',
-        'infoworker.tfn',
-        'infoworker.abn',
-        'infoworker.birthday',
-        'infoworker.employment_end_date',
-        'infoworker.passport',
-        'infoworker.address',
-        'infoworker.city',
-        'infoworker.active',
-        'infoworker.visa',
-      ])
-      .where('user.role = :role', { role })
-      .andWhere('user.active = :active', { active: true })
-      .getMany()
-    return res
+    if (role === ROLES_CONST.WORKER) {
+      const res = await this.userRepository
+        .createQueryBuilder('user')
+        .leftJoinAndSelect('user.infoworker', 'infoworker')
+        .select([
+          'user.id',
+          'user.email',
+          'user.name',
+          'user.last_name',
+          'user.role',
+          'user.active',
+          'user.created_at',
+          'user.updated_at',
+          'user.deleted_at',
+          'infoworker.phone',
+          'infoworker.tfn',
+          'infoworker.abn',
+          'infoworker.birthday',
+          'infoworker.employment_end_date',
+          'infoworker.passport',
+          'infoworker.address',
+          'infoworker.city',
+          'infoworker.active',
+          'infoworker.visa',
+        ])
+        .where('user.role = :role', { role })
+        .andWhere('user.active = :active', { active: true })
+        .getMany()
+
+      return res
+    }
+
+    return await this.userRepository.find({ where: { role, active: true } })
   }
 
   async update(id: number, updateUserDto: any) {
