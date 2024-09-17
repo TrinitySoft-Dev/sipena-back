@@ -17,7 +17,9 @@ async function bootstrap() {
     }),
   )
 
-  app.enableCors()
+  app.enableCors({
+    origin: '*',
+  })
   app.useGlobalFilters(new HttpExceptionFilter())
   app.useGlobalInterceptors(new ReponseInterceptor())
   app.setGlobalPrefix('/api')
