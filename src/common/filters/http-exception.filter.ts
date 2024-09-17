@@ -1,4 +1,4 @@
-import { ArgumentsHost, ExceptionFilter } from '@nestjs/common'
+import { ArgumentsHost, ExceptionFilter, HttpException } from '@nestjs/common'
 import { Request, Response } from 'express'
 
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -6,13 +6,21 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp()
     const response = ctx.getResponse<Response>()
     const request = ctx.getRequest<Request>()
-    const status = exception.getStatus()
+    let status = 500
+    let error: any = ''
+
+    if (exception instanceof HttpException) {
+      status = exception.getStatus()
+      error = exception.getResponse()
+    } else {
+      error = exception.message
+    }
 
     response.status(status).json({
       status: status,
       timestamp: new Date().toISOString(),
       path: request.url,
-      error: exception.getResponse(),
+      error,
     })
   }
 }
