@@ -6,11 +6,15 @@ import { config as env } from '@/common/config/config'
 import { HttpExceptionFilter } from './common/filters/http-exception.filter'
 import { ReponseInterceptor } from './common/interceptors/response.interceptor'
 import { BasicAuthMiddleware } from './middlewares/swagger-auth.middleware'
-import * as cors from 'cors'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
 
+  app.enableCors({
+    origin: ['http://localhost:3000'],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  })
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -33,7 +37,6 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config)
 
   app.use('/api/docs', new BasicAuthMiddleware().use)
-  app.use(cors())
 
   SwaggerModule.setup('api/docs', app, document, {
     customSiteTitle: 'Sipena API',
