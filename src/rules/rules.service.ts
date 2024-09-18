@@ -5,6 +5,7 @@ import { Rule } from './entities/rule.entity'
 import { In, Repository } from 'typeorm'
 import { ConditionGroupsService } from '@/condition_groups/condition_groups.service'
 import { getAllowedConditionFields } from '@/common/decorators/allowed-fields.decorator'
+import * as crypto from 'crypto'
 
 @Injectable()
 export class RulesService {
@@ -45,6 +46,10 @@ export class RulesService {
   }
 
   async allowedFields() {
-    return getAllowedConditionFields()
+    const fields = getAllowedConditionFields()
+    return fields.map(field => ({
+      field,
+      id: crypto.randomUUID(),
+    }))
   }
 }
