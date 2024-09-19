@@ -9,6 +9,7 @@ import { JwtService } from '@nestjs/jwt'
 import { ImagesService } from '@/images/images.service'
 import { ROLES_CONST } from '@/common/conts/roles.const'
 import { RulesService } from '@/rules/rules.service'
+import { Response } from 'express'
 
 @Injectable()
 export class UsersService {
@@ -76,7 +77,7 @@ export class UsersService {
     return { message: 'User created successfully' }
   }
 
-  async login(loginUserDto: LoginUserDto) {
+  async login(loginUserDto: LoginUserDto, response: Response) {
     const { email, password } = loginUserDto
 
     const user = await this.userRepository.findOne({ where: { email, active: true } })
@@ -89,6 +90,15 @@ export class UsersService {
     const payload = { email: user.email }
 
     const token = await this.jwtService.signAsync(payload)
+
+    const expires = new Date(Date.now() + 1000 * 60 * 60 * 5)
+
+    response.cookie('x-auth-token', token, {
+      httpOnly: true,
+      secure: true,
+      expires,
+    })
+
     return { token }
   }
 

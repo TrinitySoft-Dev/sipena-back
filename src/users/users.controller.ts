@@ -12,6 +12,7 @@ import {
   FileTypeValidator,
   Param,
   Put,
+  Res,
 } from '@nestjs/common'
 import { UsersService } from './users.service'
 import { CreateUserDto } from './dto/worker-user.dto'
@@ -21,6 +22,7 @@ import { LoginUserDto } from './dto/login-user.dto'
 import { ClientUserDto } from './dto/client.user.dto'
 import { AuthGuard } from '@/common/guards/auth.guard'
 import { FilesInterceptor } from '@nestjs/platform-express'
+import { Response } from 'express'
 
 @ApiTags('Users')
 @Controller('users')
@@ -57,8 +59,8 @@ export class UsersController {
   }
 
   @Post('login')
-  login(@Body() loginUserDto: LoginUserDto) {
-    return this.usersService.login(loginUserDto)
+  login(@Body() loginUserDto: LoginUserDto, @Res({ passthrough: true }) res: Response) {
+    return this.usersService.login(loginUserDto, res)
   }
 
   @ApiBearerAuth()

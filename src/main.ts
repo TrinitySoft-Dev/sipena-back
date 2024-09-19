@@ -6,6 +6,7 @@ import { config as env } from '@/common/config/config'
 import { HttpExceptionFilter } from './common/filters/http-exception.filter'
 import { ReponseInterceptor } from './common/interceptors/response.interceptor'
 import { BasicAuthMiddleware } from './middlewares/swagger-auth.middleware'
+import * as cookieParser from 'cookie-parser'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
@@ -22,7 +23,7 @@ async function bootstrap() {
     }),
   )
 
-  app.useGlobalFilters(new HttpExceptionFilter())
+  // app.useGlobalFilters(new HttpExceptionFilter())
   app.useGlobalInterceptors(new ReponseInterceptor())
   app.setGlobalPrefix('/api')
 
@@ -37,6 +38,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config)
 
   app.use('/api/docs', new BasicAuthMiddleware().use)
+  app.use(cookieParser())
 
   SwaggerModule.setup('api/docs', app, document, {
     customSiteTitle: 'Sipena API',
