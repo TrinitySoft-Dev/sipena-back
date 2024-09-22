@@ -30,7 +30,7 @@ import { WorkModule } from './work/work.module'
       database: config.DB.DATABASE,
       autoLoadEntities: true,
       synchronize: false,
-      logging: true,
+      // logging: true,
       ssl: true,
     }),
     JwtModule.register({

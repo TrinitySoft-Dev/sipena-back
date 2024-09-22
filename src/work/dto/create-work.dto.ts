@@ -13,5 +13,6 @@ export class CreateWorkDto {
     description: 'Work code',
     example: 'GL',
   })
+  @IsString()
   code: string
 }

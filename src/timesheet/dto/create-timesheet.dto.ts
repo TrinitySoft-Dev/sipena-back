@@ -10,6 +10,13 @@ export class TimeSheetDto {
   customer_id: number
 
   @ApiProperty({
+    description: 'Rule id of the timesheet',
+    example: 1,
+  })
+  @IsNumber()
+  work_id: number
+
+  @ApiProperty({
     description: 'Day of the timesheet',
     example: '2021-01-01',
   })
@@ -157,6 +164,7 @@ export class CreateTimesheetDto {
     description: 'Timesheet of the timesheet',
     example: {
       customer_id: 1,
+      work_id: 1,
       day: '2021-01-01',
       week: '2021-01-01',
       comment: 'Comment',

@@ -21,9 +21,10 @@ export class TimesheetService {
   async create(createTimesheetDto: CreateTimesheetDto) {
     try {
       const { timesheet, container } = createTimesheetDto
-      const { customer_id, workers } = timesheet
+      const { customer_id, workers, work_id } = timesheet
 
-      const customerUser = await this.getCustomerRelations(customer_id)
+      const customerUser = await this.usersService.findByWorks(customer_id, work_id)
+      if (!customerUser.rules.length) throw new NotFoundException('Rules not found')
 
       const rules = customerUser.rules
       const rate = await this.validateRules(rules, container)

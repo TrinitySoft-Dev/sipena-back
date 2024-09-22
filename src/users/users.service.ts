@@ -1,4 +1,11 @@
-import { BadRequestException, forwardRef, Inject, Injectable, UnauthorizedException } from '@nestjs/common'
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { User } from './entities/user.entity'
 import { FindOneOptions, In, Repository } from 'typeorm'
@@ -62,7 +69,6 @@ export class UsersService {
     if (role === ROLES_CONST.CUSTOMER) {
       let { rules } = createUserDto
       rules = rules?.split(',').map(Number)
-
       if (rules?.length > 0) {
         let allRules = await this.rulesService.findById(rules)
         if (allRules.length !== rules.length) throw new UnauthorizedException('Rules not found')
@@ -117,6 +123,19 @@ export class UsersService {
 
   async findOne(options: FindOneOptions<User>) {
     return await this.userRepository.findOne(options)
+  }
+
+  async findByWorks(userId: number, workId: number) {
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.rules', 'rule', 'rule.workId = :workId', { workId })
+      .where('user.id = :userId', { userId })
+      .andWhere('user.active = :active', { active: true })
+      .andWhere('user.role = :role', { role: ROLES_CONST.CUSTOMER })
+      .getOne()
+
+    if (!user) throw new NotFoundException('User not found')
+    return user
   }
 
   async findByRole(role: string) {

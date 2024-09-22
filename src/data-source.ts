@@ -8,8 +8,8 @@ export default new DataSource({
   username: config.DB.USERNAME,
   password: config.DB.PASSWORD,
   database: config.DB.DATABASE,
-  entities: [__dirname + '/src/**/*.entity{.ts,.js}'],
-  migrations: [__dirname + '/src/migrations/**/*{.ts,.js}'],
+  entities: [__dirname + '/**/*.entity{.ts,.js}'],
+  migrations: [__dirname + '/migrations/**/*{.ts,.js}'],
   synchronize: false,
   ssl: true,
 })
