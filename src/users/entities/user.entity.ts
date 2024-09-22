@@ -26,14 +26,14 @@ export class User {
   password: string
 
   @Column({
-    nullable: false,
+    nullable: true,
     type: 'varchar',
     comment: 'User name',
   })
   name: string
 
   @Column({
-    nullable: false,
+    nullable: true,
     type: 'varchar',
     comment: 'User lastname',
   })

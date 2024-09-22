@@ -29,19 +29,24 @@ export class UsersService {
 
     const hashPassword = await this.encryptPassword(password)
 
-    if (role === ROLES_CONST.WORKER) {
-      if (files.length !== 2) throw new BadRequestException('Invalid files')
-      const [passport_url, visa_url] = await this.imagesService.uploadMultiple(files)
+    if (role === ROLES_CONST.WORKER || !role) {
+      if (files.length == 2) {
+        const [passport_url, visa_url] = await this.imagesService.uploadMultiple(files)
+        rest.visa_url = visa_url
+        rest.passport_url = passport_url
+      }
 
-      const infoworker = await this.infoworkerService.create({ ...rest, visa_url, passport_url })
-      await this.userRepository.save({
+      const obj = {
         email,
         password: hashPassword,
         name,
         last_name,
         role,
-        infoworker,
-      })
+      }
+
+      if (rest.create_type !== 'BASIC') obj['infoworker'] = await this.infoworkerService.create({ ...rest })
+
+      await this.userRepository.save(obj)
 
       return { message: 'User created successfully' }
     }
