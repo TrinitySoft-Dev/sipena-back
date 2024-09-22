@@ -68,13 +68,10 @@ export class UsersService {
 
     if (role === ROLES_CONST.CUSTOMER) {
       let { rules } = createUserDto
-      rules = rules?.split(',').map(Number)
-      if (rules?.length > 0) {
-        let allRules = await this.rulesService.findById(rules)
-        if (allRules.length !== rules.length) throw new UnauthorizedException('Rules not found')
-
-        obj.rules = allRules
-      }
+      rules = rules?.split(',').map(rule => ({
+        id: Number(rule),
+      }))
+      if (rules?.length > 0) obj.rules = rules
 
       const user = await this.userRepository.save(obj)
       await this.userRepository.save(user)

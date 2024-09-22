@@ -18,6 +18,7 @@ import { ContainerModule } from './container/container.module'
 import { ConditionGroupsModule } from './condition_groups/condition_groups.module'
 import { ConditionsModule } from './conditions/conditions.module'
 import { WorkModule } from './work/work.module'
+import { ProductsModule } from './products/products.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { WorkModule } from './work/work.module'
     ConditionGroupsModule,
     ConditionsModule,
     WorkModule,
+    ProductsModule,
   ],
   controllers: [],
   providers: [],
