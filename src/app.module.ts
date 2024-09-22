@@ -15,16 +15,9 @@ import { TimesheetModule } from './timesheet/timesheet.module'
 import { ContainerModule } from './container/container.module'
 
 // entities
-import { Infoworker } from './infoworkers/entities/infoworker.entity'
-import { User } from './users/entities/user.entity'
-import { Role } from './roles/entities/role.entity'
-import { Rule } from './rules/entities/rule.entity'
-import { Timesheet } from './timesheet/entities/timesheet.entity'
-import { Container } from './container/entities/container.entity'
 import { ConditionGroupsModule } from './condition_groups/condition_groups.module'
 import { ConditionsModule } from './conditions/conditions.module'
-import { ConditionGroup } from './condition_groups/entities/condition_group.entity'
-import { Condition } from './conditions/entities/condition.entity'
+import { WorkModule } from './work/work.module'
 
 @Module({
   imports: [
@@ -35,8 +28,8 @@ import { Condition } from './conditions/entities/condition.entity'
       password: config.DB.PASSWORD,
       username: config.DB.USERNAME,
       database: config.DB.DATABASE,
-      entities: [User, Infoworker, Role, Rule, Timesheet, Container, ConditionGroup, Condition],
-      synchronize: true,
+      autoLoadEntities: true,
+      synchronize: false,
       logging: true,
       ssl: true,
     }),
@@ -54,6 +47,7 @@ import { Condition } from './conditions/entities/condition.entity'
     ContainerModule,
     ConditionGroupsModule,
     ConditionsModule,
+    WorkModule,
   ],
   controllers: [],
   providers: [],

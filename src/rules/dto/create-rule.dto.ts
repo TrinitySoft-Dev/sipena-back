@@ -44,6 +44,14 @@ export class CreateRuleDto {
   customer_id: number
 
   @ApiProperty({
+    description: 'Work id of the rule',
+    example: 1,
+    required: true,
+  })
+  @IsNumber()
+  work_id: number
+
+  @ApiProperty({
     description: 'container size of the rule',
     example: '10',
     required: true,

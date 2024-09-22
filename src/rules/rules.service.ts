@@ -6,17 +6,19 @@ import { In, Repository } from 'typeorm'
 import { ConditionGroupsService } from '@/condition_groups/condition_groups.service'
 import { getAllowedConditionFields } from '@/common/decorators/allowed-fields.decorator'
 import * as crypto from 'crypto'
+import { WorkService } from '@/work/work.service'
 
 @Injectable()
 export class RulesService {
   constructor(
     @InjectRepository(Rule) private readonly ruleRepository: Repository<Rule>,
     private readonly conditionGroupService: ConditionGroupsService,
+    private readonly workService: WorkService,
   ) {}
 
   async create(createRuleDto: CreateRuleDto) {
     try {
-      const { customer_id, condition_groups, ...rest } = createRuleDto
+      const { customer_id, condition_groups, work_id, ...rest } = createRuleDto
 
       return await this.ruleRepository.manager.transaction(async transactionalEntityManager => {
         const ruleRepository = transactionalEntityManager.getRepository(Rule)
@@ -31,6 +33,7 @@ export class RulesService {
         }
 
         rule.condition_groups = conditions
+        rule.work = await this.workService.findById(work_id)
 
         await ruleRepository.save(rule)
 

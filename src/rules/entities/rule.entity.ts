@@ -1,5 +1,6 @@
 import { ConditionGroup } from '@/condition_groups/entities/condition_group.entity'
 import { User } from '@/users/entities/user.entity'
+import { Work } from '@/work/entities/work.entity'
 import { Column, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity({
@@ -32,6 +33,9 @@ export class Rule {
 
   @ManyToMany(() => User, user => user.rules)
   users: User[]
+
+  @ManyToOne(() => Work, work => work.rules)
+  work: Work
 
   @OneToMany(() => ConditionGroup, group => group.rule, { cascade: true })
   condition_groups: ConditionGroup[]
