@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { CreateProductDto } from './dto/create-product.dto'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Product } from './entities/product.entity'
-import { Repository } from 'typeorm'
+import { In, Repository } from 'typeorm'
 
 @Injectable()
 export class ProductsService {
@@ -10,5 +10,11 @@ export class ProductsService {
 
   create(createProductDto: CreateProductDto) {
     return this.productRepository.save(createProductDto)
+  }
+
+  async findByWork(workId: number) {
+    return await this.productRepository.find({
+      where: { customers: In([workId]) },
+    })
   }
 }
