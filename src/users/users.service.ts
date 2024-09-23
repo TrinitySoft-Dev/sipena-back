@@ -88,7 +88,7 @@ export class UsersService {
     const isPasswordCorrect = await bcrypt.compare(password, user.password)
     if (!isPasswordCorrect) throw new UnauthorizedException('Email or password incorrect')
 
-    const payload = { email: user.email }
+    const payload = { email: user.email, role: user.role, id: user.id }
 
     const token = await this.jwtService.signAsync(payload)
 
@@ -118,7 +118,9 @@ export class UsersService {
   async findByWorks(userId: number, workId: number) {
     const user = await this.userRepository
       .createQueryBuilder('user')
-      .leftJoinAndSelect('user.rules', 'rule', 'rule.workId = :workId', { workId })
+      .leftJoinAndSelect('user.rules', 'rule', 'rule.work = :workId', { workId })
+      .leftJoinAndSelect('rule.condition_groups', 'condition_groups')
+      .leftJoinAndSelect('condition_groups.conditions', 'conditions')
       .where('user.id = :userId', { userId })
       .andWhere('user.active = :active', { active: true })
       .andWhere('user.role = :role', { role: ROLES_CONST.CUSTOMER })

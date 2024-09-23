@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class LastMigration1727113081186 implements MigrationInterface {
-    name = 'LastMigration1727113081186'
+export class FixRelation1727117501158 implements MigrationInterface {
+    name = 'FixRelation1727117501158'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`ALTER TABLE "rules" ADD "workId" integer`);

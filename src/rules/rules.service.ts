@@ -22,7 +22,7 @@ export class RulesService {
 
       return await this.ruleRepository.manager.transaction(async transactionalEntityManager => {
         const ruleRepository = transactionalEntityManager.getRepository(Rule)
-        const rule = ruleRepository.create({ ...rest })
+        const rule = ruleRepository.create({ ...rest, work: { id: work_id } })
         await ruleRepository.save(rule)
 
         const conditions = []
@@ -33,8 +33,6 @@ export class RulesService {
         }
 
         rule.condition_groups = conditions
-        rule.work = await this.workService.findById(work_id)
-
         await ruleRepository.save(rule)
 
         return { message: 'Rule created successfully' }

@@ -24,6 +24,7 @@ export class TimesheetService {
       const { customer_id, workers, work_id } = timesheet
 
       const customerUser = await this.usersService.findByWorks(customer_id, work_id)
+      console.log(customerUser)
       if (!customerUser.rules.length) throw new NotFoundException('Rules not found')
 
       const rules = customerUser.rules
@@ -87,5 +88,15 @@ export class TimesheetService {
     if (!resultCustomer) throw new NotFoundException('Customer not found')
 
     return resultCustomer
+  }
+
+  async find(payload: any) {
+    const { role, id } = payload
+
+    if (role === ROLES_CONST.CUSTOMER) {
+      return await this.timesheetRepository.find({
+        where: { customer: id },
+      })
+    }
   }
 }

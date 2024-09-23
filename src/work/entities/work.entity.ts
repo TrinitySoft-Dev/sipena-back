@@ -1,5 +1,5 @@
 import { Rule } from '@/rules/entities/rule.entity'
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity({
   name: 'works',
