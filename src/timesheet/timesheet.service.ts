@@ -24,7 +24,6 @@ export class TimesheetService {
       const { customer_id, workers, work_id } = timesheet
 
       const customerUser = await this.usersService.findByWorks(customer_id, work_id)
-      console.log(customerUser)
       if (!customerUser.rules.length) throw new NotFoundException('Rules not found')
 
       const rules = customerUser.rules

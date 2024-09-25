@@ -1,4 +1,5 @@
 import { Infoworker } from '@/infoworkers/entities/infoworker.entity'
+import { Product } from '@/products/entities/product.entity'
 import { Rule } from '@/rules/entities/rule.entity'
 import { Timesheet } from '@/timesheet/entities/timesheet.entity'
 import {
@@ -82,6 +83,20 @@ export class User {
 
   @ManyToMany(() => Timesheet, timesheet => timesheet.workers)
   assignedTimesheets: Timesheet[]
+
+  @ManyToMany(() => Product, product => product.customers)
+  @JoinTable({
+    name: 'user_products',
+    joinColumn: {
+      name: 'user_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'product_id',
+      referencedColumnName: 'id',
+    },
+  })
+  products: Product[]
 
   @Column({
     nullable: false,
