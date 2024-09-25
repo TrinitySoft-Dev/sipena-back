@@ -1,8 +1,9 @@
-import { Controller, Post, Body, UseGuards, Get } from '@nestjs/common'
+import { Controller, Post, Body, UseGuards, Get, Req } from '@nestjs/common'
 import { RulesService } from './rules.service'
 import { CreateRuleDto } from './dto/create-rule.dto'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { AuthGuard } from '@/common/guards/auth.guard'
+import { Request } from 'express'
 
 @ApiTags('Rules')
 @ApiBearerAuth()
@@ -14,6 +15,11 @@ export class RulesController {
   @Post()
   async create(@Body() createRuleDto: CreateRuleDto) {
     return await this.rulesService.create(createRuleDto)
+  }
+
+  @Get('find')
+  async find(@Req() req: Request) {
+    return await this.rulesService.find((req as any)?.payload)
   }
 
   @Get('fields')

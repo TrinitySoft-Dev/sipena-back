@@ -2,17 +2,7 @@ import { Infoworker } from '@/infoworkers/entities/infoworker.entity'
 import { Product } from '@/products/entities/product.entity'
 import { Rule } from '@/rules/entities/rule.entity'
 import { Timesheet } from '@/timesheet/entities/timesheet.entity'
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  JoinTable,
-  ManyToMany,
-  ManyToOne,
-  OneToMany,
-  OneToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm'
+import { Column, Entity, JoinColumn, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity({
   name: 'users',
@@ -64,11 +54,11 @@ export class User {
   })
   role: string
 
-  @ManyToMany(() => Rule, rule => rule.users)
+  @ManyToMany(() => Rule, rule => rule.customers)
   @JoinTable({
-    name: 'user_rules',
+    name: 'customers_rules',
     joinColumn: {
-      name: 'user_id',
+      name: 'customers_id',
       referencedColumnName: 'id',
     },
     inverseJoinColumn: {

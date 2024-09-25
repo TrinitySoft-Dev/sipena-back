@@ -46,11 +46,15 @@ export class RulesService {
     return await this.ruleRepository.find({ where: { id: In(Array.isArray(id) ? id : [id]) } })
   }
 
+  async find(payload: any) {
+    const { id } = payload
+  }
+
   async allowedFields() {
-    const fields = getAllowedConditionFields()
-    return fields.map(field => ({
-      field,
+    const fields = getAllowedConditionFields().map(field => ({
       id: crypto.randomUUID(),
+      ...field,
     }))
+    return fields
   }
 }

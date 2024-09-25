@@ -96,11 +96,11 @@ export class UsersService {
 
     response.cookie('x-auth-token', token, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
       expires,
     })
 
-    return { token }
+    return { message: 'Login successfully' }
   }
 
   async findById(id: number) {

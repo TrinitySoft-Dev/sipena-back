@@ -1,7 +1,7 @@
 import { ConditionGroup } from '@/condition_groups/entities/condition_group.entity'
 import { User } from '@/users/entities/user.entity'
 import { Work } from '@/work/entities/work.entity'
-import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity({
   name: 'rules',
@@ -32,7 +32,7 @@ export class Rule {
   rate: number
 
   @ManyToMany(() => User, user => user.rules)
-  users: User[]
+  customers: User[]
 
   @ManyToOne(() => Work, work => work.rules)
   @JoinColumn({ name: 'work_id' })

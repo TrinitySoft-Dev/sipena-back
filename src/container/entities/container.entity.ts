@@ -1,3 +1,4 @@
+import { OPERATORS } from '@/common/conts/operators'
 import { ConditionField } from '@/common/decorators/condition-field.decorator'
 import { IsBoolean } from 'class-validator'
 import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
@@ -24,7 +25,9 @@ export class Container {
   })
   work: string
 
-  @ConditionField()
+  @ConditionField({
+    open: true,
+  })
   @Column({
     type: 'integer',
     nullable: false,
@@ -38,21 +41,21 @@ export class Container {
   })
   product: string
 
-  @ConditionField()
+  @ConditionField({ open: true })
   @Column({
     type: 'integer',
     nullable: false,
   })
   skus: number
 
-  @ConditionField()
+  @ConditionField({ open: true })
   @Column({
     type: 'integer',
     nullable: false,
   })
   cartons: number
 
-  @ConditionField()
+  @ConditionField({ open: true })
   @Column({
     type: 'integer',
     nullable: false,
@@ -60,14 +63,25 @@ export class Container {
   })
   pallets: number
 
-  @ConditionField()
+  @ConditionField({ open: true })
   @Column({
     type: 'integer',
     nullable: false,
   })
   weight: number
 
-  @ConditionField()
+  @ConditionField({
+    open: false,
+    options: {
+      operators: [
+        {
+          name: OPERATORS.EQUAL.name,
+          value: OPERATORS.EQUAL.value,
+        },
+      ],
+      values: ['Yes', 'No'],
+    },
+  })
   @Column({
     type: 'boolean',
     nullable: false,
@@ -75,7 +89,18 @@ export class Container {
   })
   forklift_driver: boolean
 
-  @ConditionField()
+  @ConditionField({
+    open: false,
+    options: {
+      operators: [
+        {
+          name: OPERATORS.EQUAL.name,
+          value: OPERATORS.EQUAL.value,
+        },
+      ],
+      values: ['Yes', 'No'],
+    },
+  })
   @Column({
     type: 'boolean',
     nullable: false,
@@ -83,7 +108,18 @@ export class Container {
   })
   trash: boolean
 
-  @ConditionField()
+  @ConditionField({
+    open: false,
+    options: {
+      operators: [
+        {
+          name: OPERATORS.EQUAL.name,
+          value: OPERATORS.EQUAL.value,
+        },
+      ],
+      values: ['Yes', 'No'],
+    },
+  })
   @Column({
     type: 'boolean',
     nullable: false,
