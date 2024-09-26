@@ -19,6 +19,7 @@ import { ConditionGroupsModule } from './condition_groups/condition_groups.modul
 import { ConditionsModule } from './conditions/conditions.module'
 import { WorkModule } from './work/work.module'
 import { ProductsModule } from './products/products.module';
+import { ContainerSizeModule } from './container_size/container_size.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { ProductsModule } from './products/products.module';
     ConditionsModule,
     WorkModule,
     ProductsModule,
+    ContainerSizeModule,
   ],
   controllers: [],
   providers: [],

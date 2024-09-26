@@ -1,7 +1,8 @@
 import { ConditionGroup } from '@/condition_groups/entities/condition_group.entity'
+import { ContainerSize } from '@/container_size/entities/container_size.entity'
 import { User } from '@/users/entities/user.entity'
 import { Work } from '@/work/entities/work.entity'
-import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity({
   name: 'rules',
@@ -17,11 +18,7 @@ export class Rule {
   })
   status: boolean
 
-  @Column({
-    nullable: false,
-    type: 'decimal',
-    comment: 'Size of the container',
-  })
+  @OneToOne(() => ContainerSize, containerSize => containerSize.rule)
   container_size: number
 
   @Column({
