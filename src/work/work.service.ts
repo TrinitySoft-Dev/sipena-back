@@ -17,4 +17,8 @@ export class WorkService {
     if (!work) throw new NotFoundException('Work not found')
     return work
   }
+
+  async find() {
+    return await this.workRepository.find()
+  }
 }
