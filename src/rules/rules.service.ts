@@ -51,10 +51,6 @@ export class RulesService {
   }
 
   async allowedFields() {
-    const fields = getAllowedConditionFields().map(field => ({
-      id: crypto.randomUUID(),
-      field,
-    }))
-    return fields
+    return getAllowedConditionFields()
   }
 }
