@@ -6,3 +6,9 @@ export function getAllowedConditionFields() {
   const fields = Reflect.getMetadata('conditionFields', container)
   return fields || []
 }
+
+export function getAllowedConditionFieldsSimplify() {
+  const container = new Container()
+  const fields = Reflect.getMetadata('conditionFields', container)
+  return fields.map(field => field.field)
+}

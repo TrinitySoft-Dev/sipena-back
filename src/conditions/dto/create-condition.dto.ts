@@ -1,7 +1,7 @@
-import { getAllowedConditionFields } from '@/common/decorators/allowed-fields.decorator'
+import { getAllowedConditionFieldsSimplify } from '@/common/decorators/allowed-fields.decorator'
 import { IsIn, IsString } from 'class-validator'
 
-const ALLOWED_CONDITION_FIELDS = getAllowedConditionFields()
+const ALLOWED_CONDITION_FIELDS = getAllowedConditionFieldsSimplify()
 
 export class CreateConditionDto {
   @IsString()
