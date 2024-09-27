@@ -18,7 +18,7 @@ export class RulesService {
 
   async create(createRuleDto: CreateRuleDto) {
     try {
-      const { customer_id, condition_groups, work_id, ...rest } = createRuleDto
+      const { condition_groups, work_id, ...rest } = createRuleDto
 
       return await this.ruleRepository.manager.transaction(async transactionalEntityManager => {
         const ruleRepository = transactionalEntityManager.getRepository(Rule)

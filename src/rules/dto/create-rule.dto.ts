@@ -1,7 +1,7 @@
 import { CreateConditionGroupDto } from '@/condition_groups/dto/create-condition_group.dto'
 import { ApiProperty } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
-import { IsArray, IsInt, IsNumber, IsString, ValidateNested } from 'class-validator'
+import { IsArray, IsBoolean, IsInt, IsNumber, IsString, ValidateNested } from 'class-validator'
 
 const example = [
   {
@@ -36,14 +36,6 @@ const example = [
 
 export class CreateRuleDto {
   @ApiProperty({
-    description: 'Customer id of the rule',
-    example: 1,
-    required: true,
-  })
-  @IsNumber()
-  customer_id: number
-
-  @ApiProperty({
     description: 'Work id of the rule',
     example: 1,
     required: true,
@@ -76,4 +68,11 @@ export class CreateRuleDto {
   @ValidateNested({ each: true })
   @Type(() => CreateConditionGroupDto)
   condition_groups: CreateConditionGroupDto[]
+
+  @ApiProperty({
+    description: 'Status of the rule',
+    example: true,
+  })
+  @IsBoolean()
+  status: boolean
 }
