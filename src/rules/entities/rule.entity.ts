@@ -18,8 +18,8 @@ export class Rule {
   })
   status: boolean
 
-  @OneToOne(() => ContainerSize, containerSize => containerSize.rule)
-  container_size: number
+  @OneToOne(() => ContainerSize, containerSize => containerSize.rule, { cascade: true })
+  container_size: ContainerSize
 
   @Column({
     nullable: false,

@@ -13,20 +13,18 @@ export class ConditionGroupsService {
     private readonly conditionsService: ConditionsService,
   ) {}
 
-  async create(createConditionGroupDto: CreateConditionGroupDto, rule: Rule, manager: EntityManager) {
+  async create(createConditionGroupDto: CreateConditionGroupDto, rule: Rule) {
     try {
       const { conditions } = createConditionGroupDto
 
-      const conditionGroupRepository = manager.getRepository(ConditionGroup)
-
-      const conditionGroup = conditionGroupRepository.create()
+      const conditionGroup = this.conditionGroupRepository.create()
       conditionGroup.rule = rule
 
-      const createdConditions = await this.conditionsService.createMany(conditions, manager)
+      const createdConditions = await this.conditionsService.createMany(conditions)
 
       conditionGroup.conditions = createdConditions
 
-      return await conditionGroupRepository.save(conditionGroup)
+      return this.conditionGroupRepository.create(conditionGroup)
     } catch (error) {
       throw error
     }

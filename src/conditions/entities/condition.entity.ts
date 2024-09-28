@@ -1,5 +1,5 @@
 import { ConditionGroup } from '@/condition_groups/entities/condition_group.entity'
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity({
   name: 'conditions',
@@ -8,7 +8,8 @@ export class Condition {
   @PrimaryGeneratedColumn()
   id: number
 
-  @ManyToOne(() => ConditionGroup, conditionGroup => conditionGroup.id, { onDelete: 'CASCADE' })
+  @ManyToOne(() => ConditionGroup, conditionGroup => conditionGroup.conditions)
+  @JoinColumn({ name: 'condition_group_id' })
   condition_group: ConditionGroup
 
   @Column({

@@ -3,12 +3,9 @@ import { RulesService } from './rules.service'
 import { RulesController } from './rules.controller'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { Rule } from './entities/rule.entity'
-import { ConditionGroupsModule } from '@/condition_groups/condition_groups.module'
-import { WorkModule } from '@/work/work.module'
-import { ContainerSizeModule } from '@/container_size/container_size.module'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Rule]), ConditionGroupsModule, WorkModule],
+  imports: [TypeOrmModule.forFeature([Rule])],
   controllers: [RulesController],
   providers: [RulesService],
   exports: [RulesService],

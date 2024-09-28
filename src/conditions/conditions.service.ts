@@ -14,13 +14,11 @@ export class ConditionsService {
     return await this.conditionRepository.save(condition)
   }
 
-  async createMany(createConditionDtos: CreateConditionDto[], manager: EntityManager): Promise<Condition[]> {
+  async createMany(createConditionDtos: CreateConditionDto[]): Promise<Condition[]> {
     try {
-      const conditionRepository = manager.getRepository(Condition)
+      const conditions = createConditionDtos.map(dto => this.conditionRepository.create(dto))
 
-      const conditions = createConditionDtos.map(dto => conditionRepository.create(dto))
-
-      return await conditionRepository.save(conditions)
+      return await this.conditionRepository.save(conditions)
     } catch (error) {
       throw error
     }

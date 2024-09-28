@@ -43,6 +43,13 @@ export class ClientUserDto {
   phone: string
 
   @ApiProperty({
+    description: 'City of the user',
+    example: 'City',
+  })
+  @IsString()
+  city: string
+
+  @ApiProperty({
     description: 'Role of the user',
     example: 'CLIENT',
     required: true,

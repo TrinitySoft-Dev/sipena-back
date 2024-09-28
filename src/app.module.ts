@@ -18,8 +18,8 @@ import { ContainerModule } from './container/container.module'
 import { ConditionGroupsModule } from './condition_groups/condition_groups.module'
 import { ConditionsModule } from './conditions/conditions.module'
 import { WorkModule } from './work/work.module'
-import { ProductsModule } from './products/products.module';
-import { ContainerSizeModule } from './container_size/container_size.module';
+import { ProductsModule } from './products/products.module'
+import { ContainerSizeModule } from './container_size/container_size.module'
 
 @Module({
   imports: [
@@ -32,7 +32,7 @@ import { ContainerSizeModule } from './container_size/container_size.module';
       database: config.DB.DATABASE,
       autoLoadEntities: true,
       synchronize: false,
-      // logging: true,
+      logging: true,
       ssl: true,
     }),
     JwtModule.register({
