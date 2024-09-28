@@ -31,8 +31,13 @@ export class RulesService {
     return await this.ruleRepository.find({ where: { id: In(Array.isArray(id) ? id : [id]) } })
   }
 
-  async find(payload: any) {
-    const { id } = payload
+  async find({ page, pageSize }: { page: number; pageSize: number }) {
+    const [result, total] = await this.ruleRepository.findAndCount({
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    })
+
+    return { result, pagination: { page, pageSize, total } }
   }
 
   async allowedFields() {
