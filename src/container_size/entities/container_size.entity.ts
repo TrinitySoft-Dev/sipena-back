@@ -1,5 +1,5 @@
 import { Rule } from '@/rules/entities/rule.entity'
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity({
   name: 'container_sizes',
@@ -14,8 +14,8 @@ export class ContainerSize {
   })
   value: number
 
-  @OneToOne(() => Rule, rule => rule.container_size)
-  rule: Rule
+  @OneToMany(() => Rule, rule => rule.container_size)
+  rules: Rule[]
 
   @Column({
     nullable: false,

@@ -2,7 +2,17 @@ import { ConditionGroup } from '@/condition_groups/entities/condition_group.enti
 import { ContainerSize } from '@/container_size/entities/container_size.entity'
 import { User } from '@/users/entities/user.entity'
 import { Work } from '@/work/entities/work.entity'
-import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm'
 
 @Entity({
   name: 'rules',
@@ -18,7 +28,8 @@ export class Rule {
   })
   status: boolean
 
-  @OneToOne(() => ContainerSize, containerSize => containerSize.rule, { cascade: true })
+  @ManyToOne(() => ContainerSize, containerSize => containerSize.rules)
+  @JoinColumn()
   container_size: ContainerSize
 
   @Column({
@@ -31,8 +42,8 @@ export class Rule {
   @ManyToMany(() => User, user => user.rules)
   customers: User[]
 
-  @ManyToOne(() => Work, work => work.rules)
-  @JoinColumn({ name: 'work_id' })
+  @ManyToOne(() => Work, work => work.rules, { cascade: true })
+  @JoinColumn()
   work: Work
 
   @OneToMany(() => ConditionGroup, group => group.rule, { cascade: true })
@@ -45,17 +56,15 @@ export class Rule {
   })
   active: boolean
 
-  @Column({
-    nullable: false,
-    type: 'date',
-    default: () => 'CURRENT_DATE',
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
   })
   created_at: Date
 
-  @Column({
-    nullable: false,
-    type: 'date',
-    default: () => 'CURRENT_DATE',
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
   })
   updated_at: Date
 

@@ -1,8 +1,21 @@
-import { Controller, Post, Body, UseGuards, Get, Req, Query, ParseIntPipe, DefaultValuePipe } from '@nestjs/common'
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Get,
+  Req,
+  Query,
+  ParseIntPipe,
+  DefaultValuePipe,
+  Put,
+  Param,
+} from '@nestjs/common'
 import { RulesService } from './rules.service'
 import { CreateRuleDto } from './dto/create-rule.dto'
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger'
 import { AuthGuard } from '@/common/guards/auth.guard'
+import { UpdateRuleDto } from './dto/update-rule.dto'
 
 @ApiTags('Rules')
 @ApiBearerAuth()
@@ -37,5 +50,10 @@ export class RulesController {
   @Get('fields')
   async allowedFields() {
     return await this.rulesService.allowedFields()
+  }
+
+  @Put(':id')
+  async update(@Param('id') id: number, @Body() updateRuleDto: UpdateRuleDto) {
+    return await this.rulesService.update(id, updateRuleDto)
   }
 }

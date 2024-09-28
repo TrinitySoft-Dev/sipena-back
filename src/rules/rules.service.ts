@@ -1,9 +1,11 @@
+import { DateTime } from 'luxon'
 import { Injectable } from '@nestjs/common'
 import { CreateRuleDto } from './dto/create-rule.dto'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Rule } from './entities/rule.entity'
 import { In, Repository } from 'typeorm'
 import { getAllowedConditionFields } from '@/common/decorators/allowed-fields.decorator'
+import { UpdateRuleDto } from './dto/update-rule.dto'
 
 @Injectable()
 export class RulesService {
@@ -16,6 +18,7 @@ export class RulesService {
       const rule = this.ruleRepository.create({
         ...rest,
         work: { id: work_id },
+        container_size: { id: container_size },
         condition_groups,
       })
 
@@ -31,13 +34,28 @@ export class RulesService {
     return await this.ruleRepository.find({ where: { id: In(Array.isArray(id) ? id : [id]) } })
   }
 
+  async update(id: number, updateRuleDto: UpdateRuleDto) {
+    const { container_size, ...rest } = updateRuleDto
+    return await this.ruleRepository.update(id, {
+      ...rest,
+      container_size: { id: container_size },
+    })
+  }
+
   async find({ page, pageSize }: { page: number; pageSize: number }) {
     const [result, total] = await this.ruleRepository.findAndCount({
       skip: (page - 1) * pageSize,
       take: pageSize,
+      relations: ['container_size'],
     })
+    const newResult = result.map(rule => ({
+      ...rule,
+      container_size: rule?.container_size?.value,
+      date: DateTime.fromJSDate(rule.created_at).toFormat('dd/MM/yyyy'),
+      time: DateTime.fromJSDate(rule.created_at).toFormat('HH:mm'),
+    }))
 
-    return { result, pagination: { page, pageSize, total } }
+    return { result: newResult, pagination: { page, pageSize, total } }
   }
 
   async allowedFields() {
