@@ -15,4 +15,8 @@ export class ContainerSizeService {
   find() {
     return this.containerSizeRepository.find()
   }
+
+  findById(id: number) {
+    return this.containerSizeRepository.findOne({ where: { id } })
+  }
 }

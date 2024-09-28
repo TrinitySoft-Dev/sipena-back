@@ -1,9 +1,8 @@
-import { Controller, Post, Body, UseGuards, Get, Req } from '@nestjs/common'
+import { Controller, Post, Body, UseGuards, Get, Req, Query, ParseIntPipe, DefaultValuePipe } from '@nestjs/common'
 import { RulesService } from './rules.service'
 import { CreateRuleDto } from './dto/create-rule.dto'
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger'
 import { AuthGuard } from '@/common/guards/auth.guard'
-import { Request } from 'express'
 
 @ApiTags('Rules')
 @ApiBearerAuth()
@@ -18,8 +17,21 @@ export class RulesController {
   }
 
   @Get('find')
-  async find(@Req() req: Request) {
-    return await this.rulesService.find((req as any)?.payload)
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    required: false,
+    type: Number,
+  })
+  async find(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
+    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize?: number,
+  ) {
+    return await this.rulesService.find({ page, pageSize })
   }
 
   @Get('fields')
