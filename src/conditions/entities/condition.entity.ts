@@ -1,5 +1,5 @@
 import { ConditionGroup } from '@/condition_groups/entities/condition_group.entity'
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, RelationId } from 'typeorm'
 
 @Entity({
   name: 'conditions',
@@ -11,6 +11,9 @@ export class Condition {
   @ManyToOne(() => ConditionGroup, conditionGroup => conditionGroup.conditions)
   @JoinColumn({ name: 'condition_group_id' })
   condition_group: ConditionGroup
+
+  @RelationId((condition: Condition) => condition.condition_group)
+  condition_group_id: number
 
   @Column({
     type: 'varchar',

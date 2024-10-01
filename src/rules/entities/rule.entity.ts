@@ -46,7 +46,7 @@ export class Rule {
   @JoinColumn()
   work: Work
 
-  @OneToMany(() => ConditionGroup, group => group.rule, { cascade: true })
+  @OneToMany(() => ConditionGroup, group => group.rule, { cascade: true, orphanedRowAction: 'delete' })
   condition_groups: ConditionGroup[]
 
   @Column({

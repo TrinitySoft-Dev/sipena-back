@@ -5,6 +5,7 @@ import { ConditionGroup } from './entities/condition_group.entity'
 import { EntityManager, Repository } from 'typeorm'
 import { ConditionsService } from '@/conditions/conditions.service'
 import { Rule } from '@/rules/entities/rule.entity'
+import { UpdateConditionGroupDto } from './dto/update-condition_group.dto'
 
 @Injectable()
 export class ConditionGroupsService {
@@ -29,4 +30,31 @@ export class ConditionGroupsService {
       throw error
     }
   }
+
+  async createByRule(createConditionGroupDto: CreateConditionGroupDto, rule: Rule) {
+    const { conditions, id } = createConditionGroupDto
+
+    const conditionGroup = this.conditionGroupRepository.create({
+      rule: { id },
+    })
+
+    await this.conditionGroupRepository.save(conditionGroup)
+
+    // Crear las condiciones asociadas
+    for (const conditionDto of conditions) {
+      await this.conditionsService.create({
+        ...conditionDto,
+        condition_group_id: conditionGroup.id,
+      })
+    }
+
+    return conditionGroup
+  }
+
+  async remove(id: number) {
+    await this.conditionsService.removeByConditionGroupId(id)
+    await this.conditionGroupRepository.delete(id)
+  }
+
+  async update(id: number, updateConditionGroupDto: UpdateConditionGroupDto) {}
 }

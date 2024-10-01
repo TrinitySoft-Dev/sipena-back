@@ -53,6 +53,14 @@ export class ConditionsService {
     }
   }
 
+  async removeByConditionGroupId(id: number) {
+    await this.conditionRepository.delete({ condition_group_id: id })
+  }
+
+  async countConditionsByConditionGroupId(conditionGroupId: number) {
+    return await this.conditionRepository.count({ where: { condition_group_id: conditionGroupId } })
+  }
+
   private parseValue(value: any) {
     if (!isNaN(value)) {
       return Number(value)

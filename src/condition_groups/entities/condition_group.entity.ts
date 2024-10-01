@@ -1,6 +1,6 @@
 import { Condition } from '@/conditions/entities/condition.entity'
 import { Rule } from '@/rules/entities/rule.entity'
-import { Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import { Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, RelationId } from 'typeorm'
 
 @Entity({
   name: 'condition_groups',
@@ -13,6 +13,9 @@ export class ConditionGroup {
   @JoinColumn({ name: 'rule_id' })
   rule: Rule
 
-  @OneToMany(() => Condition, condition => condition.condition_group, { cascade: true })
+  @RelationId((conditionGroup: ConditionGroup) => conditionGroup.rule)
+  rule_id: number
+
+  @OneToMany(() => Condition, condition => condition.condition_group, { cascade: true, orphanedRowAction: 'delete' })
   conditions: Condition[]
 }

@@ -1,5 +1,5 @@
 import { Rule } from '@/rules/entities/rule.entity'
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
 
 @Entity({
   name: 'container_sizes',
@@ -25,15 +25,15 @@ export class ContainerSize {
   })
   active: boolean
 
-  @Column({
-    type: 'date',
-    default: () => 'CURRENT_DATE',
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
   })
   created_at: Date
 
-  @Column({
-    type: 'date',
-    default: () => 'CURRENT_DATE',
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
   })
   updated_at: Date
 
