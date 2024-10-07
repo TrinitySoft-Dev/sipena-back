@@ -15,20 +15,16 @@ export class ConditionGroupsService {
   ) {}
 
   async create(createConditionGroupDto: CreateConditionGroupDto, rule: Rule) {
-    try {
-      const { conditions } = createConditionGroupDto
+    const { conditions } = createConditionGroupDto
 
-      const conditionGroup = this.conditionGroupRepository.create()
-      conditionGroup.rule = rule
+    const conditionGroup = this.conditionGroupRepository.create()
+    conditionGroup.rule = rule
 
-      const createdConditions = await this.conditionsService.createMany(conditions)
+    const createdConditions = await this.conditionsService.createMany(conditions)
 
-      conditionGroup.conditions = createdConditions
+    conditionGroup.conditions = createdConditions
 
-      return this.conditionGroupRepository.create(conditionGroup)
-    } catch (error) {
-      throw error
-    }
+    return this.conditionGroupRepository.create(conditionGroup)
   }
 
   async createByRule(createConditionGroupDto: CreateConditionGroupDto, rule: Rule) {
@@ -44,7 +40,7 @@ export class ConditionGroupsService {
     for (const conditionDto of conditions) {
       await this.conditionsService.create({
         ...conditionDto,
-        condition_group_id: conditionGroup.id,
+        // condition_group_id: conditionGroup.id,
       })
     }
 
