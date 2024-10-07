@@ -63,3 +63,4 @@ import { join } from 'path'
   providers: [],
 })
 export class AppModule {}
+console.log(join(__dirname, '..', 'public'))
