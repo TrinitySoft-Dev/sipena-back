@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { JwtModule } from '@nestjs/jwt'
+import { ServeStaticModule } from '@nestjs/serve-static'
 
 // Ensure the necessary @nestjs/typeorm package is installed or the path is correctly set
 import { config } from '@/common/config/config'
@@ -20,6 +21,7 @@ import { ConditionsModule } from './conditions/conditions.module'
 import { WorkModule } from './work/work.module'
 import { ProductsModule } from './products/products.module'
 import { ContainerSizeModule } from './container_size/container_size.module'
+import { join } from 'path'
 
 @Module({
   imports: [
@@ -39,6 +41,10 @@ import { ContainerSizeModule } from './container_size/container_size.module'
       global: true,
       secret: config.JWT_SECRET,
       signOptions: { expiresIn: '1d' },
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
+      exclude: ['/api/*'],
     }),
     UsersModule,
     InfoworkersModule,
