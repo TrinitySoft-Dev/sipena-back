@@ -43,7 +43,7 @@ import { join } from 'path'
       signOptions: { expiresIn: '1d' },
     }),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, 'public'),
+      rootPath: join(__dirname, '..', 'public'),
       serveRoot: '/public',
     }),
     UsersModule,
