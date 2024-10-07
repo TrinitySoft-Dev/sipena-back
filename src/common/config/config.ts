@@ -21,6 +21,7 @@ interface ENVIROMENTS {
   SIPENA_FILES: string
   SWAGGER_USER: string
   SWAGGER_PASSWORD: string
+  RESEND_API_KEY: string
 }
 const envs = joi
   .object({
@@ -38,6 +39,7 @@ const envs = joi
     SIPENA_FILES: joi.string().required(),
     SWAGGER_USER: joi.string().required(),
     SWAGGER_PASSWORD: joi.string().required(),
+    RESEND_API_KEY: joi.string().required(),
   })
   .unknown()
   .required()
@@ -67,4 +69,5 @@ export const config: ENVIROMENTS = {
   },
   SWAGGER_USER: value.SWAGGER_USER,
   SWAGGER_PASSWORD: value.SWAGGER_PASSWORD,
+  RESEND_API_KEY: value.RESEND_API_KEY,
 }

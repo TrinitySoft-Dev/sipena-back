@@ -10,6 +10,7 @@ import { ImagesService } from '@/images/images.service'
 import { ROLES_CONST } from '@/common/conts/roles.const'
 import { RulesService } from '@/rules/rules.service'
 import { Response } from 'express'
+import { EmailService } from '@/email/email.service'
 
 @Injectable()
 export class UsersService {
@@ -19,6 +20,7 @@ export class UsersService {
     private readonly jwtService: JwtService,
     private readonly imagesService: ImagesService,
     @Inject(forwardRef(() => RulesService)) private readonly rulesService: RulesService,
+    private readonly emailService: EmailService,
   ) {}
 
   async create(createUserDto: any, files: Express.Multer.File[]) {
@@ -47,6 +49,8 @@ export class UsersService {
       if (rest.create_type !== 'BASIC') obj['infoworker'] = await this.infoworkerService.create({ ...rest })
 
       await this.userRepository.save(obj)
+      const responseEmail = await this.emailService.send({ template: 'confirmation.html', email })
+      console.log({ responseEmail })
 
       return { message: 'User created successfully' }
     }
@@ -69,11 +73,13 @@ export class UsersService {
       const user = await this.userRepository.save(obj)
       await this.userRepository.save(user)
 
+      await this.emailService.send({ template: 'confirmation.html', email })
       return { message: 'User created successfully' }
     }
 
     const user = this.userRepository.create(obj)
     await this.userRepository.save(user)
+    await this.emailService.send({ template: 'confirmation.html', email })
 
     return { message: 'User created successfully' }
   }

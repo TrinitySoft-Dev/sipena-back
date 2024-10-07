@@ -28,7 +28,7 @@
   <mj-body background-color="#fff">
     <mj-section background-color="#ffffff" padding="20px">
       <mj-column>
-        <mj-image src="./assets/email.png" alt="Logo" width="80px" />
+        <mj-image src="https://sipena-back-eta.vercel.app/public/email.png" alt="Lpogo" width="80px" />
         <mj-text css-class="thanks-title">Thanks for <br /> registering</mj-text>
         <mj-text css-class="email-body">
           Thank you for registering with Sipena, [User Name]. Your application is under review and will be evaluated by an administrator. We estimate that the process will take approximately 24-48 hours to confirm your access.
@@ -37,7 +37,7 @@
     </mj-section>
     <mj-section background-color="#252D3C" css-class="footer">
       <mj-column>
-        <mj-image src="/assets/logo.png" alt="Logo" width="100px" />
+        <mj-image src="https://sipena-back-eta.vercel.app/public/logo.png" alt="Logo" width="100px" />
         <mj-text color="#ffffff">
           If you have questions, do not forget to write to <a href="mailto:soporte@sipnea.com.co">soporte@sipena.com.co</a><br />
           Sipena Team

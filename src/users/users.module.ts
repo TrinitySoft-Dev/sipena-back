@@ -6,9 +6,16 @@ import { User } from './entities/user.entity'
 import { InfoworkersModule } from '@/infoworkers/infoworkers.module'
 import { ImagesModule } from '@/images/images.module'
 import { RulesModule } from '@/rules/rules.module'
+import { EmailModule } from '@/email/email.module'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), InfoworkersModule, ImagesModule, forwardRef(() => RulesModule)],
+  imports: [
+    TypeOrmModule.forFeature([User]),
+    InfoworkersModule,
+    ImagesModule,
+    forwardRef(() => RulesModule),
+    EmailModule,
+  ],
   controllers: [UsersController],
   providers: [UsersService],
   exports: [UsersService],
