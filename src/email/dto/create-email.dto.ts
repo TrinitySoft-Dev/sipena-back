@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsString } from 'class-validator'
+import { IsObject, IsOptional, IsString } from 'class-validator'
 
 export class CreateEmailDto {
   @ApiProperty({
@@ -15,4 +15,15 @@ export class CreateEmailDto {
   })
   @IsString()
   email: string
+
+  @ApiProperty({
+    description: 'Data of the email',
+    example: {
+      name: 'John Doe',
+      last_name: 'Doe',
+      email: 'john@example.com',
+    },
+  })
+  @IsObject()
+  data: any
 }

@@ -23,6 +23,7 @@ import { ProductsModule } from './products/products.module'
 import { ContainerSizeModule } from './container_size/container_size.module'
 import { join } from 'path'
 import { EmailModule } from './email/email.module';
+import { PasswordHashModule } from './password_hash/password_hash.module';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { EmailModule } from './email/email.module';
     ProductsModule,
     ContainerSizeModule,
     EmailModule,
+    PasswordHashModule,
   ],
   controllers: [],
   providers: [],

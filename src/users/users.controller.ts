@@ -23,6 +23,7 @@ import { ClientUserDto } from './dto/client.user.dto'
 import { AuthGuard } from '@/common/guards/auth.guard'
 import { FilesInterceptor } from '@nestjs/platform-express'
 import { Response } from 'express'
+import { ForgotUserDto } from './dto/forgot.dto'
 
 @ApiTags('Users')
 @Controller('users')
@@ -61,6 +62,11 @@ export class UsersController {
   @Post('login')
   login(@Body() loginUserDto: LoginUserDto, @Res({ passthrough: true }) res: Response) {
     return this.usersService.login(loginUserDto, res)
+  }
+
+  @Post('forgot')
+  forgot(@Body() forgotUserDto: ForgotUserDto) {
+    return this.usersService.forgotPasssword(forgotUserDto.email)
   }
 
   @ApiBearerAuth()

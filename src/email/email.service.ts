@@ -10,12 +10,12 @@ import { config } from '@/common/config/config'
 export class EmailService {
   async send(createEmailDto: CreateEmailDto) {
     try {
-      const { template, email } = createEmailDto
+      const { template, email, data } = createEmailDto
 
-      const htmlTemplate = this.findTemplates(template)
+      const htmlTemplate = this.parseTemplate(this.findTemplates(template), data)
       const resend = new Resend(config.RESEND_API_KEY)
 
-      const res = await resend.emails.send({
+      await resend.emails.send({
         from: 'registro <admin@trinity-soft.com>',
         to: [email],
         subject: 'Sipena - Confirmación de registro',
@@ -36,5 +36,11 @@ export class EmailService {
     } catch (error) {
       throw error
     }
+  }
+
+  private parseTemplate(template: string, data: any) {
+    return template.replace(/{{([^{}]*)}}/g, (match, key) => {
+      return data[key]
+    })
   }
 }

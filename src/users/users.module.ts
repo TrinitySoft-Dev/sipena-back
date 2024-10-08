@@ -7,6 +7,7 @@ import { InfoworkersModule } from '@/infoworkers/infoworkers.module'
 import { ImagesModule } from '@/images/images.module'
 import { RulesModule } from '@/rules/rules.module'
 import { EmailModule } from '@/email/email.module'
+import { PasswordHashModule } from '@/password_hash/password_hash.module'
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { EmailModule } from '@/email/email.module'
     ImagesModule,
     forwardRef(() => RulesModule),
     EmailModule,
+    PasswordHashModule,
   ],
   controllers: [UsersController],
   providers: [UsersService],

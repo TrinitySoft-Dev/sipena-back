@@ -1,8 +1,17 @@
-import { forwardRef, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
+import * as bcrypt from 'bcrypt'
+import * as crypto from 'crypto'
+
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { User } from './entities/user.entity'
 import { FindOneOptions, In, Repository } from 'typeorm'
-import * as bcrypt from 'bcrypt'
 import { InfoworkersService } from '@/infoworkers/infoworkers.service'
 import { LoginUserDto } from './dto/login-user.dto'
 import { JwtService } from '@nestjs/jwt'
@@ -11,6 +20,9 @@ import { ROLES_CONST } from '@/common/conts/roles.const'
 import { RulesService } from '@/rules/rules.service'
 import { Response } from 'express'
 import { EmailService } from '@/email/email.service'
+import { config } from '@/common/config/config'
+import { PasswordHashService } from '@/password_hash/password_hash.service'
+import { ResetPasswordDto } from './dto/reset-password.dto'
 
 @Injectable()
 export class UsersService {
@@ -21,6 +33,7 @@ export class UsersService {
     private readonly imagesService: ImagesService,
     @Inject(forwardRef(() => RulesService)) private readonly rulesService: RulesService,
     private readonly emailService: EmailService,
+    private readonly passwordHashService: PasswordHashService,
   ) {}
 
   async create(createUserDto: any, files: Express.Multer.File[]) {
@@ -49,8 +62,14 @@ export class UsersService {
       if (rest.create_type !== 'BASIC') obj['infoworker'] = await this.infoworkerService.create({ ...rest })
 
       await this.userRepository.save(obj)
-      const responseEmail = await this.emailService.send({ template: 'confirmation.html', email })
-      console.log({ responseEmail })
+      await this.emailService.send({
+        template: 'confirmation.html',
+        email,
+        data: {
+          name,
+          lastname: last_name,
+        },
+      })
 
       return { message: 'User created successfully' }
     }
@@ -73,13 +92,27 @@ export class UsersService {
       const user = await this.userRepository.save(obj)
       await this.userRepository.save(user)
 
-      await this.emailService.send({ template: 'confirmation.html', email })
+      await this.emailService.send({
+        template: 'confirmation.html',
+        email,
+        data: {
+          name,
+          lastname: last_name,
+        },
+      })
       return { message: 'User created successfully' }
     }
 
     const user = this.userRepository.create(obj)
     await this.userRepository.save(user)
-    await this.emailService.send({ template: 'confirmation.html', email })
+    await this.emailService.send({
+      template: 'confirmation.html',
+      email,
+      data: {
+        name,
+        lastname: last_name,
+      },
+    })
 
     return { message: 'User created successfully' }
   }
@@ -111,6 +144,50 @@ export class UsersService {
 
   async findById(id: number) {
     return await this.userRepository.findOne({ where: { id } })
+  }
+
+  async forgotPasssword(email: string) {
+    const user = await this.userRepository.findOne({ where: { email } })
+    if (!user) throw new NotFoundException('User not found')
+
+    const token = crypto.randomBytes(64).toString('hex')
+    const expires = new Date()
+    expires.setMinutes(expires.getMinutes() + 5)
+
+    this.passwordHashService.create({
+      token,
+      userId: user.id,
+      expires,
+    })
+
+    const link = `${config.SIPENA_URI_FRONT}/reset-password?token=${token}`
+
+    await this.emailService.send({
+      template: 'forgot_password.html',
+      email,
+      data: {
+        name: user.name,
+        last_name: user.last_name,
+        link,
+      },
+    })
+
+    return { message: 'Email sent successfully' }
+  }
+
+  async resetPassword(resetPasswordDto: ResetPasswordDto) {
+    const hashedToken = this.passwordHashService.hastToken(resetPasswordDto.token)
+
+    const token = await this.passwordHashService.findByHash(hashedToken)
+    if (!token || token.expires < new Date()) throw new BadRequestException('Invalid token')
+
+    const user = await this.userRepository.findOne({ where: { id: token.userId } })
+    user.password = bcrypt.hashSync(resetPasswordDto.newPassword, 10)
+    await this.userRepository.save(user)
+
+    await this.passwordHashService.removeByHash(hashedToken)
+
+    return { message: 'Password reset successfully' }
   }
 
   async findWorkers(ids: number[]) {

@@ -31,7 +31,7 @@
         <mj-image src="https://sipena-back-eta.vercel.app/public/email.png" alt="Lpogo" width="80px" />
         <mj-text css-class="thanks-title">Thanks for <br /> registering</mj-text>
         <mj-text css-class="email-body">
-          Thank you for registering with Sipena, [User Name]. Your application is under review and will be evaluated by an administrator. We estimate that the process will take approximately 24-48 hours to confirm your access.
+          Thank you for registering with Sipena, {{name}} {{lastname}}. Your application is under review and will be evaluated by an administrator. We estimate that the process will take approximately 24-48 hours to confirm your access.
         </mj-text>
       </mj-column>
     </mj-section>
