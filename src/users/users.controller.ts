@@ -24,6 +24,7 @@ import { AuthGuard } from '@/common/guards/auth.guard'
 import { FilesInterceptor } from '@nestjs/platform-express'
 import { Response } from 'express'
 import { ForgotUserDto } from './dto/forgot.dto'
+import { ResetPasswordDto } from './dto/reset-password.dto'
 
 @ApiTags('Users')
 @Controller('users')
@@ -67,6 +68,11 @@ export class UsersController {
   @Post('forgot')
   forgot(@Body() forgotUserDto: ForgotUserDto) {
     return this.usersService.forgotPasssword(forgotUserDto.email)
+  }
+
+  @Post('reset')
+  reset(@Body() resetPasswordDto: ResetPasswordDto) {
+    return this.usersService.resetPassword(resetPasswordDto)
   }
 
   @ApiBearerAuth()
