@@ -8,7 +8,7 @@ export class Condition {
   @PrimaryGeneratedColumn()
   id: number
 
-  @ManyToOne(() => ConditionGroup, conditionGroup => conditionGroup.conditions)
+  @ManyToOne(() => ConditionGroup, conditionGroup => conditionGroup.conditions, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'condition_group_id' })
   condition_group: ConditionGroup
 

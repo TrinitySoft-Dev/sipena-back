@@ -9,11 +9,19 @@ export class CreateConditionGroupDto {
     example: 1,
   })
   @IsOptional()
-  @IsInt()
+  @IsNumber()
   id?: number
 
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreateConditionDto)
   conditions: CreateConditionDto[]
+
+  @ApiProperty({
+    description: 'Id of the rule',
+    example: 1,
+  })
+  @IsNumber()
+  @IsOptional()
+  rule_id?: number
 }

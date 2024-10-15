@@ -1,17 +1,26 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { CreateConditionDto } from './dto/create-condition.dto'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Condition } from './entities/condition.entity'
 import { EntityManager, Repository } from 'typeorm'
 import { ContainerDto } from '@/timesheet/dto/create-timesheet.dto'
+import { UpdateConditionDto } from './dto/update-condition.dto'
 
 @Injectable()
 export class ConditionsService {
   constructor(@InjectRepository(Condition) private readonly conditionRepository: Repository<Condition>) {}
 
-  async create(createConditionDto: CreateConditionDto): Promise<Condition> {
-    const condition = this.conditionRepository.create(createConditionDto)
-    return await this.conditionRepository.save(condition)
+  async create(createConditionDto: CreateConditionDto) {
+    const { condition_group_id, ...rest } = createConditionDto
+
+    const condition = this.conditionRepository.create({
+      ...rest,
+      condition_group: { id: condition_group_id },
+    })
+
+    await this.conditionRepository.save(condition)
+
+    return condition
   }
 
   async createMany(createConditionDtos: CreateConditionDto[]): Promise<Condition[]> {
@@ -53,8 +62,22 @@ export class ConditionsService {
     }
   }
 
-  async removeByConditionGroupId(id: number) {
-    await this.conditionRepository.delete({ condition_group_id: id })
+  async remove(id: number) {
+    const condition = await this.conditionRepository.findOne({ where: { id } })
+    if (condition) {
+      await this.conditionRepository.remove(condition)
+    }
+  }
+
+  async update(id: number, updateConditionDto: UpdateConditionDto) {
+    let condition = await this.conditionRepository.findOne({ where: { id } })
+    if (!condition) {
+      throw new NotFoundException('Condición no encontrada')
+    }
+
+    Object.assign(condition, updateConditionDto)
+    condition = await this.conditionRepository.save(condition)
+    return condition
   }
 
   async countConditionsByConditionGroupId(conditionGroupId: number) {

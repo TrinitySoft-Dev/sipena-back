@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { CreateContainerSizeDto } from './dto/create-container_size.dto'
 import { InjectRepository } from '@nestjs/typeorm'
 import { ContainerSize } from './entities/container_size.entity'
@@ -16,7 +16,9 @@ export class ContainerSizeService {
     return this.containerSizeRepository.find()
   }
 
-  findById(id: number) {
-    return this.containerSizeRepository.findOne({ where: { id } })
+  async findById(id: number) {
+    const containerSize = await this.containerSizeRepository.findOne({ where: { id } })
+    if (!containerSize) throw new NotFoundException('ContainerSize not found')
+    return containerSize
   }
 }

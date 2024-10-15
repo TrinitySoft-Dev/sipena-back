@@ -14,6 +14,15 @@ export class CreateConditionDto {
   @IsInt()
   id?: number
 
+  @ApiProperty({
+    description: 'Id of the condition group',
+    example: 1,
+    required: false,
+  })
+  @IsOptional()
+  @IsInt()
+  condition_group_id?: number
+
   @IsString()
   @IsIn(ALLOWED_CONDITION_FIELDS, {
     message: 'The field "$value" is not allowed',

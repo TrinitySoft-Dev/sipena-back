@@ -7,12 +7,19 @@ import { In, Repository } from 'typeorm'
 import { getAllowedConditionFields } from '@/common/decorators/allowed-fields.decorator'
 import { UpdateRuleDto } from './dto/update-rule.dto'
 import { ConditionGroupsService } from '@/condition_groups/condition_groups.service'
+import { User } from '@/users/entities/user.entity'
+import { Work } from '@/work/entities/work.entity'
+import { WorkService } from '@/work/work.service'
+import { ContainerSizeService } from '@/container_size/container_size.service'
 
 @Injectable()
 export class RulesService {
   constructor(
     @InjectRepository(Rule) private readonly ruleRepository: Repository<Rule>,
+    @InjectRepository(User) private readonly userRepository: Repository<User>,
     private readonly conditionGroupsService: ConditionGroupsService,
+    private readonly workService: WorkService,
+    private readonly containerSizeService: ContainerSizeService,
   ) {}
 
   async create(createRuleDto: CreateRuleDto) {
@@ -42,43 +49,50 @@ export class RulesService {
   }
 
   async update(id: number, updateRuleDto: UpdateRuleDto) {
-    const { container_size, condition_groups, work_id, ...rest } = updateRuleDto
+    try {
+      const { condition_groups, work_id, container_size, ...rest } = updateRuleDto
 
-    const rule = await this.ruleRepository.findOne({
-      where: { id },
-      relations: ['condition_groups', 'condition_groups.conditions'],
-    })
+      const rule = await this.ruleRepository.findOne({
+        where: { id },
+        relations: ['condition_groups', 'condition_groups.conditions'],
+      })
 
-    if (!rule) throw new NotFoundException('Rule not found')
-
-    Object.assign(rule, rest)
-
-    if (work_id) rule.work = { id: work_id } as any
-    if (container_size) rule.container_size = { id: container_size } as any
-
-    const existingConditionGroups = rule.condition_groups || []
-
-    const conditionGroupsIdsFromDto = condition_groups.map(group => group.id).filter(id => id !== undefined)
-    const conditionsGroupToDelete = existingConditionGroups.filter(
-      group => !conditionGroupsIdsFromDto.includes(group.id),
-    )
-
-    for (const group of conditionsGroupToDelete) {
-      await this.conditionGroupsService.remove(group.id)
-    }
-
-    for (const groupDto of condition_groups) {
-      if (groupDto.id) {
-        await this.conditionGroupsService.update(groupDto.id, groupDto)
-      } else {
-        await this.conditionGroupsService.create(groupDto, rule)
+      if (!rule) {
+        throw new NotFoundException('Regla no encontrada')
       }
-    }
 
-    // return await this.ruleRepository.update(id, {
-    //   ...rest,
-    //   container_size: { id: container_size },
-    // })
+      Object.assign(rule, rest)
+      if (work_id) rule.work = await this.workService.findById(work_id)
+      if (container_size) rule.container_size = await this.containerSizeService.findById(container_size)
+
+      if (condition_groups) {
+        const existingGroupIds = rule.condition_groups.map(group => group.id)
+        const incomingGroupIds = condition_groups.map(group => group.id).filter(id => id)
+
+        const groupsToDelete = existingGroupIds.filter(id => !incomingGroupIds.includes(id))
+
+        for (const groupId of groupsToDelete) {
+          await this.conditionGroupsService.remove(groupId)
+        }
+
+        for (const groupDto of condition_groups) {
+          if (groupDto.id) {
+            await this.conditionGroupsService.update(groupDto.id, groupDto)
+          } else {
+            await this.conditionGroupsService.create({
+              ...groupDto,
+              rule_id: rule.id,
+            })
+          }
+        }
+      }
+
+      // await this.ruleRepository.save(rule)
+
+      return { message: 'Regla actualizada exitosamente' }
+    } catch (error) {
+      throw error
+    }
   }
 
   async find({ page, pageSize }: { page: number; pageSize: number }) {
