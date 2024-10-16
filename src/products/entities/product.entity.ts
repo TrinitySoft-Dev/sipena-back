@@ -23,7 +23,7 @@ export class Product {
 
   @Column({
     type: 'varchar',
-    nullable: false,
+    nullable: true,
     length: 255,
   })
   item_code: string
