@@ -2,6 +2,7 @@ import { Infoworker } from '@/infoworkers/entities/infoworker.entity'
 import { Product } from '@/products/entities/product.entity'
 import { Rule } from '@/rules/entities/rule.entity'
 import { Timesheet } from '@/timesheet/entities/timesheet.entity'
+import { TimesheetWorker } from '@/timesheet_workers/entities/timesheet_worker.entity'
 import { Column, Entity, JoinColumn, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity({
@@ -71,8 +72,8 @@ export class User {
   @OneToMany(() => Timesheet, timesheet => timesheet.customer)
   timesheets: Timesheet[]
 
-  @ManyToMany(() => Timesheet, timesheet => timesheet.workers)
-  assignedTimesheets: Timesheet[]
+  @OneToMany(() => TimesheetWorker, timesheetWorker => timesheetWorker.worker)
+  timesheet_workers: TimesheetWorker[]
 
   @ManyToMany(() => Product, product => product.customers)
   @JoinTable({

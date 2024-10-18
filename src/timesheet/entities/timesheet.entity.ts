@@ -1,13 +1,13 @@
 import { Container } from '@/container/entities/container.entity'
+import { TimesheetWorker } from '@/timesheet_workers/entities/timesheet_worker.entity'
 import { User } from '@/users/entities/user.entity'
 import {
   Column,
   CreateDateColumn,
   Entity,
   JoinColumn,
-  JoinTable,
-  ManyToMany,
   ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -39,19 +39,8 @@ export class Timesheet {
   @JoinColumn()
   container: Container
 
-  @ManyToMany(() => User, user => user.assignedTimesheets)
-  @JoinTable({
-    name: 'timesheet_workers',
-    joinColumn: {
-      name: 'timesheet_id',
-      referencedColumnName: 'id',
-    },
-    inverseJoinColumn: {
-      name: 'user_id',
-      referencedColumnName: 'id',
-    },
-  })
-  workers: User[]
+  @OneToMany(() => TimesheetWorker, timesheetWorker => timesheetWorker.timesheet, { cascade: true })
+  timesheet_workers: TimesheetWorker[]
 
   @Column('varchar', { array: true })
   images: string[]

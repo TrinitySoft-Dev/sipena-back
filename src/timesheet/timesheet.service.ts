@@ -8,6 +8,7 @@ import { UsersService } from '@/users/users.service'
 import { Rule } from '@/rules/entities/rule.entity'
 import { ROLES_CONST } from '@/common/conts/roles.const'
 import { ConditionsService } from '@/conditions/conditions.service'
+import { TimesheetWorkersService } from '@/timesheet_workers/timesheet_workers.service'
 
 @Injectable()
 export class TimesheetService {
@@ -16,12 +17,13 @@ export class TimesheetService {
     private readonly containerService: ContainerService,
     private readonly usersService: UsersService,
     private readonly conditionsService: ConditionsService,
+    private readonly timesheetWorkersService: TimesheetWorkersService,
   ) {}
 
   async create(createTimesheetDto: CreateTimesheetDto) {
     try {
       const { timesheet, container } = createTimesheetDto
-      const { customer_id, workers, work_id } = timesheet
+      let { customer_id, workers, work_id, ...restTimesheet } = timesheet
 
       const customerUser = await this.usersService.findByWorks(customer_id, work_id)
       if (!customerUser.rules.length) throw new NotFoundException('Rules not found')
@@ -31,18 +33,29 @@ export class TimesheetService {
 
       const createdContainer = await this.containerService.create(container)
 
-      const workersUsers = await this.usersService.findWorkers(workers)
-      if (workersUsers.length !== workers.length) throw new NotFoundException('Workers not found')
+      restTimesheet = {
+        day: restTimesheet.day,
+        week: restTimesheet.week,
+        comment: restTimesheet.comment,
+        images: restTimesheet.images,
+      }
 
       const timesheetRes = this.timesheetRepository.create({
-        ...timesheet,
+        ...restTimesheet,
         rate,
         container: createdContainer,
-        customer: customerUser,
-        workers: workersUsers,
+        customer: { id: customer_id },
       })
 
       await this.timesheetRepository.save(timesheetRes)
+
+      const newWorkers = workers.map(worker => ({
+        ...worker,
+        worker: worker.worker,
+        timesheet: timesheetRes.id,
+      }))
+
+      await this.timesheetWorkersService.createMany(newWorkers)
 
       return { message: 'Timesheet created successfully' }
     } catch (error) {

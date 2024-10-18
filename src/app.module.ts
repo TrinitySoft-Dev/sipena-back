@@ -24,6 +24,7 @@ import { ContainerSizeModule } from './container_size/container_size.module'
 import { join } from 'path'
 import { EmailModule } from './email/email.module'
 import { PasswordHashModule } from './password_hash/password_hash.module'
+import { TimesheetWorkersModule } from './timesheet_workers/timesheet_workers.module'
 
 @Module({
   imports: [
@@ -62,9 +63,9 @@ import { PasswordHashModule } from './password_hash/password_hash.module'
     ContainerSizeModule,
     EmailModule,
     PasswordHashModule,
+    TimesheetWorkersModule,
   ],
   controllers: [],
   providers: [],
 })
 export class AppModule {}
-console.log(join(__dirname, '..', 'public'))

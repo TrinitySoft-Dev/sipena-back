@@ -1,5 +1,53 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsArray, IsBoolean, IsDateString, IsNumber, IsObject, IsString } from 'class-validator'
+import { IsArray, IsBoolean, IsDateString, IsNumber, IsObject, IsOptional, IsString } from 'class-validator'
+
+export class TimesheetWokers {
+  @ApiProperty({
+    description: 'Worker id of the timesheet',
+    example: 1,
+  })
+  @IsNumber()
+  worker: number
+
+  @ApiProperty({
+    description: 'Break of the timesheet',
+    example: '2021-01-01',
+    required: true,
+  })
+  @IsDateString()
+  break: Date
+
+  @ApiProperty({
+    description: 'Waiting time of the timesheet',
+    example: '2021-01-01',
+    required: true,
+  })
+  @IsDateString()
+  waiting_time: Date
+
+  @ApiProperty({
+    description: 'Time of the timesheet',
+    example: '2021-01-01',
+    required: true,
+  })
+  @IsDateString()
+  time: Date
+
+  @ApiProperty({
+    description: 'Time out of the timesheet',
+    example: '2021-01-01',
+  })
+  @IsDateString()
+  time_out: Date
+
+  @ApiProperty({
+    description: 'Comment of the timesheet',
+    example: 'Comment',
+  })
+  @IsOptional()
+  @IsString()
+  comment: string
+}
 
 export class TimeSheetDto {
   @ApiProperty({
@@ -46,10 +94,19 @@ export class TimeSheetDto {
 
   @ApiProperty({
     description: 'Workers of the timesheet',
-    example: [1],
+    example: [
+      {
+        worker: 1,
+        break: '2021-01-01',
+        waiting_time: '2021-01-01',
+        time: '2021-01-01',
+        time_out: '2021-01-01',
+        comment: 'Comment',
+      },
+    ],
   })
   @IsArray()
-  workers: number[]
+  workers: TimesheetWokers[]
 }
 
 export class ContainerDto {
@@ -169,7 +226,16 @@ export class CreateTimesheetDto {
       week: '2021-01-01',
       comment: 'Comment',
       images: ['https://sipena.com/images/1'],
-      workers: [1],
+      workers: [
+        {
+          worker: 1,
+          break: '2021-01-01',
+          waiting_time: '2021-01-01',
+          time: '2021-01-01',
+          time_out: '2021-01-01',
+          comment: 'Comment',
+        },
+      ],
     },
   })
   @IsObject()
