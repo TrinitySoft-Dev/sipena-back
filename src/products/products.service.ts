@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common'
 import { CreateProductDto } from './dto/create-product.dto'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Product } from './entities/product.entity'
-import { Repository } from 'typeorm'
+import { ILike, Repository } from 'typeorm'
 
 @Injectable()
 export class ProductsService {
@@ -11,8 +11,16 @@ export class ProductsService {
     return this.productRepository.save(createProductDto)
   }
 
-  async find(payload: any) {
-    return await this.productRepository.find({})
+  async find({ productName, page, pageSize }: { productName: string; page: number; pageSize: number }) {
+    const whereCondition = productName ? { name: ILike(`${productName}%`) } : {}
+
+    const [result, total] = await this.productRepository.findAndCount({
+      where: whereCondition,
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    })
+
+    return { result, pagination: { page, pageSize, total } }
   }
 
   async findById(id: number): Promise<Product> {
