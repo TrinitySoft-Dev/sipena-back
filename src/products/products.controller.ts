@@ -7,6 +7,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Put,
   Query,
   Req,
   UseGuards,
@@ -15,6 +16,7 @@ import { ProductsService } from './products.service'
 import { CreateProductDto } from './dto/create-product.dto'
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger'
 import { AuthGuard } from '@/common/guards/auth.guard'
+import { UpdateProductDto } from './dto/update-product.dto'
 
 @ApiTags('Product')
 // @ApiBearerAuth()
@@ -63,6 +65,15 @@ export class ProductsController {
   @Get(':id')
   async findById(@Param('id') id: number) {
     return this.productsService.findById(id)
+  }
+
+  @ApiOperation({
+    summary: 'Update a product',
+    description: 'This method updates a product',
+  })
+  @Put(':id')
+  async update(@Param('id') id: number, @Body() updateProductDto: UpdateProductDto) {
+    return await this.productsService.update(id, updateProductDto)
   }
 
   @Delete(':id')
