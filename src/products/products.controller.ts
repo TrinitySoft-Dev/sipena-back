@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common'
 import { ProductsService } from './products.service'
 import { CreateProductDto } from './dto/create-product.dto'
-import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger'
 import { AuthGuard } from '@/common/guards/auth.guard'
 
 @ApiTags('Product')
@@ -51,6 +51,15 @@ export class ProductsController {
     return await this.productsService.find({ productName, page, pageSize })
   }
 
+  @ApiOperation({
+    summary: 'Find by id',
+    description: 'This method returns a rule by id',
+  })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    type: Number,
+  })
   @Get(':id')
   async findById(@Param('id') id: number) {
     return this.productsService.findById(id)
