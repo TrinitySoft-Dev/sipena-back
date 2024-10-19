@@ -29,9 +29,16 @@ export class ProductsService {
   }
 
   async update(id: number, updateProductDto: UpdateProductDto) {
-    console.log('updateProductDto', updateProductDto)
     try {
-      await this.productRepository.update(id, updateProductDto)
+      const { customers, ...rest } = updateProductDto
+
+      if (Object.keys(rest).length > 0) {
+        await this.productRepository.update(id, rest)
+      }
+
+      if (customers) {
+        await this.productRepository.createQueryBuilder('product').relation(Product, 'customers').of(id).add(customers)
+      }
       return { message: 'Producto actualizado exitosamente' }
     } catch (error) {
       throw error

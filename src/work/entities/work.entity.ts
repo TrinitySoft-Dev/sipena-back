@@ -1,3 +1,4 @@
+import { Container } from '@/container/entities/container.entity'
 import { Rule } from '@/rules/entities/rule.entity'
 import { Column, Entity, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
 
@@ -24,6 +25,9 @@ export class Work {
 
   @OneToMany(() => Rule, rule => rule.work)
   rules: Rule[]
+
+  @OneToMany(() => Container, container => container.work)
+  container: Container[]
 
   @Column({
     nullable: false,

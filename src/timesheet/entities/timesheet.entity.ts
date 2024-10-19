@@ -31,9 +31,10 @@ export class Timesheet {
 
   @Column({
     nullable: false,
-    type: 'date',
+    type: 'varchar',
+    length: 50,
   })
-  week: Date
+  week: String
 
   @OneToOne(() => Container)
   @JoinColumn()

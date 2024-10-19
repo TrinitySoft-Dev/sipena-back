@@ -1,7 +1,8 @@
 import { OPERATORS } from '@/common/conts/operators'
 import { ConditionField } from '@/common/decorators/condition-field.decorator'
+import { Work } from '@/work/entities/work.entity'
 import { IsBoolean } from 'class-validator'
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity({
   name: 'containers',
@@ -18,12 +19,8 @@ export class Container {
   })
   container_number: string
 
-  @Column({
-    type: 'varchar',
-    nullable: false,
-    length: 40,
-  })
-  work: string
+  @ManyToOne(() => Work, work => work.container)
+  work: Work
 
   @ConditionField({
     open: true,
@@ -128,13 +125,13 @@ export class Container {
   mixed: boolean
 
   @Column({
-    type: 'date',
+    type: 'timestamp',
     nullable: false,
   })
-  start: Date
+  start: String
 
   @Column({
-    type: 'date',
+    type: 'timestamp',
     nullable: false,
   })
   finish: Date

@@ -1,7 +1,7 @@
-import { Controller, Post, Body, UseInterceptors, UploadedFile, UseGuards } from '@nestjs/common'
+import { Controller, Post, UseInterceptors, UploadedFile, UseGuards, UploadedFiles } from '@nestjs/common'
 import { ImagesService } from './images.service'
-import { FileInterceptor } from '@nestjs/platform-express'
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express'
+import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger'
 import { AuthGuard } from '@/common/guards/auth.guard'
 
 @ApiTags('Images')
@@ -15,5 +15,13 @@ export class ImagesController {
   @UseInterceptors(FileInterceptor('file'))
   create(@UploadedFile() file: Express.Multer.File) {
     return this.imagesService.upload(file)
+  }
+
+  @ApiConsumes('multipart/form-data')
+  @Post('upload-multiple')
+  @UseInterceptors(FilesInterceptor('files'))
+  @UseGuards(AuthGuard)
+  multiUpload(@UploadedFiles() files: Express.Multer.File[]) {
+    return this.imagesService.uploadMultiple(files)
   }
 }

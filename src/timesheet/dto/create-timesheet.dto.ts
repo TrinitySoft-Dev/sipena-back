@@ -75,8 +75,8 @@ export class TimeSheetDto {
     description: 'Week of the timesheet',
     example: '2021-01-01',
   })
-  @IsDateString()
-  week: Date
+  @IsString()
+  week: String
 
   @ApiProperty({
     description: 'Comment of the timesheet',
@@ -116,13 +116,6 @@ export class ContainerDto {
   })
   @IsString()
   container_number: string
-
-  @ApiProperty({
-    description: 'Work of the timesheet',
-    example: '10',
-  })
-  @IsString()
-  work: string
 
   @ApiProperty({
     description: 'Size of the timesheet',
@@ -245,7 +238,6 @@ export class CreateTimesheetDto {
     description: 'Container of the timesheet',
     example: {
       container_number: '1',
-      work: '10',
       size: 10,
       product: '1',
       skus: '1',

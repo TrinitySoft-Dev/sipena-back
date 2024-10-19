@@ -75,18 +75,8 @@ export class User {
   @OneToMany(() => TimesheetWorker, timesheetWorker => timesheetWorker.worker)
   timesheet_workers: TimesheetWorker[]
 
-  @ManyToMany(() => Product, product => product.customers, { cascade: true })
-  @JoinTable({
-    name: 'user_products',
-    joinColumn: {
-      name: 'user_id',
-      referencedColumnName: 'id',
-    },
-    inverseJoinColumn: {
-      name: 'product_id',
-      referencedColumnName: 'id',
-    },
-  })
+  @ManyToMany(() => Product, product => product.customers)
+  @JoinTable()
   products: Product[]
 
   @Column({
