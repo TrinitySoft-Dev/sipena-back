@@ -4,35 +4,23 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Product } from './entities/product.entity'
 import { ILike, In, Repository } from 'typeorm'
 import { UpdateProductDto } from './dto/update-product.dto'
-import { UsersProductsProducts } from './entities/users-products-products.entity'
 
 @Injectable()
 export class ProductsService {
-  constructor(
-    @InjectRepository(Product) private readonly productRepository: Repository<Product>,
-    @InjectRepository(UsersProductsProducts)
-    private readonly usersProductsRepository: Repository<UsersProductsProducts>,
-  ) {}
+  constructor(@InjectRepository(Product) private readonly productRepository: Repository<Product>) {}
+
   create(createProductDto: CreateProductDto) {
     return this.productRepository.save(createProductDto)
   }
 
-  // Método para obtener productos relacionados con un cliente
-  async findProductsByCustomer(userId: number) {
-    // Obtener los productIds de la tabla intermedia relacionados con el userId
-    const userProducts = await this.usersProductsRepository.find({
-      where: { usersId: userId },
-    })
+  async findProductsByCustomer(userId: number): Promise<Product[]> {
+    const products = await this.productRepository
+      .createQueryBuilder('product')
+      .innerJoin('product.customers', 'customer')
+      .where('customer.id = :userId', { userId })
+      .getMany()
 
-    // Extraer los productIds
-    const productIds = userProducts.map(up => up.productsId)
-
-    // Obtener los productos relacionados con esos productIds
-    const products = await this.productRepository.find({
-      where: { id: In(productIds) }, // Usamos In para buscar múltiples IDs
-    })
-
-    return products // Devolver los productos asociados al cliente
+    return products
   }
 
   async find({ productName, page, pageSize }: { productName: string; page: number; pageSize: number }) {
@@ -54,21 +42,6 @@ export class ProductsService {
 
     return result
   }
-
-  // async findProductsByCustomer(userId: number) {
-  //   // Consulta los productsId relacionados con el userId en la tabla intermedia
-  //   const userProducts = await this.userRepository.find({
-  //     where: { usersId: userId },
-  //   })
-
-  //   // Extrae los productsId
-  //   const productIds = userProducts.map(up => up.productsId)
-
-  //   // Obtiene los productos relacionados con esos productIds
-  //   const products = await this.productRepository.findByIds(productIds)
-
-  //   return products // Devuelve los productos asociados al cliente
-  // }
 
   async findById(id: number): Promise<Product> {
     return await this.productRepository.findOne({ where: { id } })
