@@ -54,6 +54,24 @@ export class ProductsController {
   }
 
   @ApiOperation({
+    summary: 'Get all products select',
+    description: 'This method returns select products',
+  })
+  @Get('select')
+  async selectProducts() {
+    return this.productsService.selectProducts()
+  }
+
+  @ApiOperation({
+    summary: 'Find product by customer',
+    description: 'This method returns products by customer',
+  })
+  @Get('customer/:userId')
+  async getProductsByCustomer(@Param('userId') userId: number) {
+    return this.productsService.findProductsByCustomer(userId)
+  }
+
+  @ApiOperation({
     summary: 'Find by id',
     description: 'This method returns a rule by id',
   })
