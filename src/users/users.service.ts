@@ -127,7 +127,7 @@ export class UsersService {
     const isPasswordCorrect = await bcrypt.compare(password, user.password)
     if (!isPasswordCorrect) throw new UnauthorizedException('Email or password incorrect')
 
-    const payload = { email: user.email, role: user.role, id: user.id }
+    const payload = { email: user.email, role: user.role, id: user.id, completed: user.completed }
 
     const token = await this.jwtService.signAsync(payload)
 

@@ -80,6 +80,13 @@ export class User {
   products: Product[]
 
   @Column({
+    type: 'boolean',
+    default: false,
+    comment: 'Field to check if the user has completed the registration',
+  })
+  completed: boolean
+
+  @Column({
     nullable: false,
     type: 'boolean',
     default: false,
