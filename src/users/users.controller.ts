@@ -25,6 +25,7 @@ import { FilesInterceptor } from '@nestjs/platform-express'
 import { Response } from 'express'
 import { ForgotUserDto } from './dto/forgot.dto'
 import { ResetPasswordDto } from './dto/reset-password.dto'
+import { UpdateUserDto } from './dto/update-user.dto'
 
 @ApiTags('Users')
 @Controller('users')
@@ -85,7 +86,7 @@ export class UsersController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
   @Put(':id')
-  update(@Param('id') id: number, @Body() updateUserDto: CreateUserDto | ClientUserDto) {
+  update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(id, updateUserDto)
   }
 }

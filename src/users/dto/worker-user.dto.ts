@@ -1,7 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsEmail, IsPhoneNumber, IsString } from 'class-validator'
+import { IsEmail, IsNumber, IsOptional, IsString } from 'class-validator'
 
 export class CreateUserDto {
+  @ApiProperty({
+    description: 'Id of the user',
+    example: 1,
+  })
+  @IsOptional()
+  @IsNumber()
+  id?: number
+
   @ApiProperty({
     description: 'Email of the user',
     example: 'john@example.com',
@@ -78,6 +86,34 @@ export class CreateUserDto {
   })
   @IsString()
   city: string
+
+  @ApiProperty({
+    description: 'Bank name of the user',
+    example: '123456789',
+  })
+  @IsString()
+  bank_name: string
+
+  @ApiProperty({
+    description: 'Bank account name of the user',
+    example: '123456789',
+  })
+  @IsString()
+  bank_account_name: string
+
+  @ApiProperty({
+    description: 'Bank account number of the user',
+    example: '123456789',
+  })
+  @IsString()
+  bank_account_number: string
+
+  @ApiProperty({
+    description: 'BSB of the user',
+    example: '123456789',
+  })
+  @IsString()
+  bsb: string
 
   @ApiProperty({
     description: 'Create basic user',

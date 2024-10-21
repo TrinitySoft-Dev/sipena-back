@@ -41,7 +41,7 @@ export class User {
   })
   last_name: string
 
-  @OneToOne(() => Infoworker, infoworker => infoworker.user)
+  @OneToOne(() => Infoworker, infoworker => infoworker.user, { cascade: true })
   @JoinColumn()
   infoworker: Infoworker
 
@@ -55,7 +55,7 @@ export class User {
   })
   role: string
 
-  @ManyToMany(() => Rule, rule => rule.customers)
+  @ManyToMany(() => Rule, rule => rule.customers, { cascade: true })
   @JoinTable({
     name: 'customers_rules',
     joinColumn: {

@@ -65,6 +65,34 @@ export class Infoworker {
   @Column({
     type: 'varchar',
     nullable: false,
+    length: 40,
+  })
+  bank_name: string
+
+  @Column({
+    type: 'varchar',
+    nullable: false,
+    length: 80,
+  })
+  bank_account_name: string
+
+  @Column({
+    type: 'varchar',
+    nullable: false,
+    length: 12,
+  })
+  bank_account_number: string
+
+  @Column({
+    type: 'varchar',
+    nullable: false,
+    length: 80,
+  })
+  bsb: string
+
+  @Column({
+    type: 'varchar',
+    nullable: false,
     length: 128,
   })
   visa_url: string

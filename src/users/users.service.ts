@@ -229,23 +229,41 @@ export class UsersService {
   }
 
   async update(id: number, updateUserDto: any) {
-    if (updateUserDto.role === ROLES_CONST.CUSTOMER) {
-      const { rules, ...rest } = updateUserDto
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: ['infoworker'],
+    })
 
-      const allRules = await this.rulesService.findById(rules)
+    if (!user) throw new NotFoundException('User not found')
 
-      if (allRules.length !== rules.length) throw new UnauthorizedException('Rules not found')
+    if (updateUserDto.role === ROLES_CONST.WORKER) {
+      if (user?.infoworker) {
+        Object.assign(user.infoworker, updateUserDto.infoworker)
+      } else {
+        const infoworker = await this.infoworkerService.create(updateUserDto.infoworker)
+        user.infoworker = infoworker
+      }
 
-      await this.userRepository.update({ id }, { ...rest, rules: allRules })
+      user.name = updateUserDto?.name ?? user.name
+      user.last_name = updateUserDto?.last_name ?? user.last_name
+      user.role = updateUserDto?.role ?? user.role
+
+      await this.userRepository.save(user)
 
       return { message: 'User updated successfully' }
     }
 
-    await this.userRepository.update({ id }, updateUserDto)
+    if (updateUserDto.role === ROLES_CONST.CUSTOMER || updateUserDto.role) {
+      user.name = updateUserDto?.name ?? user.name
+      user.last_name = updateUserDto?.last_name ?? user.last_name
+      user.role = updateUserDto?.role ?? user.role
 
-    return {
-      message: 'User updated successfully',
+      await this.userRepository.save(user)
+
+      return { message: 'User updated successfully' }
     }
+
+    return { message: 'User updated successfully' }
   }
 
   private async encryptPassword(password: string) {
