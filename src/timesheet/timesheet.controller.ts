@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Query, Get, Req } from '@nestjs/common'
+import { Controller, Post, Body, UseGuards, Query, Get, Req, Param } from '@nestjs/common'
 import { TimesheetService } from './timesheet.service'
 import { CreateTimesheetDto } from './dto/create-timesheet.dto'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
@@ -19,5 +19,10 @@ export class TimesheetController {
   @Get()
   find(@Req() req: any) {
     return this.timesheetService.find(req?.payload)
+  }
+
+  @Get('/customer/:customerId')
+  findByCustomer(@Param('customerId') customerId: number) {
+    return this.timesheetService.findByCustomer(customerId)
   }
 }

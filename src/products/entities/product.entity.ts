@@ -1,5 +1,6 @@
+import { Container } from '@/container/entities/container.entity'
 import { User } from '@/users/entities/user.entity'
-import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity({
   name: 'products',
@@ -34,6 +35,9 @@ export class Product {
     default: true,
   })
   active: boolean
+
+  @OneToMany(() => Container, container => container.product)
+  containers: Container[]
 
   @ManyToMany(() => User, user => user.products)
   customers: User[]

@@ -31,7 +31,10 @@ export class TimesheetService {
       const rules = customerUser.rules
       const rate = await this.validateRules(rules, container)
 
-      const createdContainer = await this.containerService.create(container)
+      const createdContainer = await this.containerService.create({
+        ...container,
+        product: { id: container.product },
+      })
 
       restTimesheet = {
         day: restTimesheet.day,
@@ -110,5 +113,21 @@ export class TimesheetService {
         where: { customer: id },
       })
     }
+  }
+
+  async findByCustomer(customerId: number) {
+    return await this.timesheetRepository.find({
+      where: { customer: { id: customerId } },
+      relations: ['timesheet_workers', 'customer', 'container', 'container.work'],
+      select: {
+        customer: { id: true, name: true, last_name: true },
+        container: {
+          container_number: true,
+          work: {
+            name: true,
+          },
+        },
+      },
+    })
   }
 }

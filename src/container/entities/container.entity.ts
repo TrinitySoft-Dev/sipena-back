@@ -1,8 +1,9 @@
 import { OPERATORS } from '@/common/conts/operators'
 import { ConditionField } from '@/common/decorators/condition-field.decorator'
+import { Product } from '@/products/entities/product.entity'
 import { Work } from '@/work/entities/work.entity'
 import { IsBoolean } from 'class-validator'
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity({
   name: 'containers',
@@ -31,12 +32,8 @@ export class Container {
   })
   size: number
 
-  @Column({
-    type: 'varchar',
-    nullable: false,
-    length: 40,
-  })
-  product: string
+  @ManyToOne(() => Product, product => product.containers, { cascade: true })
+  product: Product
 
   @ConditionField({ open: true })
   @Column({

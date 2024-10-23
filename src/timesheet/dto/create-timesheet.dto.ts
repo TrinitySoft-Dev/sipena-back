@@ -126,10 +126,10 @@ export class ContainerDto {
 
   @ApiProperty({
     description: 'Id of the product',
-    example: '1',
+    example: 1,
   })
   @IsString()
-  product: string
+  product: number
 
   @ApiProperty({
     description: 'Skus of the timesheet',

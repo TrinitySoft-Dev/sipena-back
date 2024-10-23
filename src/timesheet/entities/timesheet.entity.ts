@@ -54,14 +54,6 @@ export class Timesheet {
   rate: number
 
   @Column({
-    type: 'varchar',
-    length: 255,
-    comment: 'Comments of the timesheet',
-    nullable: true,
-  })
-  comments: string
-
-  @Column({
     nullable: false,
     type: 'boolean',
     default: true,
