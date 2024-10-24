@@ -25,6 +25,7 @@ import { join } from 'path'
 import { EmailModule } from './email/email.module'
 import { PasswordHashModule } from './password_hash/password_hash.module'
 import { TimesheetWorkersModule } from './timesheet_workers/timesheet_workers.module'
+import { ExtraRulesModule } from './extra_rules/extra_rules.module';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { TimesheetWorkersModule } from './timesheet_workers/timesheet_workers.mo
     EmailModule,
     PasswordHashModule,
     TimesheetWorkersModule,
+    ExtraRulesModule,
   ],
   controllers: [],
   providers: [],

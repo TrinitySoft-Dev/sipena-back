@@ -69,6 +69,20 @@ export class User {
   })
   rules: Rule[]
 
+  @ManyToMany(() => Rule, rule => rule.customers)
+  @JoinTable({
+    name: 'customers_extra_rules',
+    joinColumn: {
+      name: 'customers_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'extra_rule_id',
+      referencedColumnName: 'id',
+    },
+  })
+  extra_rules: Rule[]
+
   @OneToMany(() => Timesheet, timesheet => timesheet.customer)
   timesheets: Timesheet[]
 
