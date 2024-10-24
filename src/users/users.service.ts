@@ -37,11 +37,12 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: any, files: Express.Multer.File[]) {
-    const { email, password, name, last_name, role, ...rest } = createUserDto
+    let { email, password, name, last_name, role, ...rest } = createUserDto
 
     const existuser = await this.userRepository.findOne({ where: { email, active: true } })
     if (existuser) throw new UnauthorizedException('Email already exists')
 
+    password = password ? createUserDto.password : Math.random().toString(36).substring(2, 15)
     const hashPassword = await this.encryptPassword(password)
 
     if (role === ROLES_CONST.WORKER || !role) {

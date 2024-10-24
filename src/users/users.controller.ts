@@ -51,7 +51,7 @@ export class UsersController {
         fileIsRequired: false,
         validators: [
           new MaxFileSizeValidator({ maxSize: 10 * 1024 * 1024 }),
-          new FileTypeValidator({ fileType: 'image/jpeg' }),
+          new FileTypeValidator({ fileType: 'image/*' }),
         ],
       }),
     )

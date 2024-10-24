@@ -21,6 +21,7 @@ export class CreateUserDto {
     description: 'Password of the user',
     example: '123456',
   })
+  @IsOptional()
   @IsString()
   password: string
 
