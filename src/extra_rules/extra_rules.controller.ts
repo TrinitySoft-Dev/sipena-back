@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards } from '@nestjs/common'
+import { Controller, Post, Body, UseGuards, Get, Param } from '@nestjs/common'
 import { ExtraRulesService } from './extra_rules.service'
 import { CreateExtraRuleDto } from './dto/create-extra_rule.dto'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
@@ -14,5 +14,15 @@ export class ExtraRulesController {
   @Post()
   create(@Body() createExtraRuleDto: CreateExtraRuleDto) {
     return this.extraRulesService.create(createExtraRuleDto)
+  }
+
+  @Get()
+  findAll() {
+    return this.extraRulesService.findAll()
+  }
+
+  @Get(':id')
+  findByRuleId(@Param('id') id: number) {
+    return this.extraRulesService.findByRuleId(id)
   }
 }

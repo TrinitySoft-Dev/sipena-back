@@ -23,15 +23,6 @@ export class CreateConditionDto {
   @IsInt()
   condition_group_id?: number
 
-  @ApiProperty({
-    description: 'Mandatory of the condition',
-    example: true,
-    required: false,
-  })
-  @IsOptional()
-  @IsBoolean()
-  mandatory: boolean
-
   @IsString()
   @IsIn(ALLOWED_CONDITION_FIELDS, {
     message: 'The field "$value" is not allowed',

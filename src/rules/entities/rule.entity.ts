@@ -1,5 +1,6 @@
 import { ConditionGroup } from '@/condition_groups/entities/condition_group.entity'
 import { ContainerSize } from '@/container_size/entities/container_size.entity'
+import { ExtraRule } from '@/extra_rules/entities/extra_rule.entity'
 import { User } from '@/users/entities/user.entity'
 import { Work } from '@/work/entities/work.entity'
 import {
@@ -7,6 +8,7 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  JoinTable,
   ManyToMany,
   ManyToOne,
   OneToMany,
@@ -34,6 +36,20 @@ export class Rule {
     default: false,
   })
   status: boolean
+
+  @ManyToMany(() => ExtraRule, extraRule => extraRule.rules, { cascade: true })
+  @JoinTable({
+    name: 'rules_extra_rules',
+    joinColumn: {
+      name: 'rules_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'extra_rule_id',
+      referencedColumnName: 'id',
+    },
+  })
+  extra_rules: ExtraRule[]
 
   @ManyToOne(() => ContainerSize, containerSize => containerSize.rules, { cascade: true })
   container_size: ContainerSize

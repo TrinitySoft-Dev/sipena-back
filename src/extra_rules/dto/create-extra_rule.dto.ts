@@ -1,7 +1,7 @@
 import { CreateConditionGroupDto } from '@/condition_groups/dto/create-condition_group.dto'
 import { ApiProperty } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
-import { IsArray, IsBoolean, IsNumber, IsString, ValidateNested } from 'class-validator'
+import { IsArray, IsBoolean, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator'
 
 export class CreateExtraRuleDto {
   @ApiProperty({
@@ -13,14 +13,6 @@ export class CreateExtraRuleDto {
   name: string
 
   @ApiProperty({
-    name: 'status',
-    description: 'Status of the extra rule',
-    example: true,
-  })
-  @IsBoolean()
-  status: boolean
-
-  @ApiProperty({
     name: 'rate',
     description: 'Rate of the extra rule',
     example: 10,
@@ -30,27 +22,28 @@ export class CreateExtraRuleDto {
 
   @ApiProperty({
     name: 'rate_type',
-    description: 'Type of the extra rule',
-    example: 'fixed',
+    description: 'Rate of the extra rule',
+    example: 'per_item',
   })
   @IsString()
   rate_type: string
 
   @ApiProperty({
-    name: 'unit',
-    description: 'Unit of the extra rule',
-    example: 'sku',
+    name: 'active',
+    description: 'Indicates if the rule is active',
+    example: true,
   })
-  @IsString()
-  unit: string
+  @IsBoolean()
+  active: boolean
 
   @ApiProperty({
-    name: 'limit',
-    description: 'Limit of the extra rule',
-    example: 10,
+    name: 'rules',
+    description: 'Rules of the extra rule',
+    example: [{ id: 1 }],
   })
-  @IsNumber()
-  limit: number
+  @IsOptional()
+  @IsArray()
+  rules: Array<any>
 
   @ApiProperty({
     name: 'condition_groups',
@@ -61,7 +54,7 @@ export class CreateExtraRuleDto {
           {
             field: 'cartons',
             operator: '>=',
-            value: '=',
+            value: '10',
           },
           {
             field: 'cartons',

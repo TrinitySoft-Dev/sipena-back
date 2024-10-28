@@ -1,4 +1,5 @@
 import { ConditionGroup } from '@/condition_groups/entities/condition_group.entity'
+import { Rule } from '@/rules/entities/rule.entity'
 import { User } from '@/users/entities/user.entity'
 import {
   Column,
@@ -24,11 +25,11 @@ export class ExtraRule {
   })
   name: string
 
-  @ManyToMany(() => User, user => user.extra_rules)
-  customers: User[]
-
   @OneToMany(() => ConditionGroup, group => group.extra_rule, { cascade: true })
   condition_groups: ConditionGroup[]
+
+  @ManyToMany(() => Rule, rule => rule.extra_rules)
+  rules: Rule[]
 
   @Column({
     type: 'decimal',
@@ -45,19 +46,11 @@ export class ExtraRule {
   rate_type: string
 
   @Column({
-    type: 'varchar',
-    length: 20,
-    nullable: false,
-    comment: 'Unidad de medida para el cargo: sku, pallet, etc.',
+    type: 'boolean',
+    default: true,
+    comment: 'Indicates if the rule is active',
   })
-  unit: string
-
-  @Column({
-    type: 'int',
-    nullable: true,
-    comment: 'Límite para la unidad especificada',
-  })
-  limit: number
+  active: boolean
 
   @CreateDateColumn({
     type: 'timestamp',

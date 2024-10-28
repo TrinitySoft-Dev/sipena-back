@@ -205,7 +205,7 @@ export class UsersService {
       .leftJoinAndSelect('user.rules', 'rule', 'rule.work = :workId', { workId })
       .leftJoinAndSelect('rule.condition_groups', 'condition_groups')
       .leftJoinAndSelect('condition_groups.conditions', 'conditions')
-      .leftJoinAndSelect('user.extra_rules', 'extra_rules')
+      .leftJoinAndSelect('rule.extra_rules', 'extra_rules')
       .leftJoinAndSelect('extra_rules.condition_groups', 'extra_condition_groups')
       .leftJoinAndSelect('extra_condition_groups.conditions', 'extra_conditions')
       .where('user.id = :userId', { userId })
@@ -262,7 +262,6 @@ export class UsersService {
       user.last_name = updateUserDto?.last_name ?? user.last_name
       user.role = updateUserDto?.role ?? user.role
       user.rules = updateUserDto?.rules
-      user.extra_rules = updateUserDto?.extra_rules
 
       await this.userRepository.save(user)
 

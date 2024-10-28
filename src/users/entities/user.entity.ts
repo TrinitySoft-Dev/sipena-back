@@ -1,4 +1,3 @@
-import { ExtraRule } from '@/extra_rules/entities/extra_rule.entity'
 import { Infoworker } from '@/infoworkers/entities/infoworker.entity'
 import { Product } from '@/products/entities/product.entity'
 import { Rule } from '@/rules/entities/rule.entity'
@@ -69,20 +68,6 @@ export class User {
     },
   })
   rules: Rule[]
-
-  @ManyToMany(() => ExtraRule, extraRule => extraRule.customers, { cascade: true })
-  @JoinTable({
-    name: 'customers_extra_rules',
-    joinColumn: {
-      name: 'customer_id',
-      referencedColumnName: 'id',
-    },
-    inverseJoinColumn: {
-      name: 'extra_rule_id',
-      referencedColumnName: 'id',
-    },
-  })
-  extra_rules: ExtraRule[]
 
   @OneToMany(() => Timesheet, timesheet => timesheet.customer)
   timesheets: Timesheet[]

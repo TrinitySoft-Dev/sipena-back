@@ -24,7 +24,12 @@ export class RulesService {
   async create(createRuleDto: CreateRuleDto) {
     try {
       const { condition_groups, work_id, container_size, ...rest } = createRuleDto
-
+      console.log({
+        ...rest,
+        work: { id: work_id },
+        container_size: { id: container_size },
+        condition_groups,
+      })
       const rule = this.ruleRepository.create({
         ...rest,
         work: { id: work_id },

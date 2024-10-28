@@ -69,17 +69,25 @@ export class TimesheetService {
 
   async validateRules(rules: Rule[], container: ContainerDto) {
     for (const rule of rules) {
+      let extraCharge = 0
       const conditionGroups = rule.condition_groups
       let ruleIsValid = false
+      const extraRules = rule.extra_rules
 
       for (const group of conditionGroups) {
         const conditions = group.conditions
         let groupIsValid = true
         for (const condition of conditions) {
           const conditionResult = this.conditionsService.evalutedConditions(condition, container)
-          if (!conditionResult && condition.mandatory) {
-            groupIsValid = false
-            break
+          if (!conditionResult) {
+            const isAppliedExtraRule = this.isValidExtraRules(extraRules, container, condition.field)
+
+            if (!isAppliedExtraRule) {
+              groupIsValid = false
+              break
+            }
+
+            extraCharge = isAppliedExtraRule
           }
         }
 
@@ -90,69 +98,81 @@ export class TimesheetService {
       }
 
       if (ruleIsValid) {
-        return rule.rate
+        return Number(rule.rate) + Number(extraCharge)
       }
     }
 
     return 0
   }
 
-  private async validateExtraRules(extraRules: ExtraRule[], container: ContainerDto, baseRate: number) {
-    if (!extraRules.length) return 0
-    let totalExtraCharge = 0
-
+  private isValidExtraRules(extraRules: ExtraRule[], container: ContainerDto, field: string) {
     for (const extraRule of extraRules) {
+      let fields = new Set()
       const conditionGroups = extraRule.condition_groups
-      let extraRuleIsValid = false
+      let ruleIsValid = false
 
       for (const group of conditionGroups) {
         const conditions = group.conditions
         let groupIsValid = true
+        const existCondition = conditions.filter(condition => condition.field === field)
 
-        for (const condition of conditions) {
+        if (!existCondition) return false
+
+        for (const condition of existCondition) {
           const conditionResult = this.conditionsService.evalutedConditions(condition, container)
           if (!conditionResult) {
             groupIsValid = false
             break
           }
+          fields.add(condition.field)
         }
 
         if (groupIsValid) {
-          extraRuleIsValid = true
+          ruleIsValid = true
           break
         }
       }
 
-      if (extraRuleIsValid) {
-        let extraCharge = 0
+      if (ruleIsValid) {
+        const extraRate = this.calculateUnitsOverLimit(fields, container, extraRule)
+        return extraRate
+      }
+    }
+  }
 
-        if (extraRule.rate_type === 'fixed') {
-          extraCharge = extraRule.rate
-        } else if (extraRule.rate_type === 'percentage') {
-          extraCharge = (extraRule.rate / 100) * baseRate
-        } else if (extraRule.rate_type === 'per_unit') {
-          const unitsOverLimit = this.calculateUnitsOverLimit(extraRule.unit, container, extraRule.limit)
-          extraCharge = unitsOverLimit * extraRule.rate
+  private calculateUnitsOverLimit(fields: Set<any>, container: ContainerDto, extraRule: ExtraRule) {
+    let value = 0
+
+    for (const field of fields) {
+      const fieldValueContainer = container[field]
+      if (fieldValueContainer) {
+        const maxValue = this.getMaxValue(extraRule)
+        if (extraRule.rate_type === 'per_item') {
+          const diff = fieldValueContainer - maxValue
+          value = extraRule.rate * diff
         }
 
-        totalExtraCharge += extraCharge
+        if (extraRule.rate_type === 'percentage') {
+          value = (extraRule.rate / 100) * fieldValueContainer
+        }
       }
     }
 
-    return totalExtraCharge
+    return value
   }
 
-  private calculateUnitsOverLimit(unit: string, container: ContainerDto, limit: number) {
-    let value: number = 0
-
-    if (unit === 'sku') {
-      value = Number(container.skus)
-    } else if (unit === 'pallet') {
-      value = Number(container.pallets)
+  private getMaxValue(rule: Rule | ExtraRule) {
+    let value = 0
+    const conditionGroups = rule.condition_groups
+    for (const group of conditionGroups) {
+      const conditions = group.conditions
+      for (const condition of conditions) {
+        const conditionValue = Number(condition.value)
+        value = value > conditionValue ? value : conditionValue
+      }
     }
 
-    const unitsOverLimit = value - limit
-    return unitsOverLimit > 0 ? unitsOverLimit : 0
+    return value
   }
 
   async getCustomerRelations(customer: number) {

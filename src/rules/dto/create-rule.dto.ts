@@ -1,7 +1,7 @@
 import { CreateConditionGroupDto } from '@/condition_groups/dto/create-condition_group.dto'
 import { ApiProperty } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
-import { IsArray, IsBoolean, IsInt, IsNumber, IsString, ValidateNested } from 'class-validator'
+import { IsArray, IsBoolean, IsInt, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator'
 
 const example = [
   {
@@ -69,6 +69,11 @@ export class CreateRuleDto {
   })
   @IsNumber()
   rate: number
+
+  @ApiProperty({ description: 'Extra rules of the rule', example: [{ id: 1 }] })
+  @IsOptional()
+  @IsArray()
+  extra_rules: Array<any>
 
   @ApiProperty({
     description: 'Conditions of the rule',
