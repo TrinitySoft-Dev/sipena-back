@@ -16,7 +16,6 @@ import { ContainerSizeService } from '@/container_size/container_size.service'
 export class RulesService {
   constructor(
     @InjectRepository(Rule) private readonly ruleRepository: Repository<Rule>,
-    @InjectRepository(User) private readonly userRepository: Repository<User>,
     private readonly conditionGroupsService: ConditionGroupsService,
     private readonly workService: WorkService,
     private readonly containerSizeService: ContainerSizeService,
@@ -95,20 +94,50 @@ export class RulesService {
     }
   }
 
-  async find({ page, pageSize }: { page: number; pageSize: number }) {
-    const [result, total] = await this.ruleRepository.findAndCount({
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-      relations: ['container_size'],
-    })
-    const newResult = result.map(rule => ({
-      ...rule,
-      container_size: rule?.container_size?.value,
-      date: DateTime.fromJSDate(rule.created_at).toFormat('dd/MM/yyyy'),
-      time: DateTime.fromJSDate(rule.created_at).toFormat('HH:mm'),
-    }))
+  async findSelect() {
+    return await this.ruleRepository.find({ where: { active: true } })
+  }
 
-    return { result: newResult, pagination: { page, pageSize, total } }
+  async find({ page, pageSize, includePagination }: { page: number; pageSize: number; includePagination: boolean }) {
+    if (includePagination) {
+      const [result, total] = await this.ruleRepository.findAndCount({
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        relations: ['container_size'],
+      })
+      const newResult = result.map(rule => ({
+        ...rule,
+        container_size: rule?.container_size?.value,
+        date: DateTime.fromJSDate(rule.created_at).toFormat('dd/MM/yyyy'),
+        time: DateTime.fromJSDate(rule.created_at).toFormat('HH:mm'),
+      }))
+
+      return { result: newResult, pagination: { page, pageSize, total } }
+    }
+
+    return await this.ruleRepository.find({
+      where: { active: true },
+      relations: ['container_size'],
+      select: {
+        id: true,
+        rate: true,
+        status: true,
+        name: true,
+        container_size: {
+          id: true,
+          value: true,
+        },
+      },
+    })
+  }
+
+  async findByCustomer(customer: number) {
+    return await this.ruleRepository
+      .createQueryBuilder('rule')
+      .innerJoin('rule.customers', 'customer')
+      .innerJoinAndSelect('rule.container_size', 'container_size')
+      .where('customer.id = :customerId', { customerId: customer })
+      .getMany()
   }
 
   async allowedFields() {

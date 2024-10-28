@@ -9,6 +9,7 @@ import { Rule } from '@/rules/entities/rule.entity'
 import { ROLES_CONST } from '@/common/conts/roles.const'
 import { ConditionsService } from '@/conditions/conditions.service'
 import { TimesheetWorkersService } from '@/timesheet_workers/timesheet_workers.service'
+import { ExtraRule } from '@/extra_rules/entities/extra_rule.entity'
 
 @Injectable()
 export class TimesheetService {
@@ -70,12 +71,13 @@ export class TimesheetService {
     for (const rule of rules) {
       const conditionGroups = rule.condition_groups
       let ruleIsValid = false
+
       for (const group of conditionGroups) {
         const conditions = group.conditions
         let groupIsValid = true
         for (const condition of conditions) {
           const conditionResult = this.conditionsService.evalutedConditions(condition, container)
-          if (!conditionResult) {
+          if (!conditionResult && condition.mandatory) {
             groupIsValid = false
             break
           }
@@ -93,6 +95,64 @@ export class TimesheetService {
     }
 
     return 0
+  }
+
+  private async validateExtraRules(extraRules: ExtraRule[], container: ContainerDto, baseRate: number) {
+    if (!extraRules.length) return 0
+    let totalExtraCharge = 0
+
+    for (const extraRule of extraRules) {
+      const conditionGroups = extraRule.condition_groups
+      let extraRuleIsValid = false
+
+      for (const group of conditionGroups) {
+        const conditions = group.conditions
+        let groupIsValid = true
+
+        for (const condition of conditions) {
+          const conditionResult = this.conditionsService.evalutedConditions(condition, container)
+          if (!conditionResult) {
+            groupIsValid = false
+            break
+          }
+        }
+
+        if (groupIsValid) {
+          extraRuleIsValid = true
+          break
+        }
+      }
+
+      if (extraRuleIsValid) {
+        let extraCharge = 0
+
+        if (extraRule.rate_type === 'fixed') {
+          extraCharge = extraRule.rate
+        } else if (extraRule.rate_type === 'percentage') {
+          extraCharge = (extraRule.rate / 100) * baseRate
+        } else if (extraRule.rate_type === 'per_unit') {
+          const unitsOverLimit = this.calculateUnitsOverLimit(extraRule.unit, container, extraRule.limit)
+          extraCharge = unitsOverLimit * extraRule.rate
+        }
+
+        totalExtraCharge += extraCharge
+      }
+    }
+
+    return totalExtraCharge
+  }
+
+  private calculateUnitsOverLimit(unit: string, container: ContainerDto, limit: number) {
+    let value: number = 0
+
+    if (unit === 'sku') {
+      value = Number(container.skus)
+    } else if (unit === 'pallet') {
+      value = Number(container.pallets)
+    }
+
+    const unitsOverLimit = value - limit
+    return unitsOverLimit > 0 ? unitsOverLimit : 0
   }
 
   async getCustomerRelations(customer: number) {
@@ -119,15 +179,6 @@ export class TimesheetService {
     return await this.timesheetRepository.find({
       where: { customer: { id: customerId } },
       relations: ['timesheet_workers', 'customer', 'container', 'container.work'],
-      select: {
-        customer: { id: true, name: true, last_name: true },
-        container: {
-          container_number: true,
-          work: {
-            name: true,
-          },
-        },
-      },
     })
   }
 }

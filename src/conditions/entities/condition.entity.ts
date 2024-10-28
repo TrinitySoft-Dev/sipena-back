@@ -36,6 +36,13 @@ export class Condition {
   value: string
 
   @Column({
+    type: 'boolean',
+    default: true,
+    comment: 'Indicates if the rule is mandatory',
+  })
+  mandatory: boolean
+
+  @Column({
     type: 'date',
     default: () => 'CURRENT_DATE',
   })

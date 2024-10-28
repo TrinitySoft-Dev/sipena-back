@@ -29,6 +29,30 @@ export class CreateExtraRuleDto {
   rate: number
 
   @ApiProperty({
+    name: 'rate_type',
+    description: 'Type of the extra rule',
+    example: 'fixed',
+  })
+  @IsString()
+  rate_type: string
+
+  @ApiProperty({
+    name: 'unit',
+    description: 'Unit of the extra rule',
+    example: 'sku',
+  })
+  @IsString()
+  unit: string
+
+  @ApiProperty({
+    name: 'limit',
+    description: 'Limit of the extra rule',
+    example: 10,
+  })
+  @IsNumber()
+  limit: number
+
+  @ApiProperty({
     name: 'condition_groups',
     description: 'Condition groups of the extra rule',
     example: [

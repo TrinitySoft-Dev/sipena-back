@@ -10,11 +10,13 @@ const example = [
         field: 'cartons',
         operator: '>=',
         value: '=',
+        mandatory: true,
       },
       {
         field: 'cartons',
         operator: '<=',
         value: '50',
+        mandatory: true,
       },
     ],
   },
@@ -24,11 +26,13 @@ const example = [
         field: 'skus',
         operator: '>=',
         value: '0',
+        mandatory: true,
       },
       {
         field: 'skus',
         operator: '<=',
         value: '50',
+        mandatory: true,
       },
     ],
   },
@@ -50,6 +54,13 @@ export class CreateRuleDto {
   })
   @IsInt()
   container_size: number
+
+  @ApiProperty({
+    description: 'Name of the rule',
+    example: 'Extra weight',
+  })
+  @IsString()
+  name: string
 
   @ApiProperty({
     description: 'Rate of the rule',

@@ -10,6 +10,7 @@ import {
   DefaultValuePipe,
   Put,
   Param,
+  ParseBoolPipe,
 } from '@nestjs/common'
 import { RulesService } from './rules.service'
 import { CreateRuleDto } from './dto/create-rule.dto'
@@ -24,10 +25,7 @@ import { UpdateRuleDto } from './dto/update-rule.dto'
 export class RulesController {
   constructor(private readonly rulesService: RulesService) {}
 
-  @ApiOperation({
-    summary: 'Create a rule',
-    description: 'This method creates a rule',
-  })
+  @ApiOperation({ summary: 'Create a rule', description: 'This method creates a rule' })
   @Post()
   async create(@Body() createRuleDto: CreateRuleDto) {
     return await this.rulesService.create(createRuleDto)
@@ -42,46 +40,33 @@ export class RulesController {
     return await this.rulesService.allowedFields()
   }
 
-  @ApiOperation({
-    summary: 'Find by page',
-    description: 'This method returns a list of rules by page',
-  })
+  @ApiOperation({ summary: 'Find by page', description: 'This method returns a list of rules by page' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'pageSize', required: false, type: Number })
+  @ApiQuery({ name: 'includePagination', required: false, type: Boolean })
   @Get('find')
-  @ApiQuery({
-    name: 'page',
-    required: false,
-    type: Number,
-  })
-  @ApiQuery({
-    name: 'pageSize',
-    required: false,
-    type: Number,
-  })
   async find(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize?: number,
+    @Query('includePagination', new DefaultValuePipe(false), ParseBoolPipe) includePagination?: boolean,
   ) {
-    return await this.rulesService.find({ page, pageSize })
+    return await this.rulesService.find({ page, pageSize, includePagination })
   }
 
-  @ApiOperation({
-    summary: 'Find by id',
-    description: 'This method returns a rule by id',
-  })
-  @ApiParam({
-    name: 'id',
-    required: true,
-    type: Number,
-  })
+  @ApiOperation({ summary: 'Find by customer', description: 'This method returns a list of rules by customer' })
+  @Get('customer/:customerId')
+  async findByCustomer(@Param('customerId') customerId: number) {
+    return await this.rulesService.findByCustomer(customerId)
+  }
+
+  @ApiOperation({ summary: 'Find by id', description: 'This method returns a rule by id' })
+  @ApiParam({ name: 'id', required: true, type: Number })
   @Get(':id')
   async findById(@Param('id', ParseIntPipe) id: number) {
     return await this.rulesService.findById(id)
   }
 
-  @ApiOperation({
-    summary: 'Update a rule',
-    description: 'This method updates a rule',
-  })
+  @ApiOperation({ summary: 'Update a rule', description: 'This method updates a rule' })
   @Put(':id')
   async update(@Param('id') id: number, @Body() updateRuleDto: UpdateRuleDto) {
     return await this.rulesService.update(id, updateRuleDto)

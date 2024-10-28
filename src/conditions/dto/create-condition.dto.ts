@@ -1,6 +1,6 @@
 import { getAllowedConditionFieldsSimplify } from '@/common/decorators/allowed-fields.decorator'
 import { ApiProperty } from '@nestjs/swagger'
-import { IsIn, IsInt, IsOptional, IsString } from 'class-validator'
+import { IsBoolean, IsIn, IsInt, IsOptional, IsString } from 'class-validator'
 
 const ALLOWED_CONDITION_FIELDS = getAllowedConditionFieldsSimplify()
 
@@ -22,6 +22,15 @@ export class CreateConditionDto {
   @IsOptional()
   @IsInt()
   condition_group_id?: number
+
+  @ApiProperty({
+    description: 'Mandatory of the condition',
+    example: true,
+    required: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  mandatory: boolean
 
   @IsString()
   @IsIn(ALLOWED_CONDITION_FIELDS, {

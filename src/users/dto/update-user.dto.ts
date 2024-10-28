@@ -65,6 +65,14 @@ export class UpdateUserDto {
   rules: number[]
 
   @ApiProperty({
+    description: 'Extra rules of the user',
+    example: [{ id: 1 }],
+  })
+  @IsOptional()
+  @IsArray()
+  extra_rules: number[]
+
+  @ApiProperty({
     description: 'Information worker of the user',
     example: {
       phone: '123456789',

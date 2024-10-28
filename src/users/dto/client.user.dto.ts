@@ -63,4 +63,11 @@ export class ClientUserDto {
   })
   @IsArray()
   rules: number[]
+
+  @ApiProperty({
+    description: 'Extra rules of the user',
+    example: '[1,2,3,4]',
+  })
+  @IsArray()
+  extra_rules: number[]
 }

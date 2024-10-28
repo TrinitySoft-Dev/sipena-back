@@ -23,13 +23,19 @@ export class Rule {
 
   @Column({
     nullable: false,
+    type: 'varchar',
+    length: 80,
+  })
+  name: string
+
+  @Column({
+    nullable: false,
     type: 'boolean',
     default: false,
   })
   status: boolean
 
-  @ManyToOne(() => ContainerSize, containerSize => containerSize.rules)
-  @JoinColumn()
+  @ManyToOne(() => ContainerSize, containerSize => containerSize.rules, { cascade: true })
   container_size: ContainerSize
 
   @Column({

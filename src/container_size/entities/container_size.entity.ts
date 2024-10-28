@@ -9,7 +9,7 @@ export class ContainerSize {
   id: number
 
   @Column({
-    type: 'int',
+    type: 'varchar',
     nullable: false,
   })
   value: number
