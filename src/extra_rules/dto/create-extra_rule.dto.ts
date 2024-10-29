@@ -45,6 +45,10 @@ export class CreateExtraRuleDto {
   @IsArray()
   rules: Array<any>
 
+  @ApiProperty({ description: 'Unit of the extra rule', example: 'sku' })
+  @IsString()
+  unit: string
+
   @ApiProperty({
     name: 'condition_groups',
     description: 'Condition groups of the extra rule',

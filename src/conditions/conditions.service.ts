@@ -46,6 +46,8 @@ export class ConditionsService {
 
     const parseFieldValue = this.parseValue(fieldValue)
     const parseConditionValue = this.parseValue(conditionValue)
+
+    console.log(parseFieldValue, operator, parseConditionValue)
     switch (operator) {
       case '=':
         return parseFieldValue === parseConditionValue

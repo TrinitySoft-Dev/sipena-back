@@ -46,6 +46,14 @@ export class ExtraRule {
   rate_type: string
 
   @Column({
+    type: 'varchar',
+    length: 20,
+    nullable: false,
+    comment: 'Unidad de medida para el cargo: sku, pallet, etc.',
+  })
+  unit: string
+
+  @Column({
     type: 'boolean',
     default: true,
     comment: 'Indicates if the rule is active',
