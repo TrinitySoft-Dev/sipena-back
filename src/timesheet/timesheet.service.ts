@@ -141,7 +141,6 @@ export class TimesheetService {
   }
 
   private calculateUnitsOverLimit(fields: Set<any>, container: ContainerDto, extraRule: ExtraRule) {
-    console.log(fields)
     let value = 0
     for (const field of fields) {
       const fieldValueContainer = container[field]
@@ -166,7 +165,7 @@ export class TimesheetService {
     const conditionGroups = rule.condition_groups
     for (const group of conditionGroups) {
       const conditions = group.conditions.filter(condition => condition.field === unit)
-      console.log({ conditions, unit })
+
       for (const condition of conditions) {
         const conditionValue = Number(condition.value)
         value = value > conditionValue ? value : conditionValue

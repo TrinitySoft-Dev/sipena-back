@@ -21,7 +21,7 @@ export class ExtraRulesController {
     return this.extraRulesService.findAll()
   }
 
-  @Get(':id')
+  @Get('/rule/:id')
   findByRuleId(@Param('id') id: number) {
     return this.extraRulesService.findByRuleId(id)
   }

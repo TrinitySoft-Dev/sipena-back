@@ -30,13 +30,6 @@ export class Rule {
   })
   name: string
 
-  @Column({
-    nullable: false,
-    type: 'boolean',
-    default: false,
-  })
-  status: boolean
-
   @ManyToMany(() => ExtraRule, extraRule => extraRule.rules, { cascade: true })
   @JoinTable({
     name: 'rules_extra_rules',

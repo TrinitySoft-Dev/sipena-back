@@ -24,12 +24,6 @@ export class RulesService {
   async create(createRuleDto: CreateRuleDto) {
     try {
       const { condition_groups, work_id, container_size, ...rest } = createRuleDto
-      console.log({
-        ...rest,
-        work: { id: work_id },
-        container_size: { id: container_size },
-        condition_groups,
-      })
       const rule = this.ruleRepository.create({
         ...rest,
         work: { id: work_id },
@@ -44,12 +38,17 @@ export class RulesService {
       throw error
     }
   }
-
   async findById(id: number | number[]): Promise<Rule[]> {
-    return await this.ruleRepository.find({
-      where: { id: In(Array.isArray(id) ? id : [id]) },
-      relations: ['container_size', 'work', 'condition_groups', 'condition_groups.conditions'],
-    })
+    return await this.ruleRepository
+      .createQueryBuilder('rule')
+      .leftJoinAndSelect('rule.container_size', 'container_size')
+      .leftJoinAndSelect('rule.work', 'work')
+      .leftJoinAndSelect('rule.condition_groups', 'condition_groups')
+      .leftJoinAndSelect('condition_groups.conditions', 'conditions')
+      .where('rule.id IN (:...ids)', { ids: Array.isArray(id) ? id : [id] })
+      .orderBy('condition_groups.id', 'ASC')
+      .addOrderBy('conditions.id', 'ASC')
+      .getMany()
   }
 
   async update(id: number, updateRuleDto: UpdateRuleDto) {
@@ -66,32 +65,64 @@ export class RulesService {
       }
 
       Object.assign(rule, rest)
+
       if (work_id) rule.work = await this.workService.findById(work_id)
       if (container_size) rule.container_size = await this.containerSizeService.findById(container_size)
 
       if (condition_groups) {
-        const existingGroupIds = rule.condition_groups.map(group => group.id)
-        const incomingGroupIds = condition_groups.map(group => group.id).filter(id => id)
+        const incomingConditionGroupIds = condition_groups.map(cg => cg.id).filter(id => id)
+        const conditionGroupsToRemove = rule.condition_groups.filter(cg => !incomingConditionGroupIds.includes(cg.id))
 
-        const groupsToDelete = existingGroupIds.filter(id => !incomingGroupIds.includes(id))
-
-        for (const groupId of groupsToDelete) {
-          await this.conditionGroupsService.remove(groupId)
+        if (conditionGroupsToRemove.length > 0) {
+          rule.condition_groups = rule.condition_groups.filter(cg => incomingConditionGroupIds.includes(cg.id))
         }
 
-        for (const groupDto of condition_groups) {
-          if (groupDto.id) {
-            await this.conditionGroupsService.update(groupDto.id, groupDto)
+        for (const cgDto of condition_groups) {
+          let conditionGroup
+          if (cgDto.id) {
+            conditionGroup = rule.condition_groups.find(cg => cg.id === cgDto.id)
+            if (conditionGroup) {
+              Object.assign(conditionGroup, cgDto)
+            } else {
+              conditionGroup = this.ruleRepository.manager.create('ConditionGroup', cgDto)
+              rule.condition_groups.push(conditionGroup)
+            }
           } else {
-            await this.conditionGroupsService.create({
-              ...groupDto,
-              rule_id: rule.id,
-            })
+            conditionGroup = this.ruleRepository.manager.create('ConditionGroup', cgDto)
+            rule.condition_groups.push(conditionGroup)
+          }
+
+          if (cgDto.conditions) {
+            const incomingConditionIds = cgDto.conditions.map(cond => cond.id).filter(id => id)
+
+            const conditionsToRemove = conditionGroup.conditions.filter(cond => !incomingConditionIds.includes(cond.id))
+
+            if (conditionsToRemove.length > 0) {
+              conditionGroup.conditions = conditionGroup.conditions.filter(cond =>
+                incomingConditionIds.includes(cond.id),
+              )
+            }
+
+            for (const condDto of cgDto.conditions) {
+              let condition
+              if (condDto.id) {
+                condition = conditionGroup.conditions.find(cond => cond.id === condDto.id)
+                if (condition) {
+                  Object.assign(condition, condDto)
+                } else {
+                  condition = this.ruleRepository.manager.create('Condition', condDto)
+                  conditionGroup.conditions.push(condition)
+                }
+              } else {
+                condition = this.ruleRepository.manager.create('Condition', condDto)
+                conditionGroup.conditions.push(condition)
+              }
+            }
           }
         }
       }
 
-      // await this.ruleRepository.save(rule)
+      await this.ruleRepository.save(rule)
 
       return { message: 'Regla actualizada exitosamente' }
     } catch (error) {
@@ -126,7 +157,7 @@ export class RulesService {
       select: {
         id: true,
         rate: true,
-        status: true,
+        active: true,
         name: true,
         container_size: {
           id: true,

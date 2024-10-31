@@ -90,5 +90,5 @@ export class CreateRuleDto {
     example: true,
   })
   @IsBoolean()
-  status: boolean
+  active: boolean
 }
