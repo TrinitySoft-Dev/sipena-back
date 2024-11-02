@@ -41,11 +41,11 @@ import { ExtraRulesModule } from './extra_rules/extra_rules.module'
       // logging: true,
       ssl: true,
     }),
-    JwtModule.register({
-      global: true,
-      secret: config.JWT_SECRET,
-      signOptions: { expiresIn: '1d' },
-    }),
+    // JwtModule.register({
+    //   global: true,
+    //   secret: config.JWT_SECRET,
+    //   signOptions: { expiresIn: '1d' },
+    // }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
       serveRoot: '/public',

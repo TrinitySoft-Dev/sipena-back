@@ -23,13 +23,16 @@ import { EmailService } from '@/email/email.service'
 import { config } from '@/common/config/config'
 import { PasswordHashService } from '@/password_hash/password_hash.service'
 import { ResetPasswordDto } from './dto/reset-password.dto'
+import { AccessJwtService } from '@/common/services/access-jwt.service'
+import { AccessJwtRefreshService } from '@/common/services/refresh-jwt.service'
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     private readonly infoworkerService: InfoworkersService,
-    private readonly jwtService: JwtService,
+    private readonly jwtService: AccessJwtService,
+    private readonly jwtRefreshService: AccessJwtRefreshService,
     private readonly imagesService: ImagesService,
     @Inject(forwardRef(() => RulesService)) private readonly rulesService: RulesService,
     private readonly emailService: EmailService,
@@ -121,16 +124,22 @@ export class UsersService {
   async login(loginUserDto: LoginUserDto, response: Response) {
     const { email, password } = loginUserDto
 
-    const user = await this.userRepository.findOne({ where: { email, active: true } })
+    const user = await this.userRepository.findOne({ where: { email, active: true }, relations: ['infoworker'] })
 
     if (!user) throw new UnauthorizedException('Email or password incorrect')
 
     const isPasswordCorrect = await bcrypt.compare(password, user.password)
     if (!isPasswordCorrect) throw new UnauthorizedException('Email or password incorrect')
 
-    const payload = { email: user.email, role: user.role, id: user.id, completed: user.completed }
+    let completed = true
+    if (user.role === ROLES_CONST.WORKER) {
+      completed = this.infoworkerService.validateInfoworker(user.infoworker)
+    }
+
+    const payload = { email: user.email, role: user.role, id: user.id, completedInfoworker: completed }
 
     const token = await this.jwtService.signAsync(payload)
+    const refreshToken = await this.jwtRefreshService.signAsync(payload)
 
     const expires = new Date(Date.now() + 1000 * 60 * 60 * 5)
 
@@ -140,11 +149,36 @@ export class UsersService {
       expires,
     })
 
+    response.cookie('x-refresh-token', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      expires,
+    })
+
     return { message: 'Login successfully' }
   }
 
+
+  async refreshToken(refreshToken: string) {
+    const validToken = await this.jwtRefreshService.verifyAsync(refreshToken)
+    const user = await this.userRepository.findOne({ where: { email: validToken.email, active: true }, relations: ['infoworker'] })
+    if (!user) throw new UnauthorizedException('Email or password incorrect')
+
+    let completed = true
+    if (user.role === ROLES_CONST.WORKER) {
+      completed = this.infoworkerService.validateInfoworker(user.infoworker)
+    }
+
+    const payload = { email: user.email, role: user.role, id: user.id, completedInfoworker: completed }
+
+    const token = await this.jwtService.signAsync(payload)
+    const newRefreshToken = await this.jwtRefreshService.signAsync(payload)
+
+    return { token, newRefreshToken }
+  }
+
   async findById(id: number) {
-    return await this.userRepository.findOne({ where: { id } })
+    return await this.userRepository.findOne({ where: { id }, relations: ['infoworker'], select: ['id', 'email', 'role', 'completed', 'infoworker', 'name', 'last_name'] })
   }
 
   async forgotPasssword(email: string) {

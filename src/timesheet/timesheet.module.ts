@@ -8,6 +8,7 @@ import { UsersModule } from '@/users/users.module'
 import { RulesModule } from '@/rules/rules.module'
 import { ConditionsModule } from '@/conditions/conditions.module'
 import { TimesheetWorkersModule } from '@/timesheet_workers/timesheet_workers.module'
+import { AccessJwtService } from '@/common/services/access-jwt.service'
 
 @Module({
   imports: [
@@ -18,6 +19,6 @@ import { TimesheetWorkersModule } from '@/timesheet_workers/timesheet_workers.mo
     TimesheetWorkersModule,
   ],
   controllers: [TimesheetController],
-  providers: [TimesheetService],
+  providers: [TimesheetService, AccessJwtService],
 })
 export class TimesheetModule {}

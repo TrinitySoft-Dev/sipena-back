@@ -18,6 +18,9 @@ interface ENVIROMENTS {
   }
   PORT: string
   JWT_SECRET: string
+  JWT_EXPIRES: string
+  JWT_REFRESH_EXPIRES: string
+  JWT_REFRESH_SECRET: string
   SIPENA_FILES: string
   SWAGGER_USER: string
   SWAGGER_PASSWORD: string
@@ -33,6 +36,7 @@ const envs = joi
     DB_DATABASE: joi.string().required(),
     PORT: joi.string().required(),
     JWT_SECRET: joi.string().required(),
+    JWT_EXPIRES: joi.string().required(),
     S3_BUCKET: joi.string().required(),
     S3_ACCESS_KEY: joi.string().required(),
     S3_SECRET_ACCESS_KEY: joi.string().required(),
@@ -42,6 +46,8 @@ const envs = joi
     SWAGGER_PASSWORD: joi.string().required(),
     RESEND_API_KEY: joi.string().required(),
     SIPENA_URI_FRONT: joi.string().required(),
+    JWT_REFRESH_SECRET: joi.string().required(),
+    JWT_REFRESH_EXPIRES: joi.string().required(),
   })
   .unknown()
   .required()
@@ -62,6 +68,9 @@ export const config: ENVIROMENTS = {
   },
   PORT: value.PORT,
   JWT_SECRET: value.JWT_SECRET,
+  JWT_EXPIRES: value.JWT_EXPIRES,
+  JWT_REFRESH_EXPIRES: value.JWT_REFRESH_EXPIRES,
+  JWT_REFRESH_SECRET: value.JWT_REFRESH_SECRET,
   SIPENA_FILES: value.SIPENA_FILES,
   AWS: {
     S3_BUCKET: value.S3_BUCKET,

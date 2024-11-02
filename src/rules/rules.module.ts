@@ -7,11 +7,12 @@ import { ConditionGroupsModule } from '@/condition_groups/condition_groups.modul
 import { User } from '@/users/entities/user.entity'
 import { WorkModule } from '@/work/work.module'
 import { ContainerSizeModule } from '@/container_size/container_size.module'
+import { AccessJwtService } from '@/common/services/access-jwt.service'
 
 @Module({
   imports: [TypeOrmModule.forFeature([Rule, User]), ConditionGroupsModule, WorkModule, ContainerSizeModule],
   controllers: [RulesController],
-  providers: [RulesService],
+  providers: [RulesService, AccessJwtService],
   exports: [RulesService],
 })
 export class RulesModule {}

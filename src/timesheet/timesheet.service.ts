@@ -46,9 +46,10 @@ export class TimesheetService {
 
       const timesheetRes = this.timesheetRepository.create({
         ...restTimesheet,
-        rate,
+        rate: typeof rate === 'object' ? rate.rate : 0,
         container: createdContainer,
         customer: { id: customer_id },
+        extra_rates: typeof rate === 'object' ? JSON.stringify(rate.json) : null,
       })
 
       await this.timesheetRepository.save(timesheetRes)
@@ -68,6 +69,7 @@ export class TimesheetService {
   }
 
   async validateRules(rules: Rule[], container: ContainerDto) {
+    const extra_charges = {}
     for (const rule of rules) {
       let extraCharge = 0
       const conditionGroups = rule.condition_groups
@@ -87,7 +89,7 @@ export class TimesheetService {
               break
             }
 
-            extraCharge = isAppliedExtraRule
+            extraCharge = isAppliedExtraRule.rate
           }
         }
 
@@ -98,7 +100,9 @@ export class TimesheetService {
       }
 
       if (ruleIsValid) {
-        return Number(rule.rate) + Number(extraCharge)
+        extra_charges[rule.name] = extraCharge
+        const obj = { ...rule, extra_charges }
+        return { rate: Number(rule.rate) + Number(extraCharge), json: obj }
       }
     }
 
@@ -106,6 +110,7 @@ export class TimesheetService {
   }
 
   private isValidExtraRules(extraRules: ExtraRule[], container: ContainerDto, field: string) {
+    let extraCharge = {}
     for (const extraRule of extraRules) {
       let fields = new Set()
       const conditionGroups = extraRule.condition_groups
@@ -134,8 +139,9 @@ export class TimesheetService {
       }
 
       if (ruleIsValid) {
+        extraCharge = this.calculateUnitsOverLimit(fields, container, extraRule)
         const extraRate = this.calculateUnitsOverLimit(fields, container, extraRule)
-        return extraRate
+        return { rate: extraRate, json: extraCharge }
       }
     }
   }

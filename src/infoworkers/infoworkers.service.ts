@@ -16,4 +16,18 @@ export class InfoworkersService {
   update(id: number, updateInfoworkerDto: UpdateInfoworkerDto) {
     return this.infoworkerRepository.update(id, updateInfoworkerDto)
   }
+
+  validateInfoworker(infoworker: Infoworker | null) {
+    if (!infoworker) return false
+
+    const keys = Object.keys(infoworker)
+    if (keys.length === 0) return false
+    let complete = true
+
+    keys.forEach(key => {
+      if (infoworker[key] === undefined) complete = false
+    })
+
+    return complete
+  }
 }

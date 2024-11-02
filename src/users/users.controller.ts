@@ -12,7 +12,7 @@ import {
   FileTypeValidator,
   Param,
   Put,
-  Res,
+  Res, ParseIntPipe,
 } from '@nestjs/common'
 import { UsersService } from './users.service'
 import { CreateUserDto } from './dto/worker-user.dto'
@@ -26,6 +26,7 @@ import { Response } from 'express'
 import { ForgotUserDto } from './dto/forgot.dto'
 import { ResetPasswordDto } from './dto/reset-password.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
+import { RefreshTokenDto } from '@/users/dto/refresh-toke.dto'
 
 @ApiTags('Users')
 @Controller('users')
@@ -66,6 +67,11 @@ export class UsersController {
     return this.usersService.login(loginUserDto, res)
   }
 
+  @Post('refresh-token')
+  refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
+    return this.usersService.refreshToken(refreshTokenDto.refreshToken)
+  }
+
   @Post('forgot')
   forgot(@Body() forgotUserDto: ForgotUserDto) {
     return this.usersService.forgotPasssword(forgotUserDto.email)
@@ -81,6 +87,13 @@ export class UsersController {
   @Get('role')
   findByRole(@Query('role') role: string) {
     return this.usersService.findByRole(role)
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @Get('/:id')
+  findByRoleId(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.findById(id)
   }
 
   @ApiBearerAuth()

@@ -60,6 +60,12 @@ export class Timesheet {
   })
   active: boolean
 
+  @Column({
+    type: 'json',
+    nullable: true,
+  })
+  extra_rates: any
+
   @CreateDateColumn({ type: 'timestamp', comment: 'Timesheet created at' })
   created_at: Date
 

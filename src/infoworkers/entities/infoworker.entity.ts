@@ -37,9 +37,9 @@ export class Infoworker {
 
   @Column({
     type: 'date',
-    nullable: false,
+    nullable: true,
   })
-  employment_end_date: Date
+  employment_start_date: Date
 
   @Column({
     type: 'varchar',
