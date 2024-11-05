@@ -21,4 +21,11 @@ export class ContainerSizeService {
     if (!containerSize) throw new NotFoundException('ContainerSize not found')
     return containerSize
   }
+
+  async update(id: number, createContainerSizeDto: CreateContainerSizeDto) {
+    const containerSize = await this.containerSizeRepository.findOne({ where: { id } })
+    if (!containerSize) throw new NotFoundException('ContainerSize not found')
+    Object.assign(containerSize, createContainerSizeDto)
+    return this.containerSizeRepository.save(containerSize)
+  }
 }

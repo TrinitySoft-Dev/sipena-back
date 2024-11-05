@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsNumber } from 'class-validator'
+import { IsBoolean, IsNumber } from 'class-validator'
 
 export class CreateContainerSizeDto {
   @ApiProperty({
@@ -8,4 +8,11 @@ export class CreateContainerSizeDto {
   })
   @IsNumber()
   value: number
+
+  @ApiProperty({
+    description: 'Active',
+    example: true,
+  })
+  @IsBoolean()
+  active: boolean
 }
