@@ -21,6 +21,11 @@ export class TimesheetController {
     return this.timesheetService.find(req?.payload)
   }
 
+  @Get(':id')
+  findOne(@Param('id') id: number) {
+    return this.timesheetService.findTimesheetById(id)
+  }
+
   @Get('/customer/:customerId')
   findByCustomer(@Param('customerId') customerId: number) {
     return this.timesheetService.findByCustomer(customerId)

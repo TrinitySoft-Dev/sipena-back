@@ -181,6 +181,16 @@ export class TimesheetService {
     return value
   }
 
+  async findTimesheetById(id: number) {
+    const timesheet = await this.timesheetRepository.findOne({
+      where: { id },
+      relations: ['timesheet_workers', 'timesheet_workers.worker', 'customer', 'container', 'container.work'],
+    })
+    if (!timesheet) throw new NotFoundException('Timesheet not found')
+
+    return timesheet
+  }
+
   async getCustomerRelations(customer: number) {
     const resultCustomer = await this.usersService.findOne({
       where: { id: customer, active: true, role: ROLES_CONST.CUSTOMER },
