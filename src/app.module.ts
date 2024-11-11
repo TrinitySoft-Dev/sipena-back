@@ -26,6 +26,8 @@ import { EmailModule } from './email/email.module'
 import { PasswordHashModule } from './password_hash/password_hash.module'
 import { TimesheetWorkersModule } from './timesheet_workers/timesheet_workers.module'
 import { ExtraRulesModule } from './extra_rules/extra_rules.module'
+import { RulesWorkersModule } from './rules_workers/rules_workers.module'
+import { PermissionsModule } from './permissions/permissions.module';
 
 @Module({
   imports: [
@@ -38,14 +40,8 @@ import { ExtraRulesModule } from './extra_rules/extra_rules.module'
       database: config.DB.DATABASE,
       autoLoadEntities: true,
       synchronize: false,
-      // logging: true,
       ssl: true,
     }),
-    // JwtModule.register({
-    //   global: true,
-    //   secret: config.JWT_SECRET,
-    //   signOptions: { expiresIn: '1d' },
-    // }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
       serveRoot: '/public',
@@ -66,6 +62,8 @@ import { ExtraRulesModule } from './extra_rules/extra_rules.module'
     PasswordHashModule,
     TimesheetWorkersModule,
     ExtraRulesModule,
+    RulesWorkersModule,
+    PermissionsModule,
   ],
   controllers: [],
   providers: [],

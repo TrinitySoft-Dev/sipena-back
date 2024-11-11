@@ -23,7 +23,7 @@ async function bootstrap() {
     }),
   )
 
-  // app.useGlobalFilters(new HttpExceptionFilter())
+  app.useGlobalFilters(new HttpExceptionFilter())
   app.useGlobalInterceptors(new ReponseInterceptor())
   app.setGlobalPrefix('/api')
 
