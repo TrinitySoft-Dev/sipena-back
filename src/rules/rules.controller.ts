@@ -46,7 +46,7 @@ export class RulesController {
   @ApiQuery({ name: 'includePagination', required: false, type: Boolean })
   @Get('find')
   async find(
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
+    @Query('page', new DefaultValuePipe(0), ParseIntPipe) page?: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize?: number,
     @Query('includePagination', new DefaultValuePipe(false), ParseBoolPipe) includePagination?: boolean,
   ) {
