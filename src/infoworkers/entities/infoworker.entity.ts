@@ -1,5 +1,13 @@
 import { User } from '@/users/entities/user.entity'
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm'
 
 @Entity({
   name: 'info_workers',
@@ -106,23 +114,21 @@ export class Infoworker {
   })
   active: boolean
 
-  @Column({
-    nullable: false,
-    type: 'date',
+  @CreateDateColumn({
+    type: 'timestamp',
     default: () => 'CURRENT_DATE',
   })
   created_at: Date
 
-  @Column({
-    nullable: false,
-    type: 'date',
+  @UpdateDateColumn({
+    type: 'timestamp',
     default: () => 'CURRENT_DATE',
+    onUpdate: 'CURRENT_DATE',
   })
   updated_at: Date
 
-  @Column({
-    nullable: true,
-    type: 'date',
+  @DeleteDateColumn({
+    type: 'timestamp',
   })
-  deleted_at: Date
+  delete_at: Date
 }

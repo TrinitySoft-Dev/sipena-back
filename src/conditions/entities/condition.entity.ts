@@ -1,5 +1,15 @@
 import { ConditionGroup } from '@/condition_groups/entities/condition_group.entity'
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, RelationId } from 'typeorm'
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  RelationId,
+  UpdateDateColumn,
+} from 'typeorm'
 
 @Entity({
   name: 'conditions',
@@ -35,21 +45,21 @@ export class Condition {
   })
   value: string
 
-  @Column({
-    type: 'date',
+  @CreateDateColumn({
+    type: 'timestamp',
     default: () => 'CURRENT_DATE',
   })
   created_at: Date
 
-  @Column({
-    type: 'date',
+  @UpdateDateColumn({
+    type: 'timestamp',
     default: () => 'CURRENT_DATE',
+    onUpdate: 'CURRENT_DATE',
   })
   updated_at: Date
 
-  @Column({
-    type: 'date',
-    nullable: true,
+  @DeleteDateColumn({
+    type: 'timestamp',
   })
-  deleted_at: Date
+  delete_at: Date
 }

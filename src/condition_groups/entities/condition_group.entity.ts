@@ -1,7 +1,17 @@
 import { Condition } from '@/conditions/entities/condition.entity'
 import { ExtraRule } from '@/extra_rules/entities/extra_rule.entity'
 import { Rule } from '@/rules/entities/rule.entity'
-import { Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, RelationId } from 'typeorm'
+import {
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  RelationId,
+  UpdateDateColumn,
+} from 'typeorm'
 
 @Entity({
   name: 'condition_groups',
@@ -22,4 +32,22 @@ export class ConditionGroup {
 
   @OneToMany(() => Condition, condition => condition.condition_group, { cascade: true, orphanedRowAction: 'delete' })
   conditions: Condition[]
+
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_DATE',
+  })
+  created_at: Date
+
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_DATE',
+    onUpdate: 'CURRENT_DATE',
+  })
+  updated_at: Date
+
+  @DeleteDateColumn({
+    type: 'timestamp',
+  })
+  delete_at: Date
 }

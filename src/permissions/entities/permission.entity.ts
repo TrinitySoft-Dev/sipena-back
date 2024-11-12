@@ -19,7 +19,7 @@ export class Permission {
   @Column({
     unique: true,
     type: 'varchar',
-    length: 120,
+    length: 80,
   })
   name: string
 

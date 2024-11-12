@@ -28,6 +28,7 @@ import { TimesheetWorkersModule } from './timesheet_workers/timesheet_workers.mo
 import { ExtraRulesModule } from './extra_rules/extra_rules.module'
 import { RulesWorkersModule } from './rules_workers/rules_workers.module'
 import { PermissionsModule } from './permissions/permissions.module';
+import { PermissionGroupsModule } from './permission_groups/permission_groups.module';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { PermissionsModule } from './permissions/permissions.module';
     ExtraRulesModule,
     RulesWorkersModule,
     PermissionsModule,
+    PermissionGroupsModule,
   ],
   controllers: [],
   providers: [],

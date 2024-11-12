@@ -4,6 +4,7 @@ import { User } from '@/users/entities/user.entity'
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   ManyToMany,
   OneToMany,
@@ -62,13 +63,19 @@ export class ExtraRule {
 
   @CreateDateColumn({
     type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
+    default: () => 'CURRENT_DATE',
   })
-  created_at: string
+  created_at: Date
 
   @UpdateDateColumn({
     type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
+    default: () => 'CURRENT_DATE',
+    onUpdate: 'CURRENT_DATE',
   })
-  updated_at: string
+  updated_at: Date
+
+  @DeleteDateColumn({
+    type: 'timestamp',
+  })
+  delete_at: Date
 }

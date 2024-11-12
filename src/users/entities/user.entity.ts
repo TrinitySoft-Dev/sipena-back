@@ -3,7 +3,19 @@ import { Product } from '@/products/entities/product.entity'
 import { Rule } from '@/rules/entities/rule.entity'
 import { Timesheet } from '@/timesheet/entities/timesheet.entity'
 import { TimesheetWorker } from '@/timesheet_workers/entities/timesheet_worker.entity'
-import { Column, Entity, JoinColumn, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm'
 
 @Entity({
   name: 'users',
@@ -94,21 +106,21 @@ export class User {
   })
   active: boolean
 
-  @Column({
-    type: 'date',
+  @CreateDateColumn({
+    type: 'timestamp',
     default: () => 'CURRENT_DATE',
   })
   created_at: Date
 
-  @Column({
-    type: 'date',
+  @UpdateDateColumn({
+    type: 'timestamp',
     default: () => 'CURRENT_DATE',
+    onUpdate: 'CURRENT_DATE',
   })
   updated_at: Date
 
-  @Column({
-    type: 'date',
-    nullable: true,
+  @DeleteDateColumn({
+    type: 'timestamp',
   })
-  deleted_at: Date
+  delete_at: Date
 }

@@ -1,6 +1,16 @@
 import { Container } from '@/container/entities/container.entity'
 import { Rule } from '@/rules/entities/rule.entity'
-import { Column, Entity, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm'
 
 @Entity({
   name: 'works',
@@ -37,21 +47,21 @@ export class Work {
   })
   active: boolean
 
-  @Column({
-    type: 'date',
+  @CreateDateColumn({
+    type: 'timestamp',
     default: () => 'CURRENT_DATE',
   })
   created_at: Date
 
-  @Column({
-    type: 'date',
+  @UpdateDateColumn({
+    type: 'timestamp',
     default: () => 'CURRENT_DATE',
+    onUpdate: 'CURRENT_DATE',
   })
   updated_at: Date
 
-  @Column({
-    type: 'date',
-    nullable: true,
+  @DeleteDateColumn({
+    type: 'timestamp',
   })
-  deleted_at: Date
+  delete_at: Date
 }

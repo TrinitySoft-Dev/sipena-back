@@ -4,6 +4,7 @@ import { User } from '@/users/entities/user.entity'
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -66,16 +67,21 @@ export class Timesheet {
   })
   extra_rates: any
 
-  @CreateDateColumn({ type: 'timestamp', comment: 'Timesheet created at' })
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_DATE',
+  })
   created_at: Date
 
-  @UpdateDateColumn({ type: 'timestamp', comment: 'Timesheet updated at' })
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_DATE',
+    onUpdate: 'CURRENT_DATE',
+  })
   updated_at: Date
 
-  @Column({
+  @DeleteDateColumn({
     type: 'timestamp',
-    comment: 'Timesheet deleted at',
-    nullable: true,
   })
-  deleted_at: Date
+  delete_at: Date
 }

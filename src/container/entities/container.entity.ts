@@ -3,7 +3,16 @@ import { ConditionField } from '@/common/decorators/condition-field.decorator'
 import { Product } from '@/products/entities/product.entity'
 import { Work } from '@/work/entities/work.entity'
 import { IsBoolean } from 'class-validator'
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm'
 
 @Entity({
   name: 'containers',
@@ -155,23 +164,21 @@ export class Container {
   @IsBoolean()
   active: boolean
 
-  @Column({
-    type: 'date',
-    nullable: false,
+  @CreateDateColumn({
+    type: 'timestamp',
     default: () => 'CURRENT_DATE',
   })
   created_at: Date
 
-  @Column({
-    type: 'date',
-    nullable: false,
+  @UpdateDateColumn({
+    type: 'timestamp',
     default: () => 'CURRENT_DATE',
+    onUpdate: 'CURRENT_DATE',
   })
   updated_at: Date
 
-  @Column({
-    type: 'date',
-    nullable: true,
+  @DeleteDateColumn({
+    type: 'timestamp',
   })
-  deleted_at: Date
+  delete_at: Date
 }

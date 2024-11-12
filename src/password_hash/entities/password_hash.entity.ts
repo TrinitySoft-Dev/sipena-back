@@ -2,6 +2,7 @@ import { User } from '@/users/entities/user.entity'
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   Index,
   JoinColumn,
@@ -39,9 +40,21 @@ export class PasswordHash {
   @Column({ type: 'timestamp', nullable: false })
   expires: Date
 
-  @CreateDateColumn({ type: 'timestamp', comment: 'Timesheet created at' })
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_DATE',
+  })
   created_at: Date
 
-  @UpdateDateColumn({ type: 'timestamp', comment: 'Timesheet updated at' })
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_DATE',
+    onUpdate: 'CURRENT_DATE',
+  })
   updated_at: Date
+
+  @DeleteDateColumn({
+    type: 'timestamp',
+  })
+  delete_at: Date
 }

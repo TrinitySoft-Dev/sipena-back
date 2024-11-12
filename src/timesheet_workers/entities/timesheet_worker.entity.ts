@@ -3,6 +3,7 @@ import { User } from '@/users/entities/user.entity'
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   ManyToMany,
   ManyToOne,
@@ -56,12 +57,19 @@ export class TimesheetWorker {
 
   @CreateDateColumn({
     type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
+    default: () => 'CURRENT_DATE',
   })
   created_at: Date
 
   @UpdateDateColumn({
     type: 'timestamp',
+    default: () => 'CURRENT_DATE',
+    onUpdate: 'CURRENT_DATE',
   })
   updated_at: Date
+
+  @DeleteDateColumn({
+    type: 'timestamp',
+  })
+  delete_at: Date
 }

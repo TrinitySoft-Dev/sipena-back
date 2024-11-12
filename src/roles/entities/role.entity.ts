@@ -1,11 +1,20 @@
 import { Permission } from '@/permissions/entities/permission.entity'
-import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm'
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm'
 
 @Entity({
   name: 'roles',
 })
 export class Role {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: number
 
   @Column({
@@ -41,17 +50,21 @@ export class Role {
   })
   active: boolean
 
-  @Column({
-    nullable: false,
-    type: 'date',
+  @CreateDateColumn({
+    type: 'timestamp',
     default: () => 'CURRENT_DATE',
   })
   created_at: Date
 
-  @Column({
-    nullable: false,
-    type: 'date',
+  @UpdateDateColumn({
+    type: 'timestamp',
     default: () => 'CURRENT_DATE',
+    onUpdate: 'CURRENT_DATE',
   })
   updated_at: Date
+
+  @DeleteDateColumn({
+    type: 'timestamp',
+  })
+  delete_at: Date
 }

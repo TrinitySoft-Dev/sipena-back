@@ -37,7 +37,7 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config)
 
-  app.use('/api/docs', new BasicAuthMiddleware().use)
+  // app.use('/api/docs', new BasicAuthMiddleware().use)
   app.use(cookieParser())
 
   SwaggerModule.setup('api/docs', app, document, {
