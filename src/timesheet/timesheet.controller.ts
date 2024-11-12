@@ -30,4 +30,9 @@ export class TimesheetController {
   findByCustomer(@Param('customerId') customerId: number) {
     return this.timesheetService.findByCustomer(customerId)
   }
+
+  @Get('/worker/:workerId')
+  findTimesheetByWorker(@Param('workerId') workerId: number) {
+    return this.timesheetService.findTimesheetByWorker(workerId)
+  }
 }

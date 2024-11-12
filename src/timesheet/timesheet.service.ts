@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common'
 import { ContainerDto, CreateTimesheetDto } from './dto/create-timesheet.dto'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Timesheet } from './entities/timesheet.entity'
-import { Repository } from 'typeorm'
+import { In, Repository } from 'typeorm'
 import { ContainerService } from '@/container/container.service'
 import { UsersService } from '@/users/users.service'
 import { Rule } from '@/rules/entities/rule.entity'
@@ -214,6 +214,13 @@ export class TimesheetService {
   async findByCustomer(customerId: number) {
     return await this.timesheetRepository.find({
       where: { customer: { id: customerId } },
+      relations: ['timesheet_workers', 'customer', 'container', 'container.work'],
+    })
+  }
+
+  async findTimesheetByWorker(workerId: number) {
+    return await this.timesheetRepository.find({
+      where: { timesheet_workers: { worker: { id: In([workerId]) } } },
       relations: ['timesheet_workers', 'customer', 'container', 'container.work'],
     })
   }
