@@ -6,7 +6,6 @@ import { AuthGuard } from '@/common/guards/auth.guard'
 
 @ApiTags('Images')
 @ApiBearerAuth()
-@UseGuards(AuthGuard)
 @Controller('images')
 export class ImagesController {
   constructor(private readonly imagesService: ImagesService) {}
