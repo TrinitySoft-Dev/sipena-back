@@ -137,10 +137,14 @@ export class RulesService {
   async find({ page, pageSize, includePagination }: { page: number; pageSize: number; includePagination: boolean }) {
     if (includePagination) {
       const [result, total] = await this.ruleRepository.findAndCount({
-        skip: (page - 1) * pageSize,
+        skip: page * pageSize,
         take: pageSize,
         relations: ['container_size'],
+        order: {
+          created_at: 'DESC',
+        },
       })
+
       const newResult = result.map(rule => ({
         ...rule,
         container_size: rule?.container_size?.value,
@@ -163,6 +167,9 @@ export class RulesService {
           id: true,
           value: true,
         },
+      },
+      order: {
+        created_at: 'DESC',
       },
     })
   }
