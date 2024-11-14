@@ -27,11 +27,27 @@ import { PasswordHashModule } from './password_hash/password_hash.module'
 import { TimesheetWorkersModule } from './timesheet_workers/timesheet_workers.module'
 import { ExtraRulesModule } from './extra_rules/extra_rules.module'
 import { RulesWorkersModule } from './rules_workers/rules_workers.module'
-import { PermissionsModule } from './permissions/permissions.module';
-import { PermissionGroupsModule } from './permission_groups/permission_groups.module';
+import { PermissionsModule } from './permissions/permissions.module'
+import { CityModule } from './city/city.module'
+import { StateModule } from './state/state.module'
+import { LoggerModule } from 'nestjs-pino'
 
 @Module({
   imports: [
+    LoggerModule.forRoot({
+      pinoHttp: {
+        transport:
+          process.env.NODE_ENV !== 'production'
+            ? {
+                target: 'pino-pretty',
+                options: {
+                  messageKey: 'message',
+                },
+              }
+            : undefined,
+        messageKey: 'message',
+      },
+    }),
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: config.DB.HOST,
@@ -65,7 +81,8 @@ import { PermissionGroupsModule } from './permission_groups/permission_groups.mo
     ExtraRulesModule,
     RulesWorkersModule,
     PermissionsModule,
-    PermissionGroupsModule,
+    CityModule,
+    StateModule,
   ],
   controllers: [],
   providers: [],

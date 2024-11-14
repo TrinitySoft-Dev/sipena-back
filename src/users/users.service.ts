@@ -63,6 +63,9 @@ export class UsersService {
         role,
       }
 
+      rest.city = rest.city ? { id: rest.city } : null
+      rest.state = rest.state ? { id: rest.state } : null
+
       if (rest.create_type !== 'BASIC') obj['infoworker'] = await this.infoworkerService.create({ ...rest })
 
       await this.userRepository.save(obj)
@@ -158,10 +161,12 @@ export class UsersService {
     return { message: 'Login successfully' }
   }
 
-
   async refreshToken(refreshToken: string) {
     const validToken = await this.jwtRefreshService.verifyAsync(refreshToken)
-    const user = await this.userRepository.findOne({ where: { email: validToken.email, active: true }, relations: ['infoworker'] })
+    const user = await this.userRepository.findOne({
+      where: { email: validToken.email, active: true },
+      relations: ['infoworker'],
+    })
     if (!user) throw new UnauthorizedException('Email or password incorrect')
 
     let completed = true
@@ -178,7 +183,11 @@ export class UsersService {
   }
 
   async findById(id: number) {
-    return await this.userRepository.findOne({ where: { id }, relations: ['infoworker'], select: ['id', 'email', 'role', 'completed', 'infoworker', 'name', 'last_name'] })
+    return await this.userRepository.findOne({
+      where: { id },
+      relations: ['infoworker'],
+      select: ['id', 'email', 'role', 'completed', 'infoworker', 'name', 'last_name'],
+    })
   }
 
   async forgotPasssword(email: string) {
