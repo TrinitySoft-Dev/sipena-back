@@ -46,6 +46,21 @@ import { LoggerModule } from 'nestjs-pino'
               }
             : undefined,
         messageKey: 'message',
+        serializers: {
+          req(req) {
+            return {
+              method: req.method,
+              url: req.url,
+            }
+          },
+          res(res) {
+            return {
+              method: res.method,
+              url: res.url,
+              statusCode: res.statusCode,
+            }
+          },
+        },
       },
     }),
     TypeOrmModule.forRoot({
