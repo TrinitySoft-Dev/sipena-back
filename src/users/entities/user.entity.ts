@@ -67,6 +67,14 @@ export class User {
   })
   role: string
 
+  @Column({
+    type: 'varchar',
+    comment: 'User avatar',
+    nullable: true,
+    length: 100,
+  })
+  avatar: string
+
   @ManyToMany(() => Rule, rule => rule.customers, { cascade: true })
   @JoinTable({
     name: 'customers_rules',

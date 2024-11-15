@@ -40,6 +40,12 @@ export class UpdateUserDto {
   phone: string
 
   @ApiProperty({
+    description: 'Avatar of the user',
+    example: 'https://example.com/avatar.jpg',
+  })
+  avatar: string
+
+  @ApiProperty({
     description: 'City of the user',
     example: 'City',
   })

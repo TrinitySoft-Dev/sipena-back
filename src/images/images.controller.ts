@@ -20,7 +20,6 @@ export class ImagesController {
   @ApiConsumes('multipart/form-data')
   @Post('upload-multiple')
   @UseInterceptors(FilesInterceptor('files'))
-  @UseGuards(AuthGuard)
   multiUpload(@UploadedFiles() files: Express.Multer.File[]) {
     return this.imagesService.uploadMultiple(files)
   }

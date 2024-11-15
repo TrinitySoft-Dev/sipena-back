@@ -25,6 +25,7 @@ import { PasswordHashService } from '@/password_hash/password_hash.service'
 import { ResetPasswordDto } from './dto/reset-password.dto'
 import { AccessJwtService } from '@/common/services/access-jwt.service'
 import { AccessJwtRefreshService } from '@/common/services/refresh-jwt.service'
+import { UpdateUserDto } from './dto/update-user.dto'
 
 @Injectable()
 export class UsersService {
@@ -139,7 +140,14 @@ export class UsersService {
       completed = this.infoworkerService.validateInfoworker(user.infoworker)
     }
 
-    const payload = { email: user.email, role: user.role, id: user.id, completedInfoworker: completed }
+    const payload = {
+      email: user.email,
+      role: user.role,
+      id: user.id,
+      completedInfoworker: completed,
+      name: user.name,
+      lastname: user.last_name,
+    }
 
     const token = await this.jwtService.signAsync(payload)
     const refreshToken = await this.jwtRefreshService.signAsync(payload)
@@ -163,6 +171,7 @@ export class UsersService {
 
   async refreshToken(refreshToken: string) {
     const validToken = await this.jwtRefreshService.verifyAsync(refreshToken)
+
     const user = await this.userRepository.findOne({
       where: { email: validToken.email, active: true },
       relations: ['infoworker'],
@@ -174,7 +183,14 @@ export class UsersService {
       completed = this.infoworkerService.validateInfoworker(user.infoworker)
     }
 
-    const payload = { email: user.email, role: user.role, id: user.id, completedInfoworker: completed }
+    const payload = {
+      email: user.email,
+      role: user.role,
+      id: user.id,
+      completedInfoworker: completed,
+      name: user.name,
+      lastname: user.last_name,
+    }
 
     const token = await this.jwtService.signAsync(payload)
     const newRefreshToken = await this.jwtRefreshService.signAsync(payload)
@@ -185,7 +201,7 @@ export class UsersService {
   async findById(id: number) {
     return await this.userRepository.findOne({
       where: { id },
-      relations: ['infoworker'],
+      relations: ['infoworker', 'infoworker.city', 'infoworker.state'],
       select: ['id', 'email', 'role', 'completed', 'infoworker', 'name', 'last_name'],
     })
   }
@@ -299,7 +315,6 @@ export class UsersService {
 
       return { message: 'User updated successfully' }
     }
-
     if (updateUserDto.role === ROLES_CONST.CUSTOMER || updateUserDto.role) {
       user.name = updateUserDto?.name ?? user.name
       user.last_name = updateUserDto?.last_name ?? user.last_name
@@ -312,6 +327,10 @@ export class UsersService {
     }
 
     return { message: 'User updated successfully' }
+  }
+
+  updateAvatar(id: number, updateUserDto: UpdateUserDto) {
+    return this.userRepository.update(id, { avatar: updateUserDto.avatar })
   }
 
   private async encryptPassword(password: string) {

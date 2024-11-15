@@ -12,7 +12,9 @@ import {
   FileTypeValidator,
   Param,
   Put,
-  Res, ParseIntPipe,
+  Res,
+  ParseIntPipe,
+  Patch,
 } from '@nestjs/common'
 import { UsersService } from './users.service'
 import { CreateUserDto } from './dto/worker-user.dto'
@@ -101,5 +103,10 @@ export class UsersController {
   @Put(':id')
   update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(id, updateUserDto)
+  }
+
+  @Patch(':id/avatar')
+  updateAvatar(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.updateAvatar(id, updateUserDto)
   }
 }
