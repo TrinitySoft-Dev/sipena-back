@@ -147,6 +147,7 @@ export class UsersService {
       completedInfoworker: completed,
       name: user.name,
       lastname: user.last_name,
+      avatar_url: user.avatar,
     }
 
     const token = await this.jwtService.signAsync(payload)
@@ -190,6 +191,7 @@ export class UsersService {
       completedInfoworker: completed,
       name: user.name,
       lastname: user.last_name,
+      avatar_url: user.avatar,
     }
 
     const token = await this.jwtService.signAsync(payload)

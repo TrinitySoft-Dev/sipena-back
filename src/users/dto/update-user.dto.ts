@@ -43,6 +43,7 @@ export class UpdateUserDto {
     description: 'Avatar of the user',
     example: 'https://example.com/avatar.jpg',
   })
+  @IsString()
   avatar: string
 
   @ApiProperty({
