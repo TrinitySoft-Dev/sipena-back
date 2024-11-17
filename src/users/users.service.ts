@@ -293,7 +293,8 @@ export class UsersService {
     return await this.userRepository.find({ where: { role, active: true } })
   }
 
-  async update(id: number, updateUserDto: any) {
+  async update(options) {
+    const { id, updateUserDto, visa, passport } = options
     const user = await this.userRepository.findOne({
       where: { id },
       relations: ['infoworker', 'rules'],
@@ -303,7 +304,16 @@ export class UsersService {
 
     if (updateUserDto.role === ROLES_CONST.WORKER) {
       if (user?.infoworker) {
-        Object.assign(user.infoworker, updateUserDto.infoworker)
+        Object.assign(user.infoworker, JSON.parse(updateUserDto.infoworker))
+        if (visa) {
+          const visa_url = await this.imagesService.upload(visa)
+          user.infoworker.visa_url = visa_url
+        }
+
+        if (passport) {
+          const passport_url = await this.imagesService.upload(passport)
+          user.infoworker.passport_url = passport_url
+        }
       } else {
         const infoworker = await this.infoworkerService.create(updateUserDto.infoworker)
         user.infoworker = infoworker
@@ -317,6 +327,7 @@ export class UsersService {
 
       return { message: 'User updated successfully' }
     }
+
     if (updateUserDto.role === ROLES_CONST.CUSTOMER || updateUserDto.role) {
       user.name = updateUserDto?.name ?? user.name
       user.last_name = updateUserDto?.last_name ?? user.last_name

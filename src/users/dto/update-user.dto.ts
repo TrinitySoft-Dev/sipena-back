@@ -43,6 +43,7 @@ export class UpdateUserDto {
     description: 'Avatar of the user',
     example: 'https://example.com/avatar.jpg',
   })
+  @IsOptional()
   @IsString()
   avatar: string
 
@@ -70,6 +71,22 @@ export class UpdateUserDto {
   @IsOptional()
   @IsArray()
   rules: number[]
+
+  @ApiProperty({
+    description: 'Visa of the user',
+    example: '123456789',
+  })
+  @IsOptional()
+  @IsString()
+  passport: string
+
+  @ApiProperty({
+    description: 'Passport of the user',
+    example: '123456789',
+  })
+  @IsOptional()
+  @IsString()
+  visa: string
 
   @ApiProperty({
     description: 'Extra rules of the user',
