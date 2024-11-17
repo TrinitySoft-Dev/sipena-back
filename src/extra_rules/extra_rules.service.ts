@@ -13,8 +13,24 @@ export class ExtraRulesService {
     return await this.extraRuleRepository.save(createExtraRuleDto)
   }
 
-  async findAll() {
-    return await this.extraRuleRepository.find({ where: { active: true } })
+  async findAll({ page, pageSize, includePagination }: { page: number; pageSize: number; includePagination: boolean }) {
+    if (includePagination) {
+      const [result, total] = await this.extraRuleRepository.findAndCount({
+        skip: page * pageSize,
+        take: pageSize,
+        order: {
+          created_at: 'DESC',
+        },
+      })
+
+      return { result, pagination: { page, pageSize, total } }
+    }
+
+    return await this.extraRuleRepository.find({
+      order: {
+        created_at: 'DESC',
+      },
+    })
   }
 
   async findByRuleId(id: number) {

@@ -11,7 +11,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>()
     let message = (exception as any).message
     let code = 'HttpException'
-
+    console.log(exception)
     let status = HttpStatus.INTERNAL_SERVER_ERROR
 
     switch (exception.constructor) {

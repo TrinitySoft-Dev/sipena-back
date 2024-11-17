@@ -25,6 +25,7 @@ import { PasswordHashService } from '@/password_hash/password_hash.service'
 import { ResetPasswordDto } from './dto/reset-password.dto'
 import { AccessJwtService } from '@/common/services/access-jwt.service'
 import { AccessJwtRefreshService } from '@/common/services/refresh-jwt.service'
+import { UpdateUserDto } from './dto/update-user.dto'
 
 @Injectable()
 export class UsersService {
@@ -62,6 +63,9 @@ export class UsersService {
         last_name,
         role,
       }
+
+      rest.city = rest.city ? { id: rest.city } : null
+      rest.state = rest.state ? { id: rest.state } : null
 
       if (rest.create_type !== 'BASIC') obj['infoworker'] = await this.infoworkerService.create({ ...rest })
 
@@ -136,7 +140,15 @@ export class UsersService {
       completed = this.infoworkerService.validateInfoworker(user.infoworker)
     }
 
-    const payload = { email: user.email, role: user.role, id: user.id, completedInfoworker: completed }
+    const payload = {
+      email: user.email,
+      role: user.role,
+      id: user.id,
+      completedInfoworker: completed,
+      name: user.name,
+      lastname: user.last_name,
+      avatar_url: user.avatar,
+    }
 
     const token = await this.jwtService.signAsync(payload)
     const refreshToken = await this.jwtRefreshService.signAsync(payload)
@@ -158,10 +170,13 @@ export class UsersService {
     return { message: 'Login successfully' }
   }
 
-
   async refreshToken(refreshToken: string) {
     const validToken = await this.jwtRefreshService.verifyAsync(refreshToken)
-    const user = await this.userRepository.findOne({ where: { email: validToken.email, active: true }, relations: ['infoworker'] })
+
+    const user = await this.userRepository.findOne({
+      where: { email: validToken.email, active: true },
+      relations: ['infoworker'],
+    })
     if (!user) throw new UnauthorizedException('Email or password incorrect')
 
     let completed = true
@@ -169,7 +184,15 @@ export class UsersService {
       completed = this.infoworkerService.validateInfoworker(user.infoworker)
     }
 
-    const payload = { email: user.email, role: user.role, id: user.id, completedInfoworker: completed }
+    const payload = {
+      email: user.email,
+      role: user.role,
+      id: user.id,
+      completedInfoworker: completed,
+      name: user.name,
+      lastname: user.last_name,
+      avatar_url: user.avatar,
+    }
 
     const token = await this.jwtService.signAsync(payload)
     const newRefreshToken = await this.jwtRefreshService.signAsync(payload)
@@ -178,7 +201,11 @@ export class UsersService {
   }
 
   async findById(id: number) {
-    return await this.userRepository.findOne({ where: { id }, relations: ['infoworker'], select: ['id', 'email', 'role', 'completed', 'infoworker', 'name', 'last_name'] })
+    return await this.userRepository.findOne({
+      where: { id },
+      relations: ['infoworker', 'infoworker.city', 'infoworker.state'],
+      select: ['id', 'email', 'role', 'completed', 'infoworker', 'name', 'last_name'],
+    })
   }
 
   async forgotPasssword(email: string) {
@@ -266,7 +293,8 @@ export class UsersService {
     return await this.userRepository.find({ where: { role, active: true } })
   }
 
-  async update(id: number, updateUserDto: any) {
+  async update(options) {
+    const { id, updateUserDto, visa, passport } = options
     const user = await this.userRepository.findOne({
       where: { id },
       relations: ['infoworker', 'rules'],
@@ -276,7 +304,16 @@ export class UsersService {
 
     if (updateUserDto.role === ROLES_CONST.WORKER) {
       if (user?.infoworker) {
-        Object.assign(user.infoworker, updateUserDto.infoworker)
+        Object.assign(user.infoworker, JSON.parse(updateUserDto.infoworker))
+        if (visa) {
+          const visa_url = await this.imagesService.upload(visa)
+          user.infoworker.visa_url = visa_url
+        }
+
+        if (passport) {
+          const passport_url = await this.imagesService.upload(passport)
+          user.infoworker.passport_url = passport_url
+        }
       } else {
         const infoworker = await this.infoworkerService.create(updateUserDto.infoworker)
         user.infoworker = infoworker
@@ -303,6 +340,10 @@ export class UsersService {
     }
 
     return { message: 'User updated successfully' }
+  }
+
+  updateAvatar(id: number, updateUserDto: UpdateUserDto) {
+    return this.userRepository.update(id, { avatar: updateUserDto.avatar })
   }
 
   private async encryptPassword(password: string) {

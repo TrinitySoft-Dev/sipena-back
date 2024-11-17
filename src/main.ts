@@ -7,10 +7,11 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter'
 import { ReponseInterceptor } from './common/interceptors/response.interceptor'
 import { BasicAuthMiddleware } from './middlewares/swagger-auth.middleware'
 import * as cookieParser from 'cookie-parser'
+import { Logger } from 'nestjs-pino'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
-
+  app.useLogger(app.get(Logger))
   app.enableCors({
     origin: [
       'http://localhost:3000',

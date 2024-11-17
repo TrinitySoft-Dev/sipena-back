@@ -1,9 +1,12 @@
+import { City } from '@/city/entities/city.entity'
+import { State } from '@/state/entities/state.entity'
 import { User } from '@/users/entities/user.entity'
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -63,12 +66,11 @@ export class Infoworker {
   })
   address: string
 
-  @Column({
-    type: 'varchar',
-    nullable: false,
-    length: 100,
-  })
-  city: string
+  @ManyToOne(() => City, city => city.infoworkers)
+  city: City
+
+  @ManyToOne(() => State, state => state.infoworkers)
+  state: State
 
   @Column({
     type: 'varchar',
@@ -90,6 +92,13 @@ export class Infoworker {
     length: 12,
   })
   bank_account_number: string
+
+  @Column({
+    type: 'varchar',
+    nullable: false,
+    length: 20,
+  })
+  postal_code: string
 
   @Column({
     type: 'varchar',

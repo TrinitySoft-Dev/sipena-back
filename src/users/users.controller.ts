@@ -12,7 +12,9 @@ import {
   FileTypeValidator,
   Param,
   Put,
-  Res, ParseIntPipe,
+  Res,
+  ParseIntPipe,
+  Patch,
 } from '@nestjs/common'
 import { UsersService } from './users.service'
 import { CreateUserDto } from './dto/worker-user.dto'
@@ -21,7 +23,7 @@ import { exampleUserSchema, userSchema } from './schemas/users.schema'
 import { LoginUserDto } from './dto/login-user.dto'
 import { ClientUserDto } from './dto/client.user.dto'
 import { AuthGuard } from '@/common/guards/auth.guard'
-import { FilesInterceptor } from '@nestjs/platform-express'
+import { FileFieldsInterceptor, FilesInterceptor } from '@nestjs/platform-express'
 import { Response } from 'express'
 import { ForgotUserDto } from './dto/forgot.dto'
 import { ResetPasswordDto } from './dto/reset-password.dto'
@@ -96,10 +98,36 @@ export class UsersController {
     return this.usersService.findById(id)
   }
 
+  @ApiConsumes('multipart/form-data')
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
+  @UseInterceptors(
+    FileFieldsInterceptor(
+      [
+        { name: 'visa', maxCount: 1 },
+        { name: 'passport', maxCount: 1 },
+      ],
+      {
+        limits: { fileSize: 10 * 1024 * 1024 },
+      },
+    ),
+  )
   @Put(':id')
-  update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(id, updateUserDto)
+  update(
+    @UploadedFiles()
+    files: { visa?: Express.Multer.File[]; passport?: Express.Multer.File[] },
+    @Param('id')
+    id: number,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    const visa = files.visa ? files.visa[0] : null
+    const passport = files.passport ? files.passport[0] : null
+
+    return this.usersService.update({ id, updateUserDto, visa, passport })
+  }
+
+  @Patch(':id/avatar')
+  updateAvatar(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.updateAvatar(id, updateUserDto)
   }
 }
