@@ -120,8 +120,8 @@ export class UsersController {
     id: number,
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    const visa = files.visa ? files.visa[0] : null
-    const passport = files.passport ? files.passport[0] : null
+    const visa = files?.visa ? files.visa[0] : null
+    const passport = files?.passport ? files.passport[0] : null
 
     return this.usersService.update({ id, updateUserDto, visa, passport })
   }

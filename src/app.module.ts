@@ -48,17 +48,10 @@ import { LoggerModule } from 'nestjs-pino'
         messageKey: 'message',
         serializers: {
           req(req) {
-            return {
-              method: req.method,
-              url: req.url,
-            }
+            return undefined
           },
           res(res) {
-            return {
-              method: res.method,
-              url: res.url,
-              statusCode: res.statusCode,
-            }
+            return undefined
           },
         },
       },
