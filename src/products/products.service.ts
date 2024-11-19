@@ -13,7 +13,27 @@ export class ProductsService {
     return this.productRepository.save(createProductDto)
   }
 
-  async findProductsByCustomer({ userId, page, pageSize }: { userId: string; page: number; pageSize: number }) {
+  async findProductsByCustomer({
+    userId,
+    page,
+    pageSize,
+    includePagination,
+  }: {
+    userId: string
+    page: number
+    pageSize: number
+    includePagination: boolean
+  }) {
+    if (!includePagination) {
+      const result = await this.productRepository
+        .createQueryBuilder('product')
+        .innerJoin('product.customers', 'customer')
+        .where('customer.id = :userId', { userId })
+        .getMany()
+
+      return result
+    }
+
     const [result, total] = await this.productRepository
       .createQueryBuilder('product')
       .innerJoin('product.customers', 'customer')

@@ -220,8 +220,11 @@ export class TimesheetService {
     const [result, total] = await this.timesheetRepository.findAndCount({
       where: { customer: { id: customerId } },
       relations: ['timesheet_workers', 'customer', 'container', 'container.work'],
-      skip: (page - 1) * pageSize,
+      skip: page * pageSize,
       take: pageSize,
+      order: {
+        created_at: 'DESC',
+      },
     })
     return { result, pagination: { page, pageSize, total } }
   }

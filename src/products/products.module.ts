@@ -3,10 +3,11 @@ import { ProductsService } from './products.service'
 import { ProductsController } from './products.controller'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { Product } from './entities/product.entity'
+import { AccessJwtService } from '@/common/services/access-jwt.service'
 
 @Module({
   imports: [TypeOrmModule.forFeature([Product])],
   controllers: [ProductsController],
-  providers: [ProductsService],
+  providers: [ProductsService, AccessJwtService],
 })
 export class ProductsModule {}

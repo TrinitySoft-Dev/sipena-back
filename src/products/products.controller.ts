@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseBoolPipe,
   ParseIntPipe,
   Post,
   Put,
@@ -19,8 +20,8 @@ import { AuthGuard } from '@/common/guards/auth.guard'
 import { UpdateProductDto } from './dto/update-product.dto'
 
 @ApiTags('Product')
-// @ApiBearerAuth()
-// @UseGuards(AuthGuard)
+@ApiBearerAuth()
+@UseGuards(AuthGuard)
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
@@ -68,12 +69,18 @@ export class ProductsController {
     required: false,
     type: Number,
   })
+  @ApiQuery({
+    name: 'includePagination',
+    required: false,
+    type: Boolean,
+  })
   async getProductsByCustomer(
     @Param('userId') userId: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize?: number,
+    @Query('includePagination', new DefaultValuePipe(false), ParseBoolPipe) includePagination?: boolean,
   ) {
-    return this.productsService.findProductsByCustomer({ userId, page, pageSize }) // customer by id pagination
+    return this.productsService.findProductsByCustomer({ userId, page, pageSize, includePagination }) // customer by id pagination
   }
 
   @ApiOperation({
