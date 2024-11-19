@@ -90,8 +90,8 @@ export class ConditionsService {
       return Number(value)
     }
 
-    if (value.toLowerCase() === 'true') return true
-    if (value.toLowerCase() === 'false') return false
+    if (value.toLowerCase() === 'true' || value.toLowerCase() === 'yes') return true
+    if (value.toLowerCase() === 'false' || value.toLowerCase() === 'no') return false
 
     return value
   }
