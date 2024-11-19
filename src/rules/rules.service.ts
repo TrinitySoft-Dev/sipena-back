@@ -179,6 +179,7 @@ export class RulesService {
       .createQueryBuilder('rule')
       .innerJoin('rule.customers', 'customer')
       .innerJoinAndSelect('rule.container_size', 'container_size')
+      .select(['rule.id', 'rule.rate', 'rule.active', 'rule.name', 'container_size.id', 'container_size.value'])
       .where('customer.id = :customerId', { customerId: customer })
       .getMany()
   }

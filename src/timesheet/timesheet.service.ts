@@ -10,6 +10,7 @@ import { ROLES_CONST } from '@/common/conts/roles.const'
 import { ConditionsService } from '@/conditions/conditions.service'
 import { TimesheetWorkersService } from '@/timesheet_workers/timesheet_workers.service'
 import { ExtraRule } from '@/extra_rules/entities/extra_rule.entity'
+import { ContainerSizeService } from '@/container_size/container_size.service'
 
 @Injectable()
 export class TimesheetService {
@@ -19,6 +20,7 @@ export class TimesheetService {
     private readonly usersService: UsersService,
     private readonly conditionsService: ConditionsService,
     private readonly timesheetWorkersService: TimesheetWorkersService,
+    private readonly containerSizeService: ContainerSizeService,
   ) {}
 
   async create(createTimesheetDto: CreateTimesheetDto) {
@@ -28,6 +30,9 @@ export class TimesheetService {
 
       const customerUser = await this.usersService.findByWorks(customer_id, work_id)
       if (!customerUser.rules.length) throw new NotFoundException('Rules not found')
+
+      const containerSize = await this.containerSizeService.findById(container.size)
+      container.size = containerSize.value
 
       const rules = customerUser.rules
       const rate = await this.validateRules(rules, container)
@@ -83,7 +88,6 @@ export class TimesheetService {
           const conditionResult = this.conditionsService.evalutedConditions(condition, container)
           if (!conditionResult) {
             const isAppliedExtraRule = this.isValidExtraRules(extraRules, container, condition.field)
-
             if (!isAppliedExtraRule) {
               groupIsValid = false
               break
@@ -120,8 +124,7 @@ export class TimesheetService {
         const conditions = group.conditions
         let groupIsValid = true
         const existCondition = conditions.filter(condition => condition.field === field)
-
-        if (!existCondition) return false
+        if (!existCondition.length) return false
 
         for (const condition of existCondition) {
           const conditionResult = this.conditionsService.evalutedConditions(condition, container)
