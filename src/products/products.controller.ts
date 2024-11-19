@@ -54,21 +54,35 @@ export class ProductsController {
   }
 
   @ApiOperation({
+    summary: 'Find product by customer',
+    description: 'This method returns products by customer',
+  })
+  @Get('customer/:userId')
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    required: false,
+    type: Number,
+  })
+  async getProductsByCustomer(
+    @Param('userId') userId: string,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
+    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize?: number,
+  ) {
+    return this.productsService.findProductsByCustomer({ userId, page, pageSize }) // customer by id pagination
+  }
+
+  @ApiOperation({
     summary: 'Get all products select',
     description: 'This method returns select products',
   })
   @Get('select')
   async selectProducts() {
     return this.productsService.selectProducts()
-  }
-
-  @ApiOperation({
-    summary: 'Find product by customer',
-    description: 'This method returns products by customer',
-  })
-  @Get('customer/:userId')
-  async getProductsByCustomer(@Param('userId') userId: number) {
-    return this.productsService.findProductsByCustomer(userId)
   }
 
   @ApiOperation({

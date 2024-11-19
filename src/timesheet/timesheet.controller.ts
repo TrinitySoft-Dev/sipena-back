@@ -1,12 +1,23 @@
-import { Controller, Post, Body, UseGuards, Query, Get, Req, Param } from '@nestjs/common'
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Query,
+  Get,
+  Req,
+  Param,
+  DefaultValuePipe,
+  ParseIntPipe,
+} from '@nestjs/common'
 import { TimesheetService } from './timesheet.service'
 import { CreateTimesheetDto } from './dto/create-timesheet.dto'
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
 import { AuthGuard } from '@/common/guards/auth.guard'
 
 @ApiTags('Timesheet')
-@ApiBearerAuth()
-@UseGuards(AuthGuard)
+// @ApiBearerAuth()
+// @UseGuards(AuthGuard)
 @Controller('timesheet')
 export class TimesheetController {
   constructor(private readonly timesheetService: TimesheetService) {}
@@ -16,23 +27,93 @@ export class TimesheetController {
     return this.timesheetService.create(createTimesheetDto)
   }
 
+  // @Get()
+  // @ApiOperation({
+  //   summary: 'Find timesheets with pagination',
+  //   description: 'This method returns timesheets with pagination',
+  // })
+  // find(@Req() req: any) {
+  //   console.log('este es el request', req?.payload)
+  //   return this.timesheetService.find(req?.payload) // pendioente paginaciopn
+  // }
+
   @Get()
-  find(@Req() req: any) {
-    return this.timesheetService.find(req?.payload)
+  @ApiOperation({
+    summary: 'Find timesheets',
+    description: 'This method returns timesheets with pagination',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'The page number to fetch',
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    required: false,
+    type: Number,
+    description: 'The number of items per page',
+  })
+  find(
+    @Req() req: any,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
+    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize?: number,
+  ) {
+    return this.timesheetService.find(req?.payload, page, pageSize) // Pasando los parámetros de paginación
+  }
+
+  @Get('/customer/:customerId')
+  @ApiOperation({
+    summary: 'Find timesheet by customer',
+    description: 'This method returns timesheets with pagination',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'The page number to fetch',
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    required: false,
+    type: Number,
+    description: 'The number of items per page',
+  })
+  findByCustomer(
+    @Param('customerId') customerId: number,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
+    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize?: number,
+  ) {
+    return this.timesheetService.findByCustomer(customerId, page, pageSize)
+  }
+
+  @Get('/worker/:workerId')
+  @ApiOperation({
+    summary: 'Find timesheets by worker',
+    description: 'This method returns timesheets with pagination',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'The page number to fetch',
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    required: false,
+    type: Number,
+    description: 'The number of items per page',
+  })
+  findTimesheetByWorker(
+    @Param('workerId') workerId: number,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
+    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize?: number,
+  ) {
+    return this.timesheetService.findTimesheetByWorker(workerId, page, pageSize)
   }
 
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.timesheetService.findTimesheetById(id)
-  }
-
-  @Get('/customer/:customerId')
-  findByCustomer(@Param('customerId') customerId: number) {
-    return this.timesheetService.findByCustomer(customerId)
-  }
-
-  @Get('/worker/:workerId')
-  findTimesheetByWorker(@Param('workerId') workerId: number) {
-    return this.timesheetService.findTimesheetByWorker(workerId)
   }
 }

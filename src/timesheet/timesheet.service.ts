@@ -201,27 +201,33 @@ export class TimesheetService {
     return resultCustomer
   }
 
-  async find(payload: any) {
-    const { role, id } = payload
-
-    if (role === ROLES_CONST.CUSTOMER) {
-      return await this.timesheetRepository.find({
-        where: { customer: id },
+  async find(payload: any, page, pageSize) {
+    // const { role, id } = payload
+    if ('CUSTOMER' === ROLES_CONST.CUSTOMER) {
+      const [result, total] = await this.timesheetRepository.findAndCount({
+        // where: { customer: id },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
       })
+      return { result, pagination: { page, pageSize, total } }
     }
   }
 
-  async findByCustomer(customerId: number) {
-    return await this.timesheetRepository.find({
+  async findByCustomer(customerId: number, page: number, pageSize: number) {
+    const [result, total] = await this.timesheetRepository.findAndCount({
       where: { customer: { id: customerId } },
       relations: ['timesheet_workers', 'customer', 'container', 'container.work'],
+      skip: (page - 1) * pageSize,
+      take: pageSize,
     })
+    return { result, pagination: { page, pageSize, total } }
   }
 
-  async findTimesheetByWorker(workerId: number) {
-    return await this.timesheetRepository.find({
+  async findTimesheetByWorker(workerId: number, page: number, pageSize: number) {
+    const [result, total] = await this.timesheetRepository.findAndCount({
       where: { timesheet_workers: { worker: { id: In([workerId]) } } },
       relations: ['timesheet_workers', 'customer', 'container', 'container.work'],
     })
+    return { result, pagination: { page, pageSize, total } }
   }
 }

@@ -13,26 +13,27 @@ export class ProductsService {
     return this.productRepository.save(createProductDto)
   }
 
-  async findProductsByCustomer(userId: number): Promise<Product[]> {
-    const products = await this.productRepository
+  async findProductsByCustomer({ userId, page, pageSize }: { userId: string; page: number; pageSize: number }) {
+    const [result, total] = await this.productRepository
       .createQueryBuilder('product')
       .innerJoin('product.customers', 'customer')
       .where('customer.id = :userId', { userId })
-      .getMany()
+      .skip((page - 1) * pageSize)
+      .take(pageSize)
+      .getManyAndCount()
 
-    return products
+    return { result, pagination: { page, pageSize, total } }
   }
 
   async find({ productName, page, pageSize }: { productName: string; page: number; pageSize: number }) {
     const whereCondition = productName ? { name: ILike(`${productName}%`) } : {}
-
     const [result, total] = await this.productRepository.findAndCount({
       where: whereCondition,
       skip: (page - 1) * pageSize,
       take: pageSize,
     })
 
-    return { result, pagination: { page, pageSize, total } }
+    return { result, pagination: { page, pageSize, total } } // falta incluis include pagination
   }
 
   async selectProducts() {
