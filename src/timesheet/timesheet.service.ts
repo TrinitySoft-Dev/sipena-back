@@ -74,7 +74,7 @@ export class TimesheetService {
   }
 
   async validateRules(rules: Rule[], container: ContainerDto) {
-    const extra_charges = {}
+    let extraChargesApplied = []
     for (const rule of rules) {
       let extraCharge = 0
       const conditionGroups = rule.condition_groups
@@ -94,6 +94,7 @@ export class TimesheetService {
             }
 
             extraCharge = isAppliedExtraRule.rate
+            extraChargesApplied = isAppliedExtraRule.json
           }
         }
 
@@ -104,8 +105,7 @@ export class TimesheetService {
       }
 
       if (ruleIsValid) {
-        extra_charges[rule.name] = extraCharge
-        const obj = { ...rule, extra_charges }
+        const obj = { name: rule.name, rate: rule.rate, extraCharge: extraChargesApplied }
         return { rate: Number(rule.rate) + Number(extraCharge), json: obj }
       }
     }
@@ -114,8 +114,12 @@ export class TimesheetService {
   }
 
   private isValidExtraRules(extraRules: ExtraRule[], container: ContainerDto, field: string) {
-    let extraCharge = {}
-    for (const extraRule of extraRules) {
+    if (!extraRules.length) return false
+
+    const filterExtraRules = extraRules.filter(rule => rule.unit === field)
+
+    const extraRulesApplied = []
+    for (const extraRule of filterExtraRules) {
       let fields = new Set()
       const conditionGroups = extraRule.condition_groups
       let ruleIsValid = false
@@ -123,10 +127,8 @@ export class TimesheetService {
       for (const group of conditionGroups) {
         const conditions = group.conditions
         let groupIsValid = true
-        const existCondition = conditions.filter(condition => condition.field === field)
-        if (!existCondition.length) return false
 
-        for (const condition of existCondition) {
+        for (const condition of conditions) {
           const conditionResult = this.conditionsService.evalutedConditions(condition, container)
           if (!conditionResult) {
             groupIsValid = false
@@ -142,9 +144,9 @@ export class TimesheetService {
       }
 
       if (ruleIsValid) {
-        extraCharge = this.calculateUnitsOverLimit(fields, container, extraRule)
         const extraRate = this.calculateUnitsOverLimit(fields, container, extraRule)
-        return { rate: extraRate, json: extraCharge }
+        extraRulesApplied.push({ name: extraRule.name, rate: extraRate })
+        return { rate: extraRate, json: extraRulesApplied }
       }
     }
   }
