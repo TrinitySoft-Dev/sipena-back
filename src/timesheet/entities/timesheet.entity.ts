@@ -50,6 +50,13 @@ export class Timesheet {
   @Column({
     nullable: false,
     type: 'decimal',
+    comment: 'Base rate of the timesheet',
+  })
+  base: number
+
+  @Column({
+    nullable: false,
+    type: 'decimal',
     comment: 'Rate of the timesheet',
   })
   rate: number

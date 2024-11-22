@@ -52,6 +52,7 @@ export class TimesheetService {
       const timesheetRes = this.timesheetRepository.create({
         ...restTimesheet,
         rate: typeof rate === 'object' ? rate.rate : 0,
+        base: typeof rate === 'object' ? rate.base : 0,
         container: createdContainer,
         customer: { id: customer_id },
         extra_rates: typeof rate === 'object' ? JSON.stringify(rate.json) : null,
@@ -106,7 +107,7 @@ export class TimesheetService {
 
       if (ruleIsValid) {
         const obj = { name: rule.name, rate: rule.rate, extraCharge: extraChargesApplied }
-        return { rate: Number(rule.rate) + Number(extraCharge), json: obj }
+        return { rate: Number(rule.rate) + Number(extraCharge), base: Number(rule.rate), json: obj }
       }
     }
 
@@ -189,7 +190,14 @@ export class TimesheetService {
   async findTimesheetById(id: number) {
     const timesheet = await this.timesheetRepository.findOne({
       where: { id },
-      relations: ['timesheet_workers', 'timesheet_workers.worker', 'customer', 'container', 'container.work'],
+      relations: [
+        'timesheet_workers',
+        'timesheet_workers.worker',
+        'customer',
+        'container',
+        'container.work',
+        'container.product',
+      ],
     })
     if (!timesheet) throw new NotFoundException('Timesheet not found')
 
