@@ -53,14 +53,14 @@ export class Product {
 
   @CreateDateColumn({
     type: 'timestamp',
-    default: () => 'CURRENT_DATE',
+    default: () => 'CURRENT_TIMESTAMP',
   })
   created_at: Date
 
   @UpdateDateColumn({
     type: 'timestamp',
-    default: () => 'CURRENT_DATE',
-    onUpdate: 'CURRENT_DATE',
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP',
   })
   updated_at: Date
 

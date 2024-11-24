@@ -54,7 +54,6 @@ export class RulesService {
   async update(id: number, updateRuleDto: UpdateRuleDto) {
     try {
       const { condition_groups, work_id, container_size, ...rest } = updateRuleDto
-
       const rule = await this.ruleRepository.findOne({
         where: { id },
         relations: ['condition_groups', 'condition_groups.conditions'],

@@ -28,14 +28,14 @@ export class Permission {
 
   @CreateDateColumn({
     type: 'date',
-    default: () => 'CURRENT_DATE',
+    default: () => 'CURRENT_TIMESTAMP',
   })
   created_at: Date
 
   @UpdateDateColumn({
     type: 'date',
-    default: () => 'CURRENT_DATE',
-    onUpdate: 'CURRENT_DATE',
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP',
   })
   update_at: Date
 

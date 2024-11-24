@@ -36,14 +36,14 @@ export class CreateExtraRuleDto {
   @IsBoolean()
   active: boolean
 
-  @ApiProperty({
-    name: 'rules',
-    description: 'Rules of the extra rule',
-    example: [{ id: 1 }],
-  })
-  @IsOptional()
-  @IsArray()
-  rules: Array<any>
+  // @ApiProperty({
+  //   name: 'rules',
+  //   description: 'Rules of the extra rule',
+  //   example: [{ id: 1 }],
+  // })
+  // @IsOptional()
+  // @IsArray()
+  // rules: Array<any>
 
   @ApiProperty({ description: 'Unit of the extra rule', example: 'sku' })
   @IsString()
