@@ -75,9 +75,9 @@ export class TimesheetService {
   }
 
   async validateRules(rules: Rule[], container: ContainerDto) {
-    let extraChargesApplied = []
+    let totalExtraCharges = 0
     for (const rule of rules) {
-      let extraCharge = 0
+      const listExtraCharges = []
       const conditionGroups = rule.condition_groups
       let ruleIsValid = false
       const extraRules = rule.extra_rules
@@ -88,14 +88,11 @@ export class TimesheetService {
         for (const condition of conditions) {
           const conditionResult = this.conditionsService.evalutedConditions(condition, container)
           if (!conditionResult) {
-            const isAppliedExtraRule = this.isValidExtraRules(extraRules, container, condition.field)
-            if (!isAppliedExtraRule) {
+            const isAppliedExtraRule = this.isValidExtraRules(extraRules, container, condition.field, listExtraCharges)
+            if (!isAppliedExtraRule || !isAppliedExtraRule.rate) {
               groupIsValid = false
               break
             }
-
-            extraCharge = isAppliedExtraRule.rate
-            extraChargesApplied = isAppliedExtraRule.json
           }
         }
 
@@ -106,19 +103,19 @@ export class TimesheetService {
       }
 
       if (ruleIsValid) {
-        const obj = { name: rule.name, rate: rule.rate, extraCharge: extraChargesApplied }
-        return { rate: Number(rule.rate) + Number(extraCharge), base: Number(rule.rate), json: obj }
+        if (listExtraCharges.length) totalExtraCharges = listExtraCharges.reduce((acc, curr) => acc + curr.rate, 0)
+        const obj = { name: rule.name, rate: rule.rate, extraCharge: listExtraCharges }
+        return { rate: Number(rule.rate) + Number(totalExtraCharges), base: Number(rule.rate), json: obj }
       }
     }
 
     return 0
   }
 
-  private isValidExtraRules(extraRules: ExtraRule[], container: ContainerDto, field: string) {
+  private isValidExtraRules(extraRules: ExtraRule[], container: ContainerDto, field: string, listExtraCharges: any[]) {
     if (!extraRules.length) return false
-
     const filterExtraRules = extraRules.filter(rule => rule.unit === field)
-
+    let valueTotal = 0
     const extraRulesApplied = []
     for (const extraRule of filterExtraRules) {
       let fields = new Set()
@@ -146,10 +143,11 @@ export class TimesheetService {
 
       if (ruleIsValid) {
         const extraRate = this.calculateUnitsOverLimit(fields, container, extraRule)
-        extraRulesApplied.push({ name: extraRule.name, rate: extraRate })
-        return { rate: extraRate, json: extraRulesApplied }
+        valueTotal += extraRate
+        listExtraCharges.push({ name: extraRule.name, rate: extraRate })
       }
     }
+    return { rate: valueTotal, json: extraRulesApplied }
   }
 
   private calculateUnitsOverLimit(fields: Set<any>, container: ContainerDto, extraRule: ExtraRule) {
@@ -165,6 +163,10 @@ export class TimesheetService {
 
         if (extraRule.rate_type === 'percentage') {
           value = (extraRule.rate / 100) * fieldValueContainer
+        }
+
+        if (extraRule.rate_type === 'fixed') {
+          value = Number(extraRule.rate)
         }
       }
     }

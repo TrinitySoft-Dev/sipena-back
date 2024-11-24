@@ -27,16 +27,6 @@ export class TimesheetController {
     return this.timesheetService.create(createTimesheetDto)
   }
 
-  // @Get()
-  // @ApiOperation({
-  //   summary: 'Find timesheets with pagination',
-  //   description: 'This method returns timesheets with pagination',
-  // })
-  // find(@Req() req: any) {
-  //   console.log('este es el request', req?.payload)
-  //   return this.timesheetService.find(req?.payload) // pendioente paginaciopn
-  // }
-
   @Get()
   @ApiOperation({
     summary: 'Find timesheets',

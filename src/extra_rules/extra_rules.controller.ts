@@ -9,11 +9,14 @@ import {
   DefaultValuePipe,
   ParseIntPipe,
   ParseBoolPipe,
+  Put,
+  Delete,
 } from '@nestjs/common'
 import { ExtraRulesService } from './extra_rules.service'
 import { CreateExtraRuleDto } from './dto/create-extra_rule.dto'
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger'
 import { AuthGuard } from '@/common/guards/auth.guard'
+import { UpdateExtraRuleDto } from './dto/update-extra_rule.dto'
 
 @ApiTags('Extra Rules')
 @ApiBearerAuth()
@@ -43,5 +46,20 @@ export class ExtraRulesController {
   @Get('/rule/:id')
   findByRuleId(@Param('id') id: number) {
     return this.extraRulesService.findByRuleId(id)
+  }
+
+  @Get(':id')
+  findById(@Param('id') id: number) {
+    return this.extraRulesService.findById(id)
+  }
+
+  @Put(':id')
+  update(@Param('id') id: number, @Body() updateExtraRuleDto: UpdateExtraRuleDto) {
+    return this.extraRulesService.update(id, updateExtraRuleDto)
+  }
+
+  @Delete(':id')
+  delete(@Param('id') id: number) {
+    return this.extraRulesService.delete(id)
   }
 }
