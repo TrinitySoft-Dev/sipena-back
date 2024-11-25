@@ -88,7 +88,13 @@ export class TimesheetService {
         for (const condition of conditions) {
           const conditionResult = this.conditionsService.evalutedConditions(condition, container)
           if (!conditionResult) {
-            const isAppliedExtraRule = this.isValidExtraRules(extraRules, container, condition.field, listExtraCharges)
+            const isAppliedExtraRule = this.isValidExtraRules(
+              extraRules,
+              container,
+              condition.field,
+              listExtraCharges,
+              rule.rate,
+            )
             if (!isAppliedExtraRule || !isAppliedExtraRule.rate) {
               groupIsValid = false
               break
@@ -112,7 +118,13 @@ export class TimesheetService {
     return 0
   }
 
-  private isValidExtraRules(extraRules: ExtraRule[], container: ContainerDto, field: string, listExtraCharges: any[]) {
+  private isValidExtraRules(
+    extraRules: ExtraRule[],
+    container: ContainerDto,
+    field: string,
+    listExtraCharges: any[],
+    baseRate = 0,
+  ) {
     if (!extraRules.length) return false
     const filterExtraRules = extraRules.filter(rule => rule.unit === field)
     let valueTotal = 0
@@ -142,7 +154,7 @@ export class TimesheetService {
       }
 
       if (ruleIsValid) {
-        const extraRate = this.calculateUnitsOverLimit(fields, container, extraRule)
+        const extraRate = this.calculateUnitsOverLimit(fields, container, extraRule, baseRate)
         valueTotal += extraRate
         listExtraCharges.push({ name: extraRule.name, rate: extraRate })
       }
@@ -150,7 +162,7 @@ export class TimesheetService {
     return { rate: valueTotal, json: extraRulesApplied }
   }
 
-  private calculateUnitsOverLimit(fields: Set<any>, container: ContainerDto, extraRule: ExtraRule) {
+  private calculateUnitsOverLimit(fields: Set<any>, container: ContainerDto, extraRule: ExtraRule, baseRate = 0) {
     let value = 0
     for (const field of fields) {
       const fieldValueContainer = container[field]
@@ -162,7 +174,7 @@ export class TimesheetService {
         }
 
         if (extraRule.rate_type === 'percentage') {
-          value = (extraRule.rate / 100) * fieldValueContainer
+          value = (extraRule.rate / 100) * baseRate
         }
 
         if (extraRule.rate_type === 'fixed') {
