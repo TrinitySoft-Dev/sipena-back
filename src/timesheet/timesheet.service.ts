@@ -28,11 +28,8 @@ export class TimesheetService {
       const { timesheet, container } = createTimesheetDto
       let { customer_id, workers, work_id, ...restTimesheet } = timesheet
 
-      const customerUser = await this.usersService.findByWorks(customer_id, work_id)
+      const customerUser = await this.usersService.findByWorks(customer_id, work_id, container.size)
       if (!customerUser.rules.length) throw new NotFoundException('Rules not found')
-
-      const containerSize = await this.containerSizeService.findById(container.size)
-      container.size = containerSize.value
 
       const rules = customerUser.rules
       const rate = await this.validateRules(rules, container)
