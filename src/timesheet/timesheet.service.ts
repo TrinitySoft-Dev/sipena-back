@@ -11,6 +11,7 @@ import { ConditionsService } from '@/conditions/conditions.service'
 import { TimesheetWorkersService } from '@/timesheet_workers/timesheet_workers.service'
 import { ExtraRule } from '@/extra_rules/entities/extra_rule.entity'
 import { ContainerSizeService } from '@/container_size/container_size.service'
+import { RulesWorkersService } from '@/rules_workers/rules_workers.service'
 
 @Injectable()
 export class TimesheetService {
@@ -20,7 +21,7 @@ export class TimesheetService {
     private readonly usersService: UsersService,
     private readonly conditionsService: ConditionsService,
     private readonly timesheetWorkersService: TimesheetWorkersService,
-    private readonly containerSizeService: ContainerSizeService,
+    private readonly rulesWorkersService: RulesWorkersService,
   ) {}
 
   async create(createTimesheetDto: CreateTimesheetDto) {
@@ -62,6 +63,8 @@ export class TimesheetService {
         worker: worker.worker,
         timesheet: timesheetRes.id,
       }))
+
+      this.rulesWorkersService.validateRules(container, String(work_id), newWorkers)
 
       await this.timesheetWorkersService.createMany(newWorkers)
 

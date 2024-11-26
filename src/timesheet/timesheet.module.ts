@@ -9,6 +9,7 @@ import { ConditionsModule } from '@/conditions/conditions.module'
 import { TimesheetWorkersModule } from '@/timesheet_workers/timesheet_workers.module'
 import { AccessJwtService } from '@/common/services/access-jwt.service'
 import { ContainerSizeModule } from '@/container_size/container_size.module'
+import { RulesWorkersModule } from '@/rules_workers/rules_workers.module'
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ContainerSizeModule } from '@/container_size/container_size.module'
     ConditionsModule,
     TimesheetWorkersModule,
     ContainerSizeModule,
+    RulesWorkersModule,
   ],
   controllers: [TimesheetController],
   providers: [TimesheetService, AccessJwtService],

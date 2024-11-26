@@ -1,4 +1,5 @@
 import { Rule } from '@/rules/entities/rule.entity'
+import { RulesWorker } from '@/rules_workers/entities/rules_worker.entity'
 import {
   Column,
   CreateDateColumn,
@@ -32,6 +33,9 @@ export class ContainerSize {
     comment: 'User avatar',
   })
   active: boolean
+
+  @OneToMany(() => RulesWorker, rules_worker => rules_worker.container_size)
+  rules_worker: RulesWorker[]
 
   @CreateDateColumn({
     type: 'timestamp',

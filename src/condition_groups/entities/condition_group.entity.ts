@@ -1,6 +1,7 @@
 import { Condition } from '@/conditions/entities/condition.entity'
 import { ExtraRule } from '@/extra_rules/entities/extra_rule.entity'
 import { Rule } from '@/rules/entities/rule.entity'
+import { RulesWorker } from '@/rules_workers/entities/rules_worker.entity'
 import {
   CreateDateColumn,
   DeleteDateColumn,
@@ -29,6 +30,10 @@ export class ConditionGroup {
 
   @RelationId((conditionGroup: ConditionGroup) => conditionGroup.rule)
   rule_id: number
+
+  @ManyToOne(() => RulesWorker, rule_worker => rule_worker.condition_groups)
+  @JoinColumn()
+  rule_workers: RulesWorker
 
   @OneToMany(() => Condition, condition => condition.condition_group, { cascade: true, orphanedRowAction: 'delete' })
   conditions: Condition[]

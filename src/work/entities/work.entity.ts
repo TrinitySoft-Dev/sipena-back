@@ -1,5 +1,6 @@
 import { Container } from '@/container/entities/container.entity'
 import { Rule } from '@/rules/entities/rule.entity'
+import { RulesWorker } from '@/rules_workers/entities/rules_worker.entity'
 import {
   Column,
   CreateDateColumn,
@@ -35,6 +36,9 @@ export class Work {
 
   @OneToMany(() => Rule, rule => rule.work)
   rules: Rule[]
+
+  @OneToMany(() => RulesWorker, rules_worker => rules_worker.work)
+  rules_worker: RulesWorker[]
 
   @OneToMany(() => Container, container => container.work)
   container: Container[]

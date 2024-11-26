@@ -49,6 +49,12 @@ export class TimesheetWorker {
   time_out: Date
 
   @Column({
+    type: 'float',
+    nullable: false,
+  })
+  pay: number
+
+  @Column({
     type: 'varchar',
     nullable: true,
     length: 255,
