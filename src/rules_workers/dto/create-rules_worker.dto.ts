@@ -43,6 +43,7 @@ export class CreateRulesWorkerDto {
     description: 'Payment type of the rules_worker',
     example: 'group',
   })
+  @IsString()
   payment_type: string
 
   @ApiProperty({
