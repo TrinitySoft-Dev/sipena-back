@@ -229,11 +229,11 @@ export class TimesheetService {
   }
 
   async find(payload: any, page, pageSize) {
-    // const { role, id } = payload
+    const { role, id } = payload
     if ('CUSTOMER' === ROLES_CONST.CUSTOMER) {
       const [result, total] = await this.timesheetRepository.findAndCount({
-        // where: { customer: id },
-        skip: (page - 1) * pageSize,
+        where: { customer: id },
+        skip: page * pageSize,
         take: pageSize,
       })
       return { result, pagination: { page, pageSize, total } }

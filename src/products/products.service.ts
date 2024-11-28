@@ -38,7 +38,7 @@ export class ProductsService {
       .createQueryBuilder('product')
       .innerJoin('product.customers', 'customer')
       .where('customer.id = :userId', { userId })
-      .skip((page - 1) * pageSize)
+      .skip(page * pageSize)
       .take(pageSize)
       .getManyAndCount()
 
@@ -49,11 +49,14 @@ export class ProductsService {
     const whereCondition = productName ? { name: ILike(`${productName}%`) } : {}
     const [result, total] = await this.productRepository.findAndCount({
       where: whereCondition,
-      skip: (page - 1) * pageSize,
+      skip: page * pageSize,
       take: pageSize,
+      order: {
+        created_at: 'DESC',
+      },
     })
 
-    return { result, pagination: { page, pageSize, total } } // falta incluis include pagination
+    return { result, pagination: { page, pageSize, total } }
   }
 
   async selectProducts() {

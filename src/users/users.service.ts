@@ -279,19 +279,46 @@ export class UsersService {
     return user
   }
 
-  async findByRole(role: string) {
+  async findByRole({ role, page, pageSize }: { role: string; page: number; pageSize: number }) {
+    const skip = page * pageSize
+
     if (role === ROLES_CONST.WORKER) {
-      const res = await this.userRepository
+      const [result, total] = await this.userRepository
         .createQueryBuilder('user')
         .leftJoinAndSelect('user.infoworker', 'infoworker')
         .where('user.role = :role', { role })
+        .orderBy('user.created_at', 'DESC')
+        .skip(skip)
+        .take(pageSize)
         .andWhere('user.active = :active', { active: true })
-        .getMany()
+        .getManyAndCount()
 
-      return res
+      return {
+        result,
+        pagination: {
+          page,
+          pageSize,
+          total,
+        },
+      }
     }
 
-    return await this.userRepository.find({ where: { role, active: true } })
+    const [result, total] = await this.userRepository.findAndCount({
+      where: { role, active: true },
+      skip,
+      take: pageSize,
+      order: {
+        created_at: 'DESC',
+      },
+    })
+    return {
+      result,
+      pagination: {
+        page,
+        pageSize,
+        total,
+      },
+    }
   }
 
   async update(options) {

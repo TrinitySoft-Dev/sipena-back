@@ -16,8 +16,8 @@ import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
 import { AuthGuard } from '@/common/guards/auth.guard'
 
 @ApiTags('Timesheet')
-// @ApiBearerAuth()
-// @UseGuards(AuthGuard)
+@ApiBearerAuth()
+@UseGuards(AuthGuard)
 @Controller('timesheet')
 export class TimesheetController {
   constructor(private readonly timesheetService: TimesheetService) {}
@@ -46,10 +46,10 @@ export class TimesheetController {
   })
   find(
     @Req() req: any,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
+    @Query('page', new DefaultValuePipe(0), ParseIntPipe) page?: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize?: number,
   ) {
-    return this.timesheetService.find(req?.payload, page, pageSize) // Pasando los parámetros de paginación
+    return this.timesheetService.find(req?.payload, page, pageSize)
   }
 
   @Get('/customer/:customerId')
