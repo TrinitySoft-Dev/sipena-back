@@ -173,14 +173,28 @@ export class RulesService {
     })
   }
 
-  async findByCustomer(customer: number) {
-    return await this.ruleRepository
+  async findByCustomer({ customerId, page, pageSize }: { customerId: number; page: number; pageSize: number }) {
+    const skip = page * pageSize
+
+    const [result, total] = await this.ruleRepository
       .createQueryBuilder('rule')
       .innerJoin('rule.customers', 'customer')
       .innerJoinAndSelect('rule.container_size', 'container_size')
+      .skip(skip)
+      .take(pageSize)
       .select(['rule.id', 'rule.rate', 'rule.active', 'rule.name', 'container_size.id', 'container_size.value'])
-      .where('customer.id = :customerId', { customerId: customer })
-      .getMany()
+      .where('customer.id = :customerId', { customerId })
+      .orderBy('rule.id', 'DESC')
+      .getManyAndCount()
+
+    return {
+      result,
+      pagination: {
+        page,
+        pageSize,
+        total,
+      },
+    }
   }
 
   async allowedFields() {

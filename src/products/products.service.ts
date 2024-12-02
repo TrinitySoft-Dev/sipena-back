@@ -38,7 +38,7 @@ export class ProductsService {
       .createQueryBuilder('product')
       .innerJoin('product.customers', 'customer')
       .where('customer.id = :userId', { userId })
-      .skip((page - 1) * pageSize)
+      .skip(page * pageSize)
       .take(pageSize)
       .getManyAndCount()
 
@@ -49,11 +49,14 @@ export class ProductsService {
     const whereCondition = productName ? { name: ILike(`${productName}%`) } : {}
     const [result, total] = await this.productRepository.findAndCount({
       where: whereCondition,
-      skip: (page - 1) * pageSize,
+      skip: page * pageSize,
       take: pageSize,
+      order: {
+        created_at: 'DESC',
+      },
     })
 
-    return { result, pagination: { page, pageSize, total } } // falta incluis include pagination
+    return { result, pagination: { page, pageSize, total } }
   }
 
   async selectProducts() {
@@ -82,6 +85,25 @@ export class ProductsService {
       return { message: 'Producto actualizado exitosamente' }
     } catch (error) {
       throw error
+    }
+  }
+
+  async unlinkProductFromCustomer(customerId: number, productId: number) {
+    try {
+      if (!customerId || !productId) {
+        return { message: 'Debe proporcionar un cliente y un producto para desvincular' }
+      }
+
+      await this.productRepository
+        .createQueryBuilder('product')
+        .relation(Product, 'customers')
+        .of(productId)
+        .remove(customerId)
+
+      return { message: 'Producto desvinculado exitosamente' }
+    } catch (error) {
+      console.error('Error desvinculando el producto del cliente:', error)
+      throw new Error('Error al desvincular el producto del cliente')
     }
   }
 

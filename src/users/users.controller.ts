@@ -15,10 +15,11 @@ import {
   Res,
   ParseIntPipe,
   Patch,
+  DefaultValuePipe,
 } from '@nestjs/common'
 import { UsersService } from './users.service'
 import { CreateUserDto } from './dto/worker-user.dto'
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger'
 import { exampleUserSchema, userSchema } from './schemas/users.schema'
 import { LoginUserDto } from './dto/login-user.dto'
 import { ClientUserDto } from './dto/client.user.dto'
@@ -84,11 +85,19 @@ export class UsersController {
     return this.usersService.resetPassword(resetPasswordDto)
   }
 
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  // @ApiBearerAuth()
+  // @UseGuards(AuthGuard)
+  @ApiOperation({
+    summary: 'Find users by role',
+    description: 'This method returns users by role',
+  })
   @Get('role')
-  findByRole(@Query('role') role: string) {
-    return this.usersService.findByRole(role)
+  findByRole(
+    @Query('role') role: string,
+    @Query('page', new DefaultValuePipe(0), ParseIntPipe) page?: number,
+    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize?: number,
+  ) {
+    return this.usersService.findByRole({ role, page, pageSize }) // revisar paginacion page customers
   }
 
   @ApiBearerAuth()

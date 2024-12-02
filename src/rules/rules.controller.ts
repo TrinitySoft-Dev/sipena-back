@@ -19,8 +19,8 @@ import { AuthGuard } from '@/common/guards/auth.guard'
 import { UpdateRuleDto } from './dto/update-rule.dto'
 
 @ApiTags('Rules')
-@ApiBearerAuth()
-@UseGuards(AuthGuard)
+// @ApiBearerAuth()
+// @UseGuards(AuthGuard)
 @Controller('rules')
 export class RulesController {
   constructor(private readonly rulesService: RulesService) {}
@@ -55,8 +55,12 @@ export class RulesController {
 
   @ApiOperation({ summary: 'Find by customer', description: 'This method returns a list of rules by customer' })
   @Get('customer/:customerId')
-  async findByCustomer(@Param('customerId') customerId: number) {
-    return await this.rulesService.findByCustomer(customerId)
+  async findByCustomer(
+    @Param('customerId') customerId: number,
+    @Query('page', new DefaultValuePipe(0), ParseIntPipe) page?: number,
+    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize?: number,
+  ) {
+    return await this.rulesService.findByCustomer({ customerId, page, pageSize })
   }
 
   @ApiOperation({ summary: 'Find by id', description: 'This method returns a rule by id' })

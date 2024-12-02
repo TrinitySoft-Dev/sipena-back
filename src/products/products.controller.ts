@@ -20,8 +20,8 @@ import { AuthGuard } from '@/common/guards/auth.guard'
 import { UpdateProductDto } from './dto/update-product.dto'
 
 @ApiTags('Product')
-@ApiBearerAuth()
-@UseGuards(AuthGuard)
+// @ApiBearerAuth()
+// @UseGuards(AuthGuard)
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
@@ -48,7 +48,7 @@ export class ProductsController {
   })
   async find(
     @Query('productName') productName?: string,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
+    @Query('page', new DefaultValuePipe(0), ParseIntPipe) page?: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize?: number,
   ) {
     return await this.productsService.find({ productName, page, pageSize })
@@ -76,7 +76,7 @@ export class ProductsController {
   })
   async getProductsByCustomer(
     @Param('userId') userId: string,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
+    @Query('page', new DefaultValuePipe(0), ParseIntPipe) page?: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize?: number,
     @Query('includePagination', new DefaultValuePipe(false), ParseBoolPipe) includePagination?: boolean,
   ) {
@@ -110,6 +110,18 @@ export class ProductsController {
     summary: 'Update a product',
     description: 'This method updates a product',
   })
+  @ApiOperation({
+    summary: 'Unlink a product from a customer',
+    description: 'This endpoint removes the relation between a product and a customer',
+  })
+  @Delete(':id/customer/:customerId')
+  async unlinkProductFromCustomer(
+    @Param('id', ParseIntPipe) productId: number,
+    @Param('customerId', ParseIntPipe) customerId: number,
+  ) {
+    return await this.productsService.unlinkProductFromCustomer(customerId, productId)
+  }
+
   @Put(':id')
   async update(@Param('id') id: number, @Body() updateProductDto: UpdateProductDto) {
     return await this.productsService.update(id, updateProductDto)
