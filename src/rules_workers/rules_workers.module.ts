@@ -4,9 +4,17 @@ import { RulesWorkersController } from './rules_workers.controller'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { RulesWorker } from './entities/rules_worker.entity'
 import { ConditionsModule } from '@/conditions/conditions.module'
+import { WorkModule } from '@/work/work.module'
+import { ContainerSizeModule } from '@/container_size/container_size.module'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([RulesWorker]), ConditionsModule],
+  imports: [
+    TypeOrmModule.forFeature([RulesWorker]),
+    ConditionsModule,
+    ConditionsModule,
+    WorkModule,
+    ContainerSizeModule,
+  ],
   controllers: [RulesWorkersController],
   providers: [RulesWorkersService],
   exports: [RulesWorkersService],

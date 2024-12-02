@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { CreateRulesWorkerDto } from './dto/create-rules_worker.dto'
 import { UpdateRulesWorkerDto } from './dto/update-rules_worker.dto'
 import { InjectRepository } from '@nestjs/typeorm'
@@ -7,12 +7,16 @@ import { Repository } from 'typeorm'
 import { ContainerDto } from '@/timesheet/dto/create-timesheet.dto'
 import { ConditionsService } from '@/conditions/conditions.service'
 import { DateTime } from 'luxon'
+import { WorkService } from '@/work/work.service'
+import { ContainerSizeService } from '@/container_size/container_size.service'
 
 @Injectable()
 export class RulesWorkersService {
   constructor(
     @InjectRepository(RulesWorker) private readonly rulesWorkerRepository: Repository<RulesWorker>,
     private readonly conditionSerce: ConditionsService,
+    private readonly workService: WorkService,
+    private readonly containerSizeService: ContainerSizeService,
   ) {}
 
   create(createRulesWorkerDto: CreateRulesWorkerDto) {
@@ -54,9 +58,97 @@ export class RulesWorkersService {
       }
 
       if (ruleIsValid) {
-        this.calculateOverUnitsOverLimit(rule, container, rule.payment_type, workers)
-        break
+        return this.calculateOverUnitsOverLimit(rule, container, rule.payment_type, workers)
       }
+    }
+  }
+
+  findById(id: number) {
+    return this.rulesWorkerRepository.findOne({
+      where: { id },
+      relations: ['condition_groups', 'condition_groups.conditions', 'container_size', 'work'],
+    })
+  }
+
+  find() {
+    return this.rulesWorkerRepository.find({ relations: ['container_size'] })
+  }
+
+  async update(id: number, updateRuleDto: UpdateRulesWorkerDto) {
+    try {
+      const { condition_groups, work, container_size, ...rest } = updateRuleDto
+      const rule = await this.rulesWorkerRepository.findOne({
+        where: { id },
+        relations: ['condition_groups', 'condition_groups.conditions'],
+      })
+
+      if (!rule) {
+        throw new NotFoundException('Regla no encontrada')
+      }
+
+      Object.assign(rule, rest)
+
+      if (work) rule.work = await this.workService.findById(work)
+      if (container_size) rule.container_size = await this.containerSizeService.findById(container_size)
+
+      if (condition_groups) {
+        const incomingConditionGroupIds = condition_groups.map(cg => cg.id).filter(id => id)
+        const conditionGroupsToRemove = rule.condition_groups.filter(cg => !incomingConditionGroupIds.includes(cg.id))
+
+        if (conditionGroupsToRemove.length > 0) {
+          rule.condition_groups = rule.condition_groups.filter(cg => incomingConditionGroupIds.includes(cg.id))
+        }
+
+        for (const cgDto of condition_groups) {
+          let conditionGroup
+          if (cgDto.id) {
+            conditionGroup = rule.condition_groups.find(cg => cg.id === cgDto.id)
+            if (conditionGroup) {
+              Object.assign(conditionGroup, cgDto)
+            } else {
+              conditionGroup = this.rulesWorkerRepository.manager.create('ConditionGroup', cgDto)
+              rule.condition_groups.push(conditionGroup)
+            }
+          } else {
+            conditionGroup = this.rulesWorkerRepository.manager.create('ConditionGroup', cgDto)
+            rule.condition_groups.push(conditionGroup)
+          }
+
+          if (cgDto.conditions) {
+            const incomingConditionIds = cgDto.conditions.map(cond => cond.id).filter(id => id)
+
+            const conditionsToRemove = conditionGroup.conditions.filter(cond => !incomingConditionIds.includes(cond.id))
+
+            if (conditionsToRemove.length > 0) {
+              conditionGroup.conditions = conditionGroup.conditions.filter(cond =>
+                incomingConditionIds.includes(cond.id),
+              )
+            }
+
+            for (const condDto of cgDto.conditions) {
+              let condition
+              if (condDto.id) {
+                condition = conditionGroup.conditions.find(cond => cond.id === condDto.id)
+                if (condition) {
+                  Object.assign(condition, condDto)
+                } else {
+                  condition = this.rulesWorkerRepository.manager.create('Condition', condDto)
+                  conditionGroup.conditions.push(condition)
+                }
+              } else {
+                condition = this.rulesWorkerRepository.manager.create('Condition', condDto)
+                conditionGroup.conditions.push(condition)
+              }
+            }
+          }
+        }
+      }
+
+      await this.rulesWorkerRepository.save(rule)
+
+      return { message: 'Regla actualizada exitosamente' }
+    } catch (error) {
+      throw error
     }
   }
 
@@ -66,8 +158,8 @@ export class RulesWorkersService {
     payment_type: string,
     workers: any[],
   ) {
-    const start = DateTime.fromISO(container.start.toISOString())
-    const end = DateTime.fromISO(container.finish.toISOString())
+    const start = DateTime.fromISO(container.start)
+    const end = DateTime.fromISO(container.finish)
 
     const calculatePay = (rateType: string, rate: number) => {
       const timeUnits = {
@@ -94,5 +186,7 @@ export class RulesWorkersService {
         worker.pay = calculatePay(rule.rate_type, rule.rate)
       })
     }
+
+    return workers
   }
 }

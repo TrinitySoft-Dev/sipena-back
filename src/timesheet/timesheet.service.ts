@@ -64,9 +64,9 @@ export class TimesheetService {
         timesheet: timesheetRes.id,
       }))
 
-      this.rulesWorkersService.validateRules(container, String(work_id), newWorkers)
+      const payWorkers = await this.rulesWorkersService.validateRules(container, String(work_id), newWorkers)
 
-      await this.timesheetWorkersService.createMany(newWorkers)
+      await this.timesheetWorkersService.createMany(payWorkers)
 
       return { message: 'Timesheet created successfully' }
     } catch (error) {
