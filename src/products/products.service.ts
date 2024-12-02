@@ -88,6 +88,25 @@ export class ProductsService {
     }
   }
 
+  async unlinkProductFromCustomer(customerId: number, productId: number) {
+    try {
+      if (!customerId || !productId) {
+        return { message: 'Debe proporcionar un cliente y un producto para desvincular' }
+      }
+
+      await this.productRepository
+        .createQueryBuilder('product')
+        .relation(Product, 'customers')
+        .of(productId)
+        .remove(customerId)
+
+      return { message: 'Producto desvinculado exitosamente' }
+    } catch (error) {
+      console.error('Error desvinculando el producto del cliente:', error)
+      throw new Error('Error al desvincular el producto del cliente')
+    }
+  }
+
   async deleteById(id: number): Promise<void> {
     const result = await this.productRepository.delete(id)
     if (result.affected === 0) {

@@ -110,6 +110,18 @@ export class ProductsController {
     summary: 'Update a product',
     description: 'This method updates a product',
   })
+  @ApiOperation({
+    summary: 'Unlink a product from a customer',
+    description: 'This endpoint removes the relation between a product and a customer',
+  })
+  @Delete(':id/customer/:customerId')
+  async unlinkProductFromCustomer(
+    @Param('id', ParseIntPipe) productId: number,
+    @Param('customerId', ParseIntPipe) customerId: number,
+  ) {
+    return await this.productsService.unlinkProductFromCustomer(customerId, productId)
+  }
+
   @Put(':id')
   async update(@Param('id') id: number, @Body() updateProductDto: UpdateProductDto) {
     return await this.productsService.update(id, updateProductDto)
