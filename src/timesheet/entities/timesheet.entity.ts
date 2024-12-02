@@ -1,3 +1,4 @@
+import { SelectedField } from '@/common/decorators/selected-fields.decorator'
 import { Container } from '@/container/entities/container.entity'
 import { TimesheetWorker } from '@/timesheet_workers/entities/timesheet_worker.entity'
 import { User } from '@/users/entities/user.entity'
@@ -22,12 +23,16 @@ export class Timesheet {
   id: number
 
   @ManyToOne(() => User, user => user.timesheets)
+  @SelectedField({
+    relation: () => User,
+  })
   customer: User
 
   @Column({
     nullable: false,
     type: 'date',
   })
+  @SelectedField()
   day: Date
 
   @Column({
@@ -35,10 +40,14 @@ export class Timesheet {
     type: 'varchar',
     length: 50,
   })
+  @SelectedField()
   week: String
 
   @OneToOne(() => Container)
   @JoinColumn()
+  @SelectedField({
+    relation: () => Container,
+  })
   container: Container
 
   @OneToMany(() => TimesheetWorker, timesheetWorker => timesheetWorker.timesheet, { cascade: true })

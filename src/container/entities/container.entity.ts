@@ -1,5 +1,6 @@
 import { OPERATORS } from '@/common/conts/operators'
 import { ConditionField } from '@/common/decorators/condition-field.decorator'
+import { SelectedField } from '@/common/decorators/selected-fields.decorator'
 import { Product } from '@/products/entities/product.entity'
 import { Work } from '@/work/entities/work.entity'
 import { IsBoolean } from 'class-validator'
@@ -27,9 +28,13 @@ export class Container {
     length: 40,
     comment: 'Container number',
   })
+  @SelectedField()
   container_number: string
 
   @ManyToOne(() => Work, work => work.container)
+  @SelectedField({
+    relation: () => Work,
+  })
   work: Work
 
   @ConditionField({
@@ -39,6 +44,7 @@ export class Container {
     type: 'integer',
     nullable: false,
   })
+  @SelectedField()
   size: number
 
   @ManyToOne(() => Product, product => product.containers, { cascade: true })
@@ -49,6 +55,7 @@ export class Container {
     type: 'integer',
     nullable: false,
   })
+  @SelectedField()
   skus: number
 
   @ConditionField({ open: true })
@@ -56,6 +63,7 @@ export class Container {
     type: 'integer',
     nullable: false,
   })
+  @SelectedField()
   cartons: number
 
   @ConditionField({ open: true })
@@ -64,6 +72,7 @@ export class Container {
     nullable: false,
     default: 0,
   })
+  @SelectedField()
   pallets: number
 
   @ConditionField({ open: true })
@@ -71,6 +80,7 @@ export class Container {
     type: 'integer',
     nullable: false,
   })
+  @SelectedField()
   weight: number
 
   @ConditionField({
@@ -90,6 +100,7 @@ export class Container {
     nullable: false,
     default: false,
   })
+  @SelectedField()
   forklift_driver: boolean
 
   @ConditionField({
@@ -109,6 +120,7 @@ export class Container {
     nullable: false,
     default: false,
   })
+  @SelectedField()
   trash: boolean
 
   @ConditionField({
@@ -128,18 +140,21 @@ export class Container {
     nullable: false,
     default: false,
   })
+  @SelectedField()
   mixed: boolean
 
   @Column({
     type: 'timestamp',
     nullable: false,
   })
+  @SelectedField()
   start: String
 
   @Column({
     type: 'timestamp',
     nullable: false,
   })
+  @SelectedField()
   finish: Date
 
   @Column({
@@ -147,6 +162,7 @@ export class Container {
     nullable: false,
     length: 40,
   })
+  @SelectedField()
   total_time: string
 
   @Column({
@@ -154,6 +170,7 @@ export class Container {
     nullable: false,
     length: 40,
   })
+  @SelectedField()
   plt_time_min: string
 
   @Column({

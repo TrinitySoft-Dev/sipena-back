@@ -31,6 +31,9 @@ import { PermissionsModule } from './permissions/permissions.module'
 import { CityModule } from './city/city.module'
 import { StateModule } from './state/state.module'
 import { LoggerModule } from 'nestjs-pino'
+import { TemplateModule } from './template/template.module'
+import { TemplateColumnsModule } from './template_columns/template_columns.module';
+import { InvoiceModule } from './invoice/invoice.module';
 
 @Module({
   imports: [
@@ -91,6 +94,9 @@ import { LoggerModule } from 'nestjs-pino'
     PermissionsModule,
     CityModule,
     StateModule,
+    TemplateModule,
+    TemplateColumnsModule,
+    InvoiceModule,
   ],
   controllers: [],
   providers: [],
