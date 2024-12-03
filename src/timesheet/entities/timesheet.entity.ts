@@ -15,6 +15,11 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
+enum TimesheetStatus {
+  OPEN = 'OPEN',
+  CLOSED = 'CLOSED',
+}
+
 @Entity({
   name: 'time_sheets',
 })
@@ -71,11 +76,11 @@ export class Timesheet {
   rate: number
 
   @Column({
-    nullable: false,
-    type: 'boolean',
-    default: true,
+    type: 'enum',
+    enum: TimesheetStatus,
+    default: TimesheetStatus.OPEN,
   })
-  active: boolean
+  status: string
 
   @Column({
     type: 'json',

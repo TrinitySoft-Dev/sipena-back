@@ -13,8 +13,8 @@ import {
   name: 'templates',
 })
 export class Template {
-  @PrimaryGeneratedColumn('uuid')
-  id: string
+  @PrimaryGeneratedColumn()
+  id: number
 
   @Column({
     type: 'varchar',

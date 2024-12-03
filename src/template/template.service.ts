@@ -14,6 +14,10 @@ export class TemplateService {
     return this.templateRepository.save(createTemplateDto)
   }
 
+  findOne(id: number) {
+    return this.templateRepository.findOne({ where: { id }, relations: ['columns'] })
+  }
+
   fields() {
     return getSelectedFieldsWithPaths(Timesheet)
   }

@@ -23,5 +23,6 @@ import { RulesWorkersModule } from '@/rules_workers/rules_workers.module'
   ],
   controllers: [TimesheetController],
   providers: [TimesheetService, AccessJwtService],
+  exports: [TimesheetService],
 })
 export class TimesheetModule {}
