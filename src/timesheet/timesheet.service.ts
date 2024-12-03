@@ -10,8 +10,9 @@ import { ROLES_CONST } from '@/common/conts/roles.const'
 import { ConditionsService } from '@/conditions/conditions.service'
 import { TimesheetWorkersService } from '@/timesheet_workers/timesheet_workers.service'
 import { ExtraRule } from '@/extra_rules/entities/extra_rule.entity'
-import { ContainerSizeService } from '@/container_size/container_size.service'
 import { RulesWorkersService } from '@/rules_workers/rules_workers.service'
+import { randomUUID } from 'crypto'
+import { UpdateTimesheetDto } from './dto/update-timesheet.dto'
 
 @Injectable()
 export class TimesheetService {
@@ -74,7 +75,7 @@ export class TimesheetService {
     }
   }
 
-  async validateRules(rules: Rule[], container: ContainerDto) {
+  private async validateRules(rules: Rule[], container: ContainerDto) {
     let totalExtraCharges = 0
     for (const rule of rules) {
       const listExtraCharges = []
@@ -259,5 +260,60 @@ export class TimesheetService {
       relations: ['timesheet_workers', 'customer', 'container', 'container.work'],
     })
     return { result, pagination: { page, pageSize, total } }
+  }
+
+  async findTimesheetsByWeek(week: string, customerId: number) {
+    const result = await this.timesheetRepository
+      .createQueryBuilder('timesheet')
+      .leftJoinAndSelect('timesheet.container', 'container')
+      .leftJoinAndSelect('container.work', 'work')
+      .leftJoinAndSelect('container.product', 'product')
+      .leftJoinAndSelect('timesheet.customer', 'customer')
+      .where('timesheet.week = :week', { week })
+      .andWhere('timesheet.customer = :customerId', { customerId })
+      .andWhere('timesheet.status = :status', { status: 'OPEN' })
+      .getRawMany()
+
+    return result
+  }
+
+  async findWeekByOpenTimesheet() {
+    const result = await this.timesheetRepository
+      .createQueryBuilder('timesheet')
+      .select('timesheet.week')
+      .where('timesheet.status = :status', { status: 'OPEN' })
+      .orderBy('timesheet.week', 'ASC')
+      .groupBy('timesheet.week')
+      .getRawMany()
+
+    const flattened = result.map(item => item.timesheet_week)
+    return flattened
+  }
+
+  async findCustomerByWeek(week: string) {
+    const result = await this.timesheetRepository
+      .createQueryBuilder('timesheet')
+      .leftJoin('timesheet.customer', 'customer')
+      .select(['timesheet.week', 'customer.name', 'customer.id'])
+      .where('timesheet.week = :week', { week })
+      .groupBy('timesheet.week')
+      .addGroupBy('customer.name')
+      .addGroupBy('customer.id')
+      .getRawMany()
+
+    return result.map(item => ({
+      id: item.customer_id,
+      name: item.customer_name,
+    }))
+  }
+
+  async update(id: number, data: UpdateTimesheetDto) {
+    const timesheet = await this.timesheetRepository.findOne({ where: { id } })
+    if (!timesheet) throw new NotFoundException('Timesheet not found')
+
+    Object.assign(timesheet, data)
+    await this.timesheetRepository.save(timesheet)
+
+    return { message: 'Timesheet updated successfully' }
   }
 }

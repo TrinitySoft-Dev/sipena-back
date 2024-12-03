@@ -1,3 +1,4 @@
+import { SelectedField } from '@/common/decorators/selected-fields.decorator'
 import { Infoworker } from '@/infoworkers/entities/infoworker.entity'
 import { Product } from '@/products/entities/product.entity'
 import { Rule } from '@/rules/entities/rule.entity'
@@ -30,6 +31,7 @@ export class User {
     type: 'varchar',
     comment: 'User email',
   })
+  @SelectedField()
   email: string
 
   @Column({
@@ -44,6 +46,7 @@ export class User {
     type: 'varchar',
     comment: 'User name',
   })
+  @SelectedField()
   name: string
 
   @Column({
@@ -51,6 +54,7 @@ export class User {
     type: 'varchar',
     comment: 'User lastname',
   })
+  @SelectedField()
   last_name: string
 
   @OneToOne(() => Infoworker, infoworker => infoworker.user, { cascade: true })

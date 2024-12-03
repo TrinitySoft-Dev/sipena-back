@@ -17,7 +17,7 @@ import { AuthGuard } from '@/common/guards/auth.guard'
 
 @ApiTags('Timesheet')
 @ApiBearerAuth()
-@UseGuards(AuthGuard)
+// @UseGuards(AuthGuard)
 @Controller('timesheet')
 export class TimesheetController {
   constructor(private readonly timesheetService: TimesheetService) {}
@@ -50,6 +50,16 @@ export class TimesheetController {
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize?: number,
   ) {
     return this.timesheetService.find(req?.payload, page, pageSize)
+  }
+
+  @Get('/week')
+  findWeek() {
+    return this.timesheetService.findWeekByOpenTimesheet()
+  }
+
+  @Get('/week/customer')
+  findCustomerByWeek(@Query('week', new DefaultValuePipe('')) week?: string) {
+    return this.timesheetService.findCustomerByWeek(week)
   }
 
   @Get('/customer/:customerId')

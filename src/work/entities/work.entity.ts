@@ -1,3 +1,4 @@
+import { SelectedField } from '@/common/decorators/selected-fields.decorator'
 import { Container } from '@/container/entities/container.entity'
 import { Rule } from '@/rules/entities/rule.entity'
 import { RulesWorker } from '@/rules_workers/entities/rules_worker.entity'
@@ -25,6 +26,7 @@ export class Work {
     nullable: false,
     length: 50,
   })
+  @SelectedField()
   name: string
 
   @Column({
@@ -32,6 +34,7 @@ export class Work {
     nullable: false,
     length: 50,
   })
+  @SelectedField()
   code: string
 
   @OneToMany(() => Rule, rule => rule.work)

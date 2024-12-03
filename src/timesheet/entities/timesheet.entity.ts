@@ -1,3 +1,4 @@
+import { SelectedField } from '@/common/decorators/selected-fields.decorator'
 import { Container } from '@/container/entities/container.entity'
 import { TimesheetWorker } from '@/timesheet_workers/entities/timesheet_worker.entity'
 import { User } from '@/users/entities/user.entity'
@@ -14,6 +15,11 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
+enum TimesheetStatus {
+  OPEN = 'OPEN',
+  CLOSED = 'CLOSED',
+}
+
 @Entity({
   name: 'time_sheets',
 })
@@ -22,12 +28,16 @@ export class Timesheet {
   id: number
 
   @ManyToOne(() => User, user => user.timesheets)
+  @SelectedField({
+    relation: () => User,
+  })
   customer: User
 
   @Column({
     nullable: false,
     type: 'date',
   })
+  @SelectedField()
   day: Date
 
   @Column({
@@ -35,10 +45,14 @@ export class Timesheet {
     type: 'varchar',
     length: 50,
   })
+  @SelectedField()
   week: String
 
   @OneToOne(() => Container)
   @JoinColumn()
+  @SelectedField({
+    relation: () => Container,
+  })
   container: Container
 
   @OneToMany(() => TimesheetWorker, timesheetWorker => timesheetWorker.timesheet, { cascade: true })
@@ -62,11 +76,11 @@ export class Timesheet {
   rate: number
 
   @Column({
-    nullable: false,
-    type: 'boolean',
-    default: true,
+    type: 'enum',
+    enum: TimesheetStatus,
+    default: TimesheetStatus.OPEN,
   })
-  active: boolean
+  status: string
 
   @Column({
     type: 'json',

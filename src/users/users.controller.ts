@@ -16,6 +16,7 @@ import {
   ParseIntPipe,
   Patch,
   DefaultValuePipe,
+  ParseBoolPipe,
 } from '@nestjs/common'
 import { UsersService } from './users.service'
 import { CreateUserDto } from './dto/worker-user.dto'
@@ -96,8 +97,9 @@ export class UsersController {
     @Query('role') role: string,
     @Query('page', new DefaultValuePipe(0), ParseIntPipe) page?: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize?: number,
+    @Query('includePagination', new DefaultValuePipe(false), ParseBoolPipe) includePagination?: boolean,
   ) {
-    return this.usersService.findByRole({ role, page, pageSize }) // revisar paginacion page customers
+    return this.usersService.findByRole({ role, page, pageSize, includePagination })
   }
 
   @ApiBearerAuth()
