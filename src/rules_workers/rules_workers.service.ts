@@ -158,8 +158,8 @@ export class RulesWorkersService {
     payment_type: string,
     workers: any[],
   ) {
-    const start = DateTime.fromISO(container.start)
-    const end = DateTime.fromISO(container.finish)
+    const start = DateTime.fromISO(String(container.start))
+    const end = DateTime.fromISO(String(container.finish))
 
     const calculatePay = (rateType: string, rate: number) => {
       const timeUnits = {
