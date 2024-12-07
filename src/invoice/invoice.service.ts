@@ -12,7 +12,7 @@ export class InvoiceService {
     private readonly templateService: TemplateService,
   ) {}
 
-  async create(createInvoiceDto: CreateInvoiceDto): Promise<Readable> {
+  async create(createInvoiceDto: CreateInvoiceDto) {
     const { reference_week, customer, invoice_number } = createInvoiceDto
     const timesheets = await this.timesheetService.findTimesheetsByWeek(reference_week, customer)
 
@@ -26,21 +26,31 @@ export class InvoiceService {
     const cellStyle = wb.createStyle({
       alignment: {
         horizontal: 'left',
-        vertical: 'center',
+        wrapText: true,
       },
     })
 
     headers.forEach((header, colIndex) => {
       const rows = columns[header].rows
-      const maxWidth = Math.max(header.length, ...rows.map(row => row.length)) + 5
+      const maxWidth = Math.max(header?.length, ...rows.map(row => row?.length || 10))
       ws.column(colIndex + 1).setWidth(maxWidth)
 
       ws.cell(1, colIndex + 1).string(header)
 
       rows.forEach((row, rowIndex) => {
-        const type = typeof row
+        const type = typeof row === 'undefined' ? 'string' : typeof row
+
+        const cellValue =
+          typeof row === 'string'
+            ? row
+                .replace(/\\n/g, '\n')
+                .split('\n')
+                .map(line => line.trim())
+                .join('\n')
+            : row
+
         ws.cell(rowIndex + 2, colIndex + 1)
-          [type](row)
+          [type](cellValue)
           .style(cellStyle)
       })
     })
@@ -57,7 +67,7 @@ export class InvoiceService {
     const columns = {}
 
     template.columns.forEach(column => {
-      const select_field = column.select_field.replaceAll('.', '_')
+      const valueCell = column.value_cell
       if (!columns[column.name]) {
         columns[column.name] = {
           rows: [],
@@ -65,12 +75,16 @@ export class InvoiceService {
       }
 
       timesheets.forEach(timesheet => {
-        if (!columns[column.name].rows.length) columns[column.name].rows.push(timesheet[select_field])
+        const valueReplacecell = valueCell?.replace(/@path:([\w.]+)/g, (match, p1) => {
+          return timesheet[p1]
+        })
+
+        if (!columns[column.name].rows.length) columns[column.name].rows.push(valueReplacecell)
         else {
-          columns[column.name].rows = [...columns[column.name].rows, timesheet[select_field]]
+          columns[column.name].rows = [...columns[column.name].rows, valueReplacecell]
         }
 
-        this.timesheetService.update(timesheet.id, { status: 'CLOSED' })
+        // this.timesheetService.update(timesheet.id, { status: 'CLOSED' })
       })
     })
 

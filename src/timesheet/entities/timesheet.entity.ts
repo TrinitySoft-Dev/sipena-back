@@ -73,6 +73,7 @@ export class Timesheet {
     type: 'decimal',
     comment: 'Rate of the timesheet',
   })
+  @SelectedField()
   rate: number
 
   @Column({

@@ -25,17 +25,10 @@ export class TemplateColumn {
 
   @Column({
     type: 'varchar',
-    length: 100,
+    length: 255,
     nullable: true,
   })
-  default_value: string
-
-  @Column({
-    type: 'varchar',
-    length: 100,
-    nullable: true,
-  })
-  select_field: string
+  value_cell: string
 
   @ManyToOne(() => Template, template => template.columns, { onDelete: 'CASCADE' })
   template: Template

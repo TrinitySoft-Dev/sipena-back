@@ -1,9 +1,6 @@
-import getSelectedFieldsPaths from '@/common/helpers/getSelectFieldsPaths'
-import { Timesheet } from '@/timesheet/entities/timesheet.entity'
+import { Valuecell } from '@/common/validators/Valuecell'
 import { ApiProperty } from '@nestjs/swagger'
-import { IsIn, IsOptional, IsString } from 'class-validator'
-
-const TEMPLATE_PATHS = getSelectedFieldsPaths(Timesheet)
+import { IsString, Validate } from 'class-validator'
 
 export class CreateTemplateColumnDto {
   @ApiProperty({
@@ -15,18 +12,8 @@ export class CreateTemplateColumnDto {
 
   @ApiProperty({
     type: 'string',
-    description: 'The select_field of the template_column',
+    description: 'Customer name: @path:customer_name',
   })
-  @IsOptional()
-  @IsString()
-  default_value: string
-
-  @ApiProperty({
-    type: 'string',
-    description: 'The select_field of the template_column',
-  })
-  @IsIn(TEMPLATE_PATHS)
-  @IsOptional()
-  @IsString()
-  select_field: string
+  @Validate(Valuecell, { message: 'Invalid path' })
+  value_cell: string
 }

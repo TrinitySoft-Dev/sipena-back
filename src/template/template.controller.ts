@@ -14,6 +14,11 @@ export class TemplateController {
     return this.templateService.create(createTemplateDto)
   }
 
+  @Post('default')
+  createDefaultTemplate() {
+    return this.templateService.createDefaultTemplate()
+  }
+
   @Get()
   fields() {
     return this.templateService.fields()

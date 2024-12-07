@@ -18,13 +18,11 @@ export class CreateTemplateDto {
     example: [
       {
         name: 'Column 1',
-        default_value: 'Default value',
-        select_field: 'Select field',
+        value_cell: 'Customer name: @path:customer_name \n Customer address: @path:customer_address',
       },
       {
         name: 'Column 2',
-        default_value: 'Default value',
-        select_field: 'Select field',
+        value_cell: 'Customer name: @path:customer_name',
       },
     ],
   })
