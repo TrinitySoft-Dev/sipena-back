@@ -29,7 +29,7 @@ export default function getSelectedFieldsWithPaths(
       }
     } else {
       const label = currentLabelPath.join(' - ')
-      const path = currentPropertyPath.join('.')
+      const path = currentPropertyPath.join('_')
       results.push({ label, path })
     }
   })
