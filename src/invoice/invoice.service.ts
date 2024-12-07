@@ -23,6 +23,13 @@ export class InvoiceService {
     const wb = new excel4node.Workbook()
     const ws = wb.addWorksheet(`Invoice - ${invoice_number}`)
 
+    const cellStyle = wb.createStyle({
+      alignment: {
+        horizontal: 'left',
+        vertical: 'center',
+      },
+    })
+
     headers.forEach((header, colIndex) => {
       const rows = columns[header].rows
       const maxWidth = Math.max(header.length, ...rows.map(row => row.length)) + 5
@@ -31,7 +38,10 @@ export class InvoiceService {
       ws.cell(1, colIndex + 1).string(header)
 
       rows.forEach((row, rowIndex) => {
-        ws.cell(rowIndex + 2, colIndex + 1).string(row)
+        const type = typeof row
+        ws.cell(rowIndex + 2, colIndex + 1)
+          [type](row)
+          .style(cellStyle)
       })
     })
 

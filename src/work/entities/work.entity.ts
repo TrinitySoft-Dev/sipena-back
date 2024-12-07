@@ -2,6 +2,7 @@ import { SelectedField } from '@/common/decorators/selected-fields.decorator'
 import { Container } from '@/container/entities/container.entity'
 import { Rule } from '@/rules/entities/rule.entity'
 import { RulesWorker } from '@/rules_workers/entities/rules_worker.entity'
+import { WorkField } from '@/work_fields/entities/work_field.entity'
 import {
   Column,
   CreateDateColumn,
@@ -13,6 +14,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm'
+import { WorkFieldVisibility } from './workFieldVisibility.entity'
 
 @Entity({
   name: 'works',
@@ -45,6 +47,9 @@ export class Work {
 
   @OneToMany(() => Container, container => container.work)
   container: Container[]
+
+  @OneToMany(() => WorkFieldVisibility, wfv => wfv.work, { cascade: true })
+  workFieldVisibilities: WorkFieldVisibility[]
 
   @Column({
     nullable: false,

@@ -10,7 +10,6 @@ import {
   DeleteDateColumn,
   Entity,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm'
@@ -24,7 +23,7 @@ export class Container {
 
   @Column({
     type: 'varchar',
-    nullable: false,
+    nullable: true,
     length: 40,
     comment: 'Container number',
   })
@@ -37,13 +36,8 @@ export class Container {
   })
   work: Work
 
-  @ConditionField({
-    open: true,
-  })
-  @Column({
-    type: 'integer',
-    nullable: false,
-  })
+  @Column({ type: 'integer', nullable: false })
+  @ConditionField({ open: true })
   @SelectedField()
   size: number
 
@@ -53,7 +47,7 @@ export class Container {
   @ConditionField({ open: true })
   @Column({
     type: 'integer',
-    nullable: false,
+    nullable: true,
   })
   @SelectedField()
   skus: number
@@ -61,7 +55,7 @@ export class Container {
   @ConditionField({ open: true })
   @Column({
     type: 'integer',
-    nullable: false,
+    nullable: true,
   })
   @SelectedField()
   cartons: number
@@ -69,7 +63,7 @@ export class Container {
   @ConditionField({ open: true })
   @Column({
     type: 'integer',
-    nullable: false,
+    nullable: true,
     default: 0,
   })
   @SelectedField()
@@ -78,7 +72,7 @@ export class Container {
   @ConditionField({ open: true })
   @Column({
     type: 'integer',
-    nullable: false,
+    nullable: true,
   })
   @SelectedField()
   weight: number
@@ -98,7 +92,7 @@ export class Container {
   @Column({
     type: 'boolean',
     nullable: false,
-    default: false,
+    default: true,
   })
   @SelectedField()
   forklift_driver: boolean
@@ -117,7 +111,7 @@ export class Container {
   })
   @Column({
     type: 'boolean',
-    nullable: false,
+    nullable: true,
     default: false,
   })
   @SelectedField()
@@ -137,7 +131,7 @@ export class Container {
   })
   @Column({
     type: 'boolean',
-    nullable: false,
+    nullable: true,
     default: false,
   })
   @SelectedField()
@@ -159,7 +153,7 @@ export class Container {
 
   @Column({
     type: 'varchar',
-    nullable: false,
+    nullable: true,
     length: 40,
   })
   @SelectedField()
@@ -167,7 +161,7 @@ export class Container {
 
   @Column({
     type: 'varchar',
-    nullable: false,
+    nullable: true,
     length: 40,
   })
   @SelectedField()
