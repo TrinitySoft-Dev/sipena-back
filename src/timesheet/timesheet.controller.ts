@@ -57,9 +57,14 @@ export class TimesheetController {
     return this.timesheetService.findWeekByOpenTimesheet()
   }
 
-  @Get('/week/customer')
-  findCustomerByWeek(@Query('week', new DefaultValuePipe('')) week?: string) {
-    return this.timesheetService.findCustomerByWeek(week)
+  @Get('/open-by-week')
+  findOpenTimesheet() {
+    return this.timesheetService.getOpenTimesheetsGroupedByWeek()
+  }
+
+  @Get('/week-and-role')
+  findByWeekAndRole(@Query('week') week: string, @Query('role') role: string, @Query('id') id: number) {
+    return this.timesheetService.findByWeekAndRole(week, role, id)
   }
 
   @Get('/customer/:customerId')

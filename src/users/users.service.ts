@@ -1,14 +1,7 @@
 import * as bcrypt from 'bcrypt'
 import * as crypto from 'crypto'
 
-import {
-  BadRequestException,
-  forwardRef,
-  Inject,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common'
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { User } from './entities/user.entity'
 import { FindOneOptions, In, Repository } from 'typeorm'
@@ -16,7 +9,6 @@ import { InfoworkersService } from '@/infoworkers/infoworkers.service'
 import { LoginUserDto } from './dto/login-user.dto'
 import { ImagesService } from '@/images/images.service'
 import { ROLES_CONST } from '@/common/conts/roles.const'
-import { RulesService } from '@/rules/rules.service'
 import { Response } from 'express'
 import { EmailService } from '@/email/email.service'
 import { config } from '@/common/config/config'
@@ -34,7 +26,6 @@ export class UsersService {
     private readonly jwtService: AccessJwtService,
     private readonly jwtRefreshService: AccessJwtRefreshService,
     private readonly imagesService: ImagesService,
-    @Inject(forwardRef(() => RulesService)) private readonly rulesService: RulesService,
     private readonly emailService: EmailService,
     private readonly passwordHashService: PasswordHashService,
   ) {}
@@ -338,6 +329,7 @@ export class UsersService {
     const result = await this.userRepository.find(options)
     return result
   }
+
   async update(options) {
     const { id, updateUserDto, visa, passport } = options
     const user = await this.userRepository.findOne({

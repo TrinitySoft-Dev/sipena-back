@@ -290,21 +290,59 @@ export class TimesheetService {
     return flattened
   }
 
-  async findCustomerByWeek(week: string) {
-    const result = await this.timesheetRepository
-      .createQueryBuilder('timesheet')
-      .leftJoin('timesheet.customer', 'customer')
-      .select(['timesheet.week', 'customer.name', 'customer.id'])
-      .where('timesheet.week = :week', { week })
-      .groupBy('timesheet.week')
-      .addGroupBy('customer.name')
-      .addGroupBy('customer.id')
-      .getRawMany()
+  async getOpenTimesheetsGroupedByWeek() {
+    const timesheets = await this.timesheetRepository.find({
+      where: { status: 'OPEN' },
+      relations: ['customer', 'timesheet_workers', 'timesheet_workers.worker'],
+    })
 
-    return result.map(item => ({
-      id: item.customer_id,
-      name: item.customer_name,
+    const groupedByWeek = timesheets.reduce((acc, timesheet) => {
+      const week: any = timesheet.week
+      if (!acc[week]) {
+        acc[week] = { customers: new Map(), workers: new Map() }
+      }
+
+      const customer = timesheet.customer
+      if (customer) {
+        acc[week].customers.set(customer.id, {
+          id: customer.id,
+          name: customer.name,
+          last_name: customer.last_name,
+        })
+      }
+
+      for (const worker of timesheet.timesheet_workers) {
+        if (worker.worker) {
+          acc[week].workers.set(worker.worker.id, {
+            id: worker.worker.id,
+            name: worker.worker.name,
+            last_name: worker.worker.last_name,
+          })
+        }
+      }
+
+      return acc
+    }, {})
+
+    return Object.keys(groupedByWeek).map(week => ({
+      week,
+      customers: Array.from(groupedByWeek[week].customers.values()),
+      workers: Array.from(groupedByWeek[week].workers.values()),
     }))
+  }
+
+  async findByWeekAndRole(week: string, role: string, id: number) {
+    if (role === ROLES_CONST.CUSTOMER) {
+      return this.timesheetRepository.find({
+        where: { week, customer: { role: ROLES_CONST.CUSTOMER, id } },
+        relations: ['customer', 'container', 'container.work', 'container.product', 'timesheet_workers'],
+      })
+    }
+
+    return await this.timesheetRepository.find({
+      where: { week, timesheet_workers: { worker: { role: ROLES_CONST.WORKER, id } } },
+      relations: ['customer', 'container', 'container.work', 'container.product', 'timesheet_workers'],
+    })
   }
 
   async update(id: number, data: UpdateTimesheetDto) {
