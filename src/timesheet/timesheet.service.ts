@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { ContainerDto, CreateTimesheetDto } from './dto/create-timesheet.dto'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Timesheet } from './entities/timesheet.entity'
+import { Timesheet, TimesheetStatusEnum } from './entities/timesheet.entity'
 import { In, Repository } from 'typeorm'
 import { ContainerService } from '@/container/container.service'
 import { UsersService } from '@/users/users.service'
@@ -66,7 +66,6 @@ export class TimesheetService {
       }))
 
       const payWorkers = await this.rulesWorkersService.validateRules(container, String(work_id), newWorkers)
-
       await this.timesheetWorkersService.createMany(payWorkers)
 
       return { message: 'Timesheet created successfully' }
@@ -290,45 +289,56 @@ export class TimesheetService {
     return flattened
   }
 
-  async getOpenTimesheetsGroupedByWeek() {
+  async getOpenTimesheetsWorkerByWeek() {
     const timesheets = await this.timesheetRepository.find({
-      where: { status: 'OPEN' },
+      where: { status_customer_pay: TimesheetStatusEnum.OPEN },
       relations: ['customer', 'timesheet_workers', 'timesheet_workers.worker'],
     })
 
-    const groupedByWeek = timesheets.reduce((acc, timesheet) => {
-      const week: any = timesheet.week
-      if (!acc[week]) {
-        acc[week] = { customers: new Map(), workers: new Map() }
-      }
-
-      const customer = timesheet.customer
-      if (customer) {
-        acc[week].customers.set(customer.id, {
-          id: customer.id,
-          name: customer.name,
-          last_name: customer.last_name,
-        })
-      }
-
-      for (const worker of timesheet.timesheet_workers) {
-        if (worker.worker) {
-          acc[week].workers.set(worker.worker.id, {
-            id: worker.worker.id,
-            name: worker.worker.name,
-            last_name: worker.worker.last_name,
-          })
+    const uniqueWorkers = new Set<string>()
+    const groupedByWeek = timesheets.reduce(
+      (acc, timesheet) => {
+        const week: string = timesheet.week as string
+        if (!acc[week]) {
+          acc[week] = { workers: [] }
         }
-      }
 
-      return acc
-    }, {})
+        for (const timesheetWorker of timesheet.timesheet_workers) {
+          const worker = timesheetWorker.worker
+          if (worker && !uniqueWorkers.has(worker.name)) {
+            uniqueWorkers.add(worker.name)
+            acc[week].workers.push({
+              id: worker.id,
+              name: worker.name,
+              last_name: worker.last_name,
+            })
+          }
+        }
 
-    return Object.keys(groupedByWeek).map(week => ({
-      week,
-      customers: Array.from(groupedByWeek[week].customers.values()),
-      workers: Array.from(groupedByWeek[week].workers.values()),
-    }))
+        return acc
+      },
+      {} as Record<string, { workers: { id: number; name: string; last_name: string }[] }>,
+    )
+
+    return Object.keys(groupedByWeek)
+      .map(week => ({
+        week,
+        workers: groupedByWeek[week].workers,
+      }))
+      .filter(item => item.workers.length > 0)
+  }
+
+  async closeTimesheetWorker(ids: number[]) {
+    const timesheets = await this.timesheetRepository.find({ where: { id: In(ids) } })
+    if (!timesheets.length) throw new NotFoundException('Timesheet not found')
+
+    timesheets.forEach(timesheet => {
+      timesheet.status_customer_pay = TimesheetStatusEnum.CLOSED
+    })
+
+    await this.timesheetRepository.save(timesheets)
+
+    return { message: 'Timesheet closed successfully' }
   }
 
   async findByWeekAndRole(week: string, role: string, id: number) {

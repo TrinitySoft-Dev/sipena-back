@@ -9,6 +9,7 @@ import {
   Param,
   DefaultValuePipe,
   ParseIntPipe,
+  Patch,
 } from '@nestjs/common'
 import { TimesheetService } from './timesheet.service'
 import { CreateTimesheetDto } from './dto/create-timesheet.dto'
@@ -22,10 +23,21 @@ import { AuthGuard } from '@/common/guards/auth.guard'
 export class TimesheetController {
   constructor(private readonly timesheetService: TimesheetService) {}
 
+  // ================== INIT POST ==================
+
   @Post()
   create(@Body() createTimesheetDto: CreateTimesheetDto) {
     return this.timesheetService.create(createTimesheetDto)
   }
+
+  @Post('/close-timesheets-worker')
+  closeTimesheets(@Body() timesheetIds: number[]) {
+    return this.timesheetService.closeTimesheetWorker(timesheetIds)
+  }
+
+  // ================== END POST ==================
+
+  // ================== INIT GET ==================
 
   @Get()
   @ApiOperation({
@@ -57,9 +69,9 @@ export class TimesheetController {
     return this.timesheetService.findWeekByOpenTimesheet()
   }
 
-  @Get('/open-by-week')
+  @Get('/open-by-week-worker')
   findOpenTimesheet() {
-    return this.timesheetService.getOpenTimesheetsGroupedByWeek()
+    return this.timesheetService.getOpenTimesheetsWorkerByWeek()
   }
 
   @Get('/week-and-role')
@@ -67,7 +79,6 @@ export class TimesheetController {
     return this.timesheetService.findByWeekAndRole(week, role, id)
   }
 
-  @Get('/customer/:customerId')
   @ApiOperation({
     summary: 'Find timesheet by customer',
     description: 'This method returns timesheets with pagination',
@@ -84,6 +95,7 @@ export class TimesheetController {
     type: Number,
     description: 'The number of items per page',
   })
+  @Get('/customer/:customerId')
   findByCustomer(
     @Param('customerId') customerId: number,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
@@ -92,7 +104,6 @@ export class TimesheetController {
     return this.timesheetService.findByCustomer(customerId, page, pageSize)
   }
 
-  @Get('/worker/:workerId')
   @ApiOperation({
     summary: 'Find timesheets by worker',
     description: 'This method returns timesheets with pagination',
@@ -103,6 +114,7 @@ export class TimesheetController {
     type: Number,
     description: 'The page number to fetch',
   })
+  @Get('/worker/:workerId')
   @ApiQuery({
     name: 'pageSize',
     required: false,
@@ -121,4 +133,6 @@ export class TimesheetController {
   findOne(@Param('id') id: number) {
     return this.timesheetService.findTimesheetById(id)
   }
+
+  // ================== END GET ==================
 }

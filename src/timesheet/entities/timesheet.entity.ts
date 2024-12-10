@@ -15,7 +15,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-enum TimesheetStatus {
+export enum TimesheetStatusEnum {
   OPEN = 'OPEN',
   CLOSED = 'CLOSED',
 }
@@ -78,10 +78,17 @@ export class Timesheet {
 
   @Column({
     type: 'enum',
-    enum: TimesheetStatus,
-    default: TimesheetStatus.OPEN,
+    enum: TimesheetStatusEnum,
+    default: TimesheetStatusEnum.OPEN,
   })
-  status: string
+  status_worker_pay: TimesheetStatusEnum
+
+  @Column({
+    type: 'enum',
+    enum: TimesheetStatusEnum,
+    default: TimesheetStatusEnum.OPEN,
+  })
+  status_customer_pay: TimesheetStatusEnum
 
   @Column({
     type: 'json',

@@ -20,7 +20,7 @@ export class TimesheetWorkersService {
   }
 
   async createMany(createTimesheetWorkerDtos: CreateTimesheetWorkerDto[]) {
-    if (!createTimesheetWorkerDtos.length) return []
+    if (!createTimesheetWorkerDtos?.length) return []
     const entities = createTimesheetWorkerDtos.map(dto => ({
       ...dto,
       worker: { id: dto.worker },

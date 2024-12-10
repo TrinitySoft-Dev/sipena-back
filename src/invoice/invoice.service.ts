@@ -3,7 +3,7 @@ import { CreateInvoiceDto } from './dto/create-invoice.dto'
 import { TimesheetService } from '@/timesheet/timesheet.service'
 import { TemplateService } from '@/template/template.service'
 import * as excel4node from 'excel4node'
-import { Readable, Writable } from 'stream'
+import { Readable } from 'stream'
 
 @Injectable()
 export class InvoiceService {
@@ -84,7 +84,7 @@ export class InvoiceService {
           columns[column.name].rows = [...columns[column.name].rows, valueReplacecell]
         }
 
-        // this.timesheetService.update(timesheet.id, { status: 'CLOSED' })
+        this.timesheetService.update(timesheet.id, { status: 'CLOSED' })
       })
     })
 
