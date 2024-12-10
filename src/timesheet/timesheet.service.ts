@@ -220,7 +220,7 @@ export class TimesheetService {
 
   async getCustomerRelations(customer: number) {
     const resultCustomer = await this.usersService.findOne({
-      where: { id: customer, active: true, role: ROLES_CONST.CUSTOMER },
+      where: { id: customer, active: true, role: { name: 'ROLES_CONST.CUSTOMER' } },
       relations: ['rules', 'rules.condition_groups', 'rules.condition_groups.conditions'],
     })
     if (!resultCustomer) throw new NotFoundException('Customer not found')
@@ -344,13 +344,13 @@ export class TimesheetService {
   async findByWeekAndRole(week: string, role: string, id: number) {
     if (role === ROLES_CONST.CUSTOMER) {
       return this.timesheetRepository.find({
-        where: { week, customer: { role: ROLES_CONST.CUSTOMER, id } },
-        relations: ['customer', 'container', 'container.work', 'container.product', 'timesheet_workers'],
+        where: { week, customer: { role: { name: ROLES_CONST.CUSTOMER }, id } },
+        relations: ['customer', 'container', 'container.work', 'container.product', 'timesheet_workers', 'role'],
       })
     }
 
     return await this.timesheetRepository.find({
-      where: { week, timesheet_workers: { worker: { role: ROLES_CONST.WORKER, id } } },
+      where: { week, timesheet_workers: { worker: { role: { name: ROLES_CONST.WORKER }, id } } },
       relations: ['customer', 'container', 'container.work', 'container.product', 'timesheet_workers'],
     })
   }

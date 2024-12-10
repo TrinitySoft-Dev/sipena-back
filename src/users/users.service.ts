@@ -17,6 +17,7 @@ import { ResetPasswordDto } from './dto/reset-password.dto'
 import { AccessJwtService } from '@/common/services/access-jwt.service'
 import { AccessJwtRefreshService } from '@/common/services/refresh-jwt.service'
 import { UpdateUserDto } from './dto/update-user.dto'
+import { RolesService } from '@/roles/roles.service'
 
 @Injectable()
 export class UsersService {
@@ -28,30 +29,33 @@ export class UsersService {
     private readonly imagesService: ImagesService,
     private readonly emailService: EmailService,
     private readonly passwordHashService: PasswordHashService,
+    private readonly roleService: RolesService,
   ) {}
 
   async create(createUserDto: any, files: Express.Multer.File[]) {
-    let { email, password, name, last_name, role, ...rest } = createUserDto
+    let { email, password, name, last_name, role, idRole, ...rest } = createUserDto
 
     const existuser = await this.userRepository.findOne({ where: { email, active: true } })
     if (existuser) throw new UnauthorizedException('Email already exists')
 
     password = password ? createUserDto.password : Math.random().toString(36).substring(2, 15)
     const hashPassword = await this.encryptPassword(password)
-
     if (role === ROLES_CONST.WORKER || !role) {
+      if (!role) role = ROLES_CONST.WORKER
+
       if (files.length == 2) {
         const [passport_url, visa_url] = await this.imagesService.uploadMultiple(files)
         rest.visa_url = visa_url
         rest.passport_url = passport_url
       }
 
+      const resRole = await this.roleService.findByName(role)
       const obj = {
         email,
         password: hashPassword,
         name,
         last_name,
-        role,
+        role: idRole ? { id: idRole } : resRole,
       }
 
       rest.city = rest.city ? { id: rest.city } : null
@@ -86,8 +90,12 @@ export class UsersService {
         id: Number(rule),
       }))
       if (rules?.length > 0) obj.rules = rules
+      const resRole = await this.roleService.findByName(role)
 
-      const user = await this.userRepository.save(obj)
+      const user = await this.userRepository.save({
+        ...obj,
+        role: idRole ? { id: idRole } : resRole,
+      })
       await this.userRepository.save(user)
 
       await this.emailService.send({
@@ -101,7 +109,12 @@ export class UsersService {
       return { message: 'User created successfully' }
     }
 
-    const user = this.userRepository.create(obj)
+    const resRole = await this.roleService.findByName(role)
+
+    const user = this.userRepository.create({
+      ...obj,
+      role: idRole ? { id: idRole } : resRole,
+    })
     await this.userRepository.save(user)
     await this.emailService.send({
       template: 'confirmation.html',
@@ -118,7 +131,10 @@ export class UsersService {
   async login(loginUserDto: LoginUserDto, response: Response) {
     const { email, password } = loginUserDto
 
-    const user = await this.userRepository.findOne({ where: { email, active: true }, relations: ['infoworker'] })
+    const user = await this.userRepository.findOne({
+      where: { email, active: true },
+      relations: ['infoworker', 'role'],
+    })
 
     if (!user) throw new UnauthorizedException('Email or password incorrect')
 
@@ -126,13 +142,14 @@ export class UsersService {
     if (!isPasswordCorrect) throw new UnauthorizedException('Email or password incorrect')
 
     let completed = true
-    if (user.role === ROLES_CONST.WORKER) {
+
+    if (user.role.name === ROLES_CONST.WORKER) {
       completed = this.infoworkerService.validateInfoworker(user.infoworker)
     }
 
     const payload = {
       email: user.email,
-      role: user.role,
+      role: user.role.name,
       id: user.id,
       completedInfoworker: completed,
       name: user.name,
@@ -165,12 +182,12 @@ export class UsersService {
 
     const user = await this.userRepository.findOne({
       where: { email: validToken.email, active: true },
-      relations: ['infoworker'],
+      relations: ['infoworker', 'role'],
     })
     if (!user) throw new UnauthorizedException('Email or password incorrect')
 
     let completed = true
-    if (user.role === ROLES_CONST.WORKER) {
+    if (user.role.name === ROLES_CONST.WORKER) {
       completed = this.infoworkerService.validateInfoworker(user.infoworker)
     }
 
@@ -243,7 +260,7 @@ export class UsersService {
   }
 
   async findWorkers(ids: number[]) {
-    return await this.userRepository.find({ where: { id: In(ids), role: ROLES_CONST.WORKER, active: true } })
+    return await this.userRepository.find({ where: { id: In(ids), role: { name: ROLES_CONST.WORKER }, active: true } })
   }
 
   async findOne(options: FindOneOptions<User>) {
@@ -282,14 +299,15 @@ export class UsersService {
     includePagination: boolean
   }) {
     const skip = page * pageSize
-    const where = { role, active: true }
+    const where = { role: { name: role }, active: true }
     const order = { created_at: 'DESC' as const }
 
     if (role === ROLES_CONST.WORKER && includePagination) {
       const [result, total] = await this.userRepository
         .createQueryBuilder('user')
         .leftJoinAndSelect('user.infoworker', 'infoworker')
-        .where('user.role = :role', { role })
+        .leftJoinAndSelect('user.role', 'role')
+        .where('role.name = :role', { role })
         .andWhere('user.active = :active', { active: true })
         .orderBy('user.created_at', 'DESC')
         .skip(skip)
@@ -352,14 +370,27 @@ export class UsersService {
           user.infoworker.passport_url = passport_url
         }
       } else {
-        const infoworker = await this.infoworkerService.create(updateUserDto.infoworker)
+        let visaUrl = null
+        let passportUrl = null
+        if (visa) {
+          visaUrl = await this.imagesService.upload(visa)
+        }
+        if (passport) {
+          passportUrl = await this.imagesService.upload(passport)
+        }
+
+        const infoworker = await this.infoworkerService.create({
+          ...JSON.parse(updateUserDto.infoworker),
+          visa_url: visaUrl,
+          passport_url: passportUrl,
+        })
         user.infoworker = infoworker
       }
 
       user.name = updateUserDto?.name ?? user.name
       user.last_name = updateUserDto?.last_name ?? user.last_name
-      user.role = updateUserDto?.role ?? user.role
 
+      console.log(user)
       await this.userRepository.save(user)
 
       return { message: 'User updated successfully' }

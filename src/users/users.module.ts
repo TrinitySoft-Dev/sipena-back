@@ -10,6 +10,7 @@ import { EmailModule } from '@/email/email.module'
 import { PasswordHashModule } from '@/password_hash/password_hash.module'
 import { AccessJwtService } from '@/common/services/access-jwt.service'
 import { AccessJwtRefreshService } from '@/common/services/refresh-jwt.service'
+import { RolesModule } from '@/roles/roles.module'
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { AccessJwtRefreshService } from '@/common/services/refresh-jwt.service'
     forwardRef(() => RulesModule),
     EmailModule,
     PasswordHashModule,
+    RolesModule,
   ],
   controllers: [UsersController],
   providers: [UsersService, AccessJwtService, AccessJwtRefreshService],

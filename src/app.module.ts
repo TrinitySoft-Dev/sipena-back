@@ -35,6 +35,7 @@ import { TemplateModule } from './template/template.module'
 import { TemplateColumnsModule } from './template_columns/template_columns.module';
 import { InvoiceModule } from './invoice/invoice.module';
 import { WorkFieldsModule } from './work_fields/work_fields.module';
+import { GroupPermissionsModule } from './group_permissions/group_permissions.module';
 
 @Module({
   imports: [
@@ -99,6 +100,7 @@ import { WorkFieldsModule } from './work_fields/work_fields.module';
     TemplateColumnsModule,
     InvoiceModule,
     WorkFieldsModule,
+    GroupPermissionsModule,
   ],
   controllers: [],
   providers: [],

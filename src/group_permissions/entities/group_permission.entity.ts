@@ -1,20 +1,18 @@
-import { GroupPermission } from '@/group_permissions/entities/group_permission.entity'
-import { Role } from '@/roles/entities/role.entity'
+import { Permission } from '@/permissions/entities/permission.entity'
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  ManyToMany,
-  ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm'
 
 @Entity({
-  name: 'permissions',
+  name: 'group_permissions',
 })
-export class Permission {
+export class GroupPermission {
   @PrimaryGeneratedColumn('uuid')
   id: string
 
@@ -25,17 +23,8 @@ export class Permission {
   })
   name: string
 
-  @Column({
-    type: 'varchar',
-    length: 80,
-  })
-  label: string
-
-  @ManyToMany(() => Role, role => role.permissions)
-  roles: Role[]
-
-  @ManyToOne(() => GroupPermission, group_permission => group_permission.permissions)
-  group_permissions: GroupPermission
+  @OneToMany(() => Permission, permission => permission.group_permissions, { cascade: true })
+  permissions: Permission[]
 
   @CreateDateColumn({
     type: 'date',

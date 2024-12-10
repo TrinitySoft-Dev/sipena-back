@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
-import { IsArray, IsOptional, IsString, IsUUID, ValidateNested } from 'class-validator'
+import { IsArray, IsBoolean, IsOptional, IsString, IsUUID, ValidateNested } from 'class-validator'
 
 class PermissionDto {
   @ApiProperty({
@@ -25,6 +25,13 @@ export class CreateRoleDto {
   })
   @IsString()
   description: string
+
+  @ApiProperty({
+    description: 'Role status',
+    example: true,
+  })
+  @IsBoolean()
+  status: boolean
 
   @ApiProperty({
     description: 'Role permissions',

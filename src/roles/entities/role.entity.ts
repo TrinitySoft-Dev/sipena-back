@@ -1,4 +1,5 @@
 import { Permission } from '@/permissions/entities/permission.entity'
+import { User } from '@/users/entities/user.entity'
 import {
   Column,
   CreateDateColumn,
@@ -6,6 +7,7 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm'
@@ -19,6 +21,8 @@ export class Role {
 
   @Column({
     unique: true,
+    type: 'varchar',
+    nullable: false,
   })
   name: string
 
@@ -43,12 +47,15 @@ export class Role {
   })
   permissions: Permission[]
 
+  @OneToMany(() => User, user => user.role)
+  users: User[]
+
   @Column({
     nullable: false,
     type: 'boolean',
     default: true,
   })
-  active: boolean
+  status: boolean
 
   @CreateDateColumn({
     type: 'timestamp',

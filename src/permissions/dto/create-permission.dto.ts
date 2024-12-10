@@ -8,4 +8,11 @@ export class CreatePermissionDto {
   })
   @IsString()
   name: string
+
+  @ApiProperty({
+    description: 'Permission label',
+    example: 'Create user',
+  })
+  @IsString()
+  label: string
 }

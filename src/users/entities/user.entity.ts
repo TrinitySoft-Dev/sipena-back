@@ -1,6 +1,7 @@
 import { SelectedField } from '@/common/decorators/selected-fields.decorator'
 import { Infoworker } from '@/infoworkers/entities/infoworker.entity'
 import { Product } from '@/products/entities/product.entity'
+import { Role } from '@/roles/entities/role.entity'
 import { Rule } from '@/rules/entities/rule.entity'
 import { Timesheet } from '@/timesheet/entities/timesheet.entity'
 import { TimesheetWorker } from '@/timesheet_workers/entities/timesheet_worker.entity'
@@ -12,6 +13,7 @@ import {
   JoinColumn,
   JoinTable,
   ManyToMany,
+  ManyToOne,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -61,15 +63,8 @@ export class User {
   @JoinColumn()
   infoworker: Infoworker
 
-  @Column({
-    type: 'varchar',
-    comment: 'User role',
-    length: 50,
-    nullable: false,
-    enum: ['WORKER', 'CLIENT'],
-    default: 'WORKER',
-  })
-  role: string
+  @ManyToOne(() => Role, role => role.users, { cascade: true })
+  role: Role
 
   @Column({
     type: 'varchar',

@@ -11,4 +11,11 @@ export class RolesService {
   async create(createRoleDto: CreateRoleDto) {
     return this.roleRepository.save(createRoleDto)
   }
+
+  async findByName(name: string) {
+    if (!name) {
+      return null
+    }
+    return this.roleRepository.findOne({ where: { name } })
+  }
 }
