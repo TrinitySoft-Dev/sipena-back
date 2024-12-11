@@ -277,10 +277,11 @@ export class UsersService {
       .leftJoinAndSelect('extra_rules.condition_groups', 'extra_condition_groups')
       .leftJoinAndSelect('extra_condition_groups.conditions', 'extra_conditions')
       .leftJoinAndSelect('rule.container_size', 'container_size')
+      .leftJoinAndSelect('user.role', 'role')
       .where('user.id = :userId', { userId })
       .andWhere('container_size.id = :size', { size })
       .andWhere('user.active = :active', { active: true })
-      .andWhere('user.role = :role', { role: ROLES_CONST.CUSTOMER })
+      .andWhere('role.name = :role', { role: ROLES_CONST.CUSTOMER })
       .getOne()
 
     if (!user) throw new NotFoundException('User not found')
@@ -398,7 +399,6 @@ export class UsersService {
     if (updateUserDto.role === ROLES_CONST.CUSTOMER || updateUserDto.role) {
       user.name = updateUserDto?.name ?? user.name
       user.last_name = updateUserDto?.last_name ?? user.last_name
-      user.role = updateUserDto?.role ?? user.role
       user.rules = updateUserDto?.rules
 
       await this.userRepository.save(user)
