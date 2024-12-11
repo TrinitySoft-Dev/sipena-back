@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { CreateRoleDto } from './dto/create-role.dto'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Role } from './entities/role.entity'
-import { Repository } from 'typeorm'
+import { ILike, Repository } from 'typeorm'
 
 @Injectable()
 export class RolesService {
@@ -19,7 +19,31 @@ export class RolesService {
     return this.roleRepository.findOne({ where: { name } })
   }
 
-  async find() {
+  async find({
+    roleName,
+    page,
+    pageSize,
+    includePagination,
+  }: {
+    roleName: string
+    page: number
+    pageSize: number
+    includePagination: boolean
+  }) {
+    const whereCondition = roleName ? { name: ILike(`${roleName}%`) } : {}
+
+    if (includePagination) {
+      const [result, total] = await this.roleRepository.findAndCount({
+        where: whereCondition,
+        skip: page * pageSize,
+        take: pageSize,
+        order: {
+          created_at: 'DESC',
+        },
+      })
+
+      return { result, pagination: { page, pageSize, total } }
+    }
     return this.roleRepository.find({ where: { status: true } })
   }
 }

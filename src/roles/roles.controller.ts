@@ -1,8 +1,7 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common'
+import { Controller, Get, Post, Body, DefaultValuePipe, Query, ParseIntPipe, ParseBoolPipe } from '@nestjs/common'
 import { RolesService } from './roles.service'
 import { CreateRoleDto } from './dto/create-role.dto'
-import { UpdateRoleDto } from './dto/update-role.dto'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
 
 @ApiTags('Roles')
 @Controller('roles')
@@ -14,8 +13,37 @@ export class RolesController {
     return this.rolesService.create(createRoleDto)
   }
 
+  @ApiOperation({
+    summary: 'Get Roles',
+    description: 'This method get all roles',
+  })
   @Get()
-  findAll() {
-    return this.rolesService.find()
+  @ApiQuery({
+    name: 'roleName',
+    required: false,
+    type: String,
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    required: false,
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'includePagination',
+    required: false,
+    type: Boolean,
+  })
+  findAll(
+    @Query('roleName') roleName: string,
+    @Query('page', new DefaultValuePipe(0), ParseIntPipe) page?: number,
+    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize?: number,
+    @Query('includePagination', new DefaultValuePipe(false), ParseBoolPipe) includePagination?: boolean,
+  ) {
+    return this.rolesService.find({ roleName, page, pageSize, includePagination })
   }
 }
