@@ -108,8 +108,6 @@ export class TimesheetService {
       .orderBy("DATE_TRUNC('month', timesheet.day)", 'ASC')
       .getRawMany()
 
-    console.log(totalCustomerRevenue, totalWorkerPay)
-
     return {
       totalTimesheets,
       totalCustomerRevenue: parseFloat(totalCustomerRevenue?.total || '0'),
