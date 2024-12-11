@@ -390,7 +390,6 @@ export class UsersService {
       user.name = updateUserDto?.name ?? user.name
       user.last_name = updateUserDto?.last_name ?? user.last_name
 
-      console.log(user)
       await this.userRepository.save(user)
 
       return { message: 'User updated successfully' }
