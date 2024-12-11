@@ -29,4 +29,15 @@ export class TimesheetWorkersService {
 
     return await this.timesheetWorkersRepository.save(entities)
   }
+
+  async getPaysheetd(start, end) {
+    const totalWorkerPay = await this.timesheetWorkersRepository
+      .createQueryBuilder('timesheetWorker')
+      .innerJoin('timesheetWorker.timesheet', 'timesheet')
+      .where('timesheet.day BETWEEN :start AND :end', { start, end })
+      .select('SUM(timesheetWorker.pay)', 'total')
+      .getRawOne()
+
+    return totalWorkerPay.total
+  }
 }

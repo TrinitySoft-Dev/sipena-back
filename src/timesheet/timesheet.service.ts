@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common'
 import { ContainerDto, CreateTimesheetDto } from './dto/create-timesheet.dto'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Timesheet, TimesheetStatusEnum } from './entities/timesheet.entity'
-import { In, Repository } from 'typeorm'
+import { Between, In, Repository } from 'typeorm'
 import { ContainerService } from '@/container/container.service'
 import { UsersService } from '@/users/users.service'
 import { Rule } from '@/rules/entities/rule.entity'
@@ -13,6 +13,8 @@ import { ExtraRule } from '@/extra_rules/entities/extra_rule.entity'
 import { RulesWorkersService } from '@/rules_workers/rules_workers.service'
 import { randomUUID } from 'crypto'
 import { UpdateTimesheetDto } from './dto/update-timesheet.dto'
+import { FILTER_TYPE } from '@/common/enums/enums'
+import { DateTime } from 'luxon'
 
 @Injectable()
 export class TimesheetService {
@@ -71,6 +73,53 @@ export class TimesheetService {
       return { message: 'Timesheet created successfully' }
     } catch (error) {
       throw error
+    }
+  }
+
+  async getMetricsTimesheet(startDate: string, endDate: string) {
+    const start = DateTime.fromISO(startDate).toJSDate()
+    const end = DateTime.fromISO(endDate).toJSDate()
+
+    const totalTimesheets = await this.timesheetRepository.count({
+      where: {
+        day: Between(start, end),
+      },
+    })
+
+    const totalCustomerRevenue = await this.timesheetRepository
+      .createQueryBuilder('timesheet')
+      .where('timesheet.day BETWEEN :start AND :end', { start, end })
+      .select('SUM(timesheet.rate)', 'total')
+      .getRawOne()
+
+    const totalWorkerPay = await this.timesheetWorkersService.getPaysheetd(start, end)
+
+    const monthlyData = await this.timesheetRepository
+      .createQueryBuilder('timesheet')
+      .leftJoinAndSelect('timesheet.timesheet_workers', 'timesheetWorker')
+      .select([
+        "DATE_TRUNC('month', timesheet.day) AS month",
+        'SUM(timesheet.rate) AS total_rate',
+        'SUM(timesheetWorker.pay) AS total_pay',
+        '(SUM(timesheet.rate) - SUM(timesheetWorker.pay)) AS net_gain',
+      ])
+      .where('timesheet.day BETWEEN :start AND :end', { start, end })
+      .groupBy("DATE_TRUNC('month', timesheet.day)")
+      .orderBy("DATE_TRUNC('month', timesheet.day)", 'ASC')
+      .getRawMany()
+
+    console.log(totalCustomerRevenue, totalWorkerPay)
+
+    return {
+      totalTimesheets,
+      totalCustomerRevenue: parseFloat(totalCustomerRevenue?.total || '0'),
+      totalWorkerPay: parseFloat(totalWorkerPay || '0'),
+      monthlyData: monthlyData.map(data => ({
+        month: data.month,
+        totalRate: parseFloat(data.total_rate || '0'),
+        totalPay: parseFloat(data.total_pay || '0'),
+        netGain: parseFloat(data.net_gain || '0'),
+      })),
     }
   }
 

@@ -68,6 +68,11 @@ export class TimesheetController {
     return this.timesheetService.findWeekByOpenTimesheet()
   }
 
+  @Get('/metrics')
+  findMetrics(@Query('startDate') startDate: string, @Query('endDate') endDate: string) {
+    return this.timesheetService.getMetricsTimesheet(startDate, endDate)
+  }
+
   @Get('/open-by-week-worker')
   findOpenTimesheet() {
     return this.timesheetService.getOpenTimesheetsWorkerByWeek()
