@@ -1,0 +1,52 @@
+<mjml>
+  <mj-head>
+    <mj-style inline="inline">
+      .thanks-title div {
+        color: #F2652E!important;
+        font-size: 32px!important;
+        font-weight: bold!important;
+        text-align: center!important;
+        font-weight: bold!important;
+      }
+
+      .email-body div {
+        color: #252D3C!important;
+        font-size: 16px!important;
+        text-align: center!important;
+        line-height: 27px!important;
+        margin-top: 14px!important;
+      }
+
+      .footer div {
+        color: #fff!important;
+        font-size: 13px!important;
+        text-align: center!important;
+        line-height: 20px!important;
+      }
+
+        .text-bold {
+            font-weight: 600!important;
+        }
+    </mj-style>
+  </mj-head>
+  <mj-body background-color="#fff">
+    <mj-section background-color="#ffffff" padding="20px">
+      <mj-column>
+        <mj-image src="https://sipena-back-eta.vercel.app/public/email.png" alt="Lpogo" width="80px" />
+        <mj-text css-class="thanks-title">Created user</mj-text>
+        <mj-text css-class="email-body">
+          Hi, {{name}} {{lastname}}. Your account has been created successfully. <br /> <span class="text-bold">username:</span> {{email}}  <br /> <span class="text-bold">password:</span> {{password}} <br /> Do not forget to change your password when you log in. <br /> Welcome to Sipena.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+    <mj-section background-color="#252D3C" css-class="footer">
+      <mj-column>
+        <mj-image src="https://sipena-back-eta.vercel.app/public/logo.png" alt="Logo" width="100px" />
+        <mj-text color="#ffffff">
+          If you have questions, do not forget to write to <a href="mailto:soporte@sipnea.com.co">soporte@sipena.com.co</a><br />
+          Sipena Team
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

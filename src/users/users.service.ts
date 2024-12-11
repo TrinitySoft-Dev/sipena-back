@@ -64,14 +64,28 @@ export class UsersService {
       if (rest.create_type !== 'BASIC') obj['infoworker'] = await this.infoworkerService.create({ ...rest })
 
       await this.userRepository.save(obj)
-      await this.emailService.send({
-        template: 'confirmation.html',
-        email,
-        data: {
-          name,
-          lastname: last_name,
-        },
-      })
+
+      if (rest.create_type !== 'BASIC') {
+        await this.emailService.send({
+          template: 'create_user.html',
+          email,
+          data: {
+            name,
+            lastname: last_name,
+            email,
+            password,
+          },
+        })
+      } else {
+        await this.emailService.send({
+          template: 'confirmation.html',
+          email,
+          data: {
+            name,
+            lastname: last_name,
+          },
+        })
+      }
 
       return { message: 'User created successfully' }
     }
@@ -99,11 +113,13 @@ export class UsersService {
       await this.userRepository.save(user)
 
       await this.emailService.send({
-        template: 'confirmation.html',
+        template: 'create_user.html',
         email,
         data: {
           name,
           lastname: last_name,
+          email,
+          password,
         },
       })
       return { message: 'User created successfully' }
@@ -117,11 +133,13 @@ export class UsersService {
     })
     await this.userRepository.save(user)
     await this.emailService.send({
-      template: 'confirmation.html',
+      template: 'create_user.html',
       email,
       data: {
         name,
         lastname: last_name,
+        email,
+        password,
       },
     })
 
