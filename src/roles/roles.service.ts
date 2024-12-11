@@ -18,4 +18,8 @@ export class RolesService {
     }
     return this.roleRepository.findOne({ where: { name } })
   }
+
+  async find() {
+    return this.roleRepository.find({ where: { status: true } })
+  }
 }

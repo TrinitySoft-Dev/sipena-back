@@ -13,4 +13,9 @@ export class RolesController {
   create(@Body() createRoleDto: CreateRoleDto) {
     return this.rolesService.create(createRoleDto)
   }
+
+  @Get()
+  findAll() {
+    return this.rolesService.find()
+  }
 }
