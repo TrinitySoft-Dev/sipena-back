@@ -151,7 +151,7 @@ export class UsersService {
 
     const user = await this.userRepository.findOne({
       where: { email, active: true },
-      relations: ['infoworker', 'role'],
+      relations: ['infoworker', 'role', 'role.permissions'],
     })
 
     if (!user) throw new UnauthorizedException('Email or password incorrect')
@@ -165,6 +165,8 @@ export class UsersService {
       completed = this.infoworkerService.validateInfoworker(user.infoworker)
     }
 
+    const permissions = user.role.permissions.map(permission => permission.name)
+
     const payload = {
       email: user.email,
       role: user.role.name,
@@ -173,6 +175,7 @@ export class UsersService {
       name: user.name,
       lastname: user.last_name,
       avatar_url: user.avatar,
+      permissions,
     }
 
     const token = await this.jwtService.signAsync(payload)
@@ -200,7 +203,7 @@ export class UsersService {
 
     const user = await this.userRepository.findOne({
       where: { email: validToken.email, active: true },
-      relations: ['infoworker', 'role'],
+      relations: ['infoworker', 'role', 'role.permissions'],
     })
     if (!user) throw new UnauthorizedException('Email or password incorrect')
 
@@ -208,6 +211,8 @@ export class UsersService {
     if (user.role.name === ROLES_CONST.WORKER) {
       completed = this.infoworkerService.validateInfoworker(user.infoworker)
     }
+
+    const permissions = user.role.permissions.map(permission => permission.name)
 
     const payload = {
       email: user.email,
@@ -217,6 +222,7 @@ export class UsersService {
       name: user.name,
       lastname: user.last_name,
       avatar_url: user.avatar,
+      permissions,
     }
 
     const token = await this.jwtService.signAsync(payload)
@@ -424,7 +430,7 @@ export class UsersService {
       return { message: 'User updated successfully' }
     }
 
-    return { message: 'User updated successfully' }
+    return { message: 'User updated successfully', user }
   }
 
   updateAvatar(id: number, updateUserDto: UpdateUserDto) {
