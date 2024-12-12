@@ -417,7 +417,7 @@ export class UsersService {
 
       await this.userRepository.save(user)
 
-      return { message: 'User updated successfully' }
+      return { message: 'User updated successfully', user }
     }
 
     if (updateUserDto.role === ROLES_CONST.CUSTOMER || updateUserDto.role) {
@@ -427,7 +427,7 @@ export class UsersService {
 
       await this.userRepository.save(user)
 
-      return { message: 'User updated successfully' }
+      return { message: 'User updated successfully', user }
     }
 
     return { message: 'User updated successfully', user }
