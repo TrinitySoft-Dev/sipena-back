@@ -17,7 +17,7 @@ import {
 })
 export class Role {
   @PrimaryGeneratedColumn('uuid')
-  id: number
+  id: string
 
   @Column({
     unique: true,
