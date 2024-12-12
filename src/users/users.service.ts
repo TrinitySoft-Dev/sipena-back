@@ -377,7 +377,7 @@ export class UsersService {
     const { id, updateUserDto, visa, passport } = options
     const user = await this.userRepository.findOne({
       where: { id },
-      relations: ['infoworker', 'rules'],
+      relations: ['infoworker', 'rules', 'role', 'role.permissions'],
     })
 
     if (!user) throw new NotFoundException('User not found')
