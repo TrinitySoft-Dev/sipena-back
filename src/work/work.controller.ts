@@ -1,7 +1,19 @@
-import { Controller, Post, Body, Get, UseGuards, Param, Put } from '@nestjs/common'
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  UseGuards,
+  Param,
+  Put,
+  DefaultValuePipe,
+  ParseIntPipe,
+  Query,
+  ParseBoolPipe,
+} from '@nestjs/common'
 import { WorkService } from './work.service'
 import { CreateWorkDto } from './dto/create-work.dto'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiQuery, ApiTags } from '@nestjs/swagger'
 import { AuthGuard } from '@/common/guards/auth.guard'
 import { UpdateWorkDto } from './dto/update-work.dto'
 
@@ -17,8 +29,27 @@ export class WorkController {
   }
 
   @Get()
-  find() {
-    return this.workService.find()
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    required: false,
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'includePagination',
+    required: false,
+    type: Boolean,
+  })
+  find(
+    @Query('page', new DefaultValuePipe(0), ParseIntPipe) page?: number,
+    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize?: number,
+    @Query('includePagination', new DefaultValuePipe(false), ParseBoolPipe) includePagination?: boolean,
+  ) {
+    return this.workService.find({ page, pageSize, includePagination })
   }
 
   @Get(':id')

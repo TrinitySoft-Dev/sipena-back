@@ -43,10 +43,24 @@ export class WorkService {
     return work
   }
 
-  async find() {
+  async find({ page, pageSize, includePagination }: { page: number; pageSize: number; includePagination: boolean }) {
+    if (includePagination) {
+      console.log('includePagination', includePagination)
+      const [result, total] = await this.workRepository.findAndCount({
+        relations: ['workFieldVisibilities', 'workFieldVisibilities.field'],
+        skip: page * pageSize,
+        take: pageSize,
+        order: {
+          created_at: 'DESC',
+        },
+      })
+      return { result, pagination: { page, pageSize, total } }
+    }
     return await this.workRepository.find({
       relations: ['workFieldVisibilities', 'workFieldVisibilities.field'],
-      order: { id: 'ASC' },
+      order: {
+        created_at: 'DESC',
+      },
     })
   }
 

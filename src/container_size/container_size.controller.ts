@@ -1,12 +1,24 @@
-import { Controller, Post, Body, UseGuards, Get, Param, Put } from '@nestjs/common'
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Get,
+  Param,
+  Put,
+  DefaultValuePipe,
+  ParseIntPipe,
+  Query,
+  ParseBoolPipe,
+} from '@nestjs/common'
 import { ContainerSizeService } from './container_size.service'
 import { CreateContainerSizeDto } from './dto/create-container_size.dto'
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger'
 import { AuthGuard } from '@/common/guards/auth.guard'
 
 @ApiTags('Container size')
-@ApiBearerAuth()
-@UseGuards(AuthGuard)
+// @ApiBearerAuth()
+// @UseGuards(AuthGuard)
 @Controller('container-size')
 export class ContainerSizeController {
   constructor(private readonly containerSizeService: ContainerSizeService) {}
@@ -17,8 +29,27 @@ export class ContainerSizeController {
   }
 
   @Get('/')
-  find() {
-    return this.containerSizeService.find()
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    required: false,
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'includePagination',
+    required: false,
+    type: Boolean,
+  })
+  async find(
+    @Query('page', new DefaultValuePipe(0), ParseIntPipe) page?: number,
+    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize?: number,
+    @Query('includePagination', new DefaultValuePipe(false), ParseBoolPipe) includePagination?: boolean,
+  ) {
+    return await this.containerSizeService.find({ page, pageSize, includePagination })
   }
 
   @Get('/:id')

@@ -12,8 +12,23 @@ export class ContainerSizeService {
     return this.containerSizeRepository.save(createContainerSizeDto)
   }
 
-  find() {
-    return this.containerSizeRepository.find()
+  async find({ page, pageSize, includePagination }: { page: number; pageSize: number; includePagination: boolean }) {
+    if (includePagination) {
+      const [result, total] = await this.containerSizeRepository.findAndCount({
+        skip: page * pageSize,
+        take: pageSize,
+        order: {
+          created_at: 'DESC',
+        },
+      })
+
+      return { result, pagination: { page, pageSize, total } }
+    }
+    return this.containerSizeRepository.find({
+      order: {
+        created_at: 'DESC',
+      },
+    })
   }
 
   async findById(id: number) {
