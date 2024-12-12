@@ -54,4 +54,8 @@ export class RolesService {
     Object.assign(role, updateRoleDto)
     return this.roleRepository.save(role)
   }
+
+  async delete(id: string) {
+    return this.roleRepository.softDelete(id)
+  }
 }

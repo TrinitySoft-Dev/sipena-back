@@ -9,6 +9,7 @@ import {
   ParseBoolPipe,
   Put,
   Param,
+  Delete,
 } from '@nestjs/common'
 import { RolesService } from './roles.service'
 import { CreateRoleDto } from './dto/create-role.dto'
@@ -59,7 +60,20 @@ export class RolesController {
   }
 
   @Put(':id')
+  @ApiOperation({
+    summary: 'Update Role',
+    description: 'This method update a role',
+  })
   update(@Body() updateRoleDto: CreateRoleDto, @Param('id') id: string) {
     return this.rolesService.update(id, updateRoleDto)
+  }
+
+  @Delete(':id')
+  @ApiOperation({
+    summary: 'Delete Role',
+    description: 'This method delete a role',
+  })
+  remove(@Param('id') id: string) {
+    return this.rolesService.delete(id)
   }
 }
