@@ -19,6 +19,19 @@ export class TemplateService {
     return this.templateRepository.findOne({ where: { id }, relations: ['columns'] })
   }
 
+  async find(page, pageSize) {
+    const [result, total] = await this.templateRepository.findAndCount({
+      skip: page * pageSize,
+      take: pageSize,
+      relations: ['columns'],
+      order: {
+        created_at: 'DESC',
+      },
+    })
+
+    return { result, pagination: { page, pageSize, total } }
+  }
+
   fields() {
     return getSelectedFieldsWithPaths(Timesheet)
   }

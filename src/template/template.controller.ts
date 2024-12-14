@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common'
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseIntPipe,
+  Query,
+  DefaultValuePipe,
+} from '@nestjs/common'
 import { TemplateService } from './template.service'
 import { CreateTemplateDto } from './dto/create-template.dto'
 import { UpdateTemplateDto } from './dto/update-template.dto'
@@ -19,7 +30,15 @@ export class TemplateController {
     return this.templateService.createDefaultTemplate()
   }
 
-  @Get()
+  @Get('/')
+  find(
+    @Query('page', new ParseIntPipe(), new DefaultValuePipe(0)) page: number,
+    @Query('pageSize', new ParseIntPipe(), new DefaultValuePipe(10)) pageSize: number,
+  ) {
+    return this.templateService.find(page, pageSize)
+  }
+
+  @Get('fields')
   fields() {
     return this.templateService.fields()
   }
