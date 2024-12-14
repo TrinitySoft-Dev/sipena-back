@@ -55,6 +55,10 @@ export class RolesService {
     return this.roleRepository.save(role)
   }
 
+  async findById(id: string) {
+    return this.roleRepository.findOne({ where: { id }, relations: ['permissions'] })
+  }
+
   async delete(id: string) {
     return this.roleRepository.softDelete(id)
   }

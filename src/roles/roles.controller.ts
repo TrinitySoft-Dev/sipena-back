@@ -25,11 +25,11 @@ export class RolesController {
     return this.rolesService.create(createRoleDto)
   }
 
+  @Get()
   @ApiOperation({
     summary: 'Get Roles',
     description: 'This method get all roles',
   })
-  @Get()
   @ApiQuery({
     name: 'roleName',
     required: false,
@@ -57,6 +57,15 @@ export class RolesController {
     @Query('includePagination', new DefaultValuePipe(false), ParseBoolPipe) includePagination?: boolean,
   ) {
     return this.rolesService.find({ roleName, page, pageSize, includePagination })
+  }
+
+  @Get(':id')
+  @ApiOperation({
+    summary: 'Get Role',
+    description: 'This method get a role',
+  })
+  findOne(@Param('id') id: string) {
+    return this.rolesService.findById(id)
   }
 
   @Put(':id')
