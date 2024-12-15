@@ -20,7 +20,7 @@ import {
 } from '@nestjs/common'
 import { UsersService } from './users.service'
 import { CreateUserDto } from './dto/worker-user.dto'
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
 import { exampleUserSchema, userSchema } from './schemas/users.schema'
 import { LoginUserDto } from './dto/login-user.dto'
 import { ClientUserDto } from './dto/client.user.dto'
@@ -89,17 +89,21 @@ export class UsersController {
   // @ApiBearerAuth()
   // @UseGuards(AuthGuard)
   @ApiOperation({
-    summary: 'Find users by role',
-    description: 'This method returns users by role',
+    summary: 'Find users by role, name, and email',
+    description: 'This method returns users by role, name, and email',
   })
+  @ApiQuery({ name: 'name', required: false })
+  @ApiQuery({ name: 'email', required: false })
   @Get('role')
   findByRole(
     @Query('role') role: string,
+    @Query('name') name?: string,
+    @Query('email') email?: string,
     @Query('page', new DefaultValuePipe(0), ParseIntPipe) page?: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize?: number,
     @Query('includePagination', new DefaultValuePipe(false), ParseBoolPipe) includePagination?: boolean,
   ) {
-    return this.usersService.findByRole({ role, page, pageSize, includePagination })
+    return this.usersService.findByRole({ role, name, email, page, pageSize, includePagination })
   }
 
   @ApiBearerAuth()

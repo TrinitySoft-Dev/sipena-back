@@ -314,17 +314,22 @@ export class UsersService {
 
   async findByRole({
     role,
+    name,
+    email,
     page,
     pageSize,
     includePagination,
   }: {
     role: string
+    name: string
+    email: string
     page: number
     pageSize: number
     includePagination: boolean
   }) {
     const skip = page * pageSize
-    const where = { role: { name: role }, active: true }
+    const where: any = { role: { name: role }, active: true }
+
     const order = { created_at: 'DESC' as const }
 
     if (role === ROLES_CONST.WORKER && includePagination) {
@@ -334,6 +339,8 @@ export class UsersService {
         .leftJoinAndSelect('user.role', 'role')
         .where('role.name = :role', { role })
         .andWhere('user.active = :active', { active: true })
+        .andWhere(name ? '(user.name ILIKE :name OR user.last_name ILIKE :name)' : '1=1', { name: `%${name}%` })
+        .andWhere(email ? 'user.email = :email' : '1=1', { email })
         .orderBy('user.created_at', 'DESC')
         .skip(skip)
         .take(pageSize)
@@ -347,6 +354,15 @@ export class UsersService {
           total,
         },
       }
+    }
+
+    if (name) {
+      where.name = { $ilike: `%${name}%` }
+      where.last_name = { $ilike: `%${name}%` }
+    }
+
+    if (email) {
+      where.email = email
     }
 
     const options = {

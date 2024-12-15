@@ -303,9 +303,39 @@ export class TimesheetService {
   async findTimesheetByWorker(workerId: number, page: number, pageSize: number) {
     const [result, total] = await this.timesheetRepository.findAndCount({
       where: { timesheet_workers: { worker: { id: In([workerId]) } } },
-      relations: ['timesheet_workers', 'customer', 'container', 'container.work'],
+      relations: ['timesheet_workers', 'timesheet_workers.worker', 'customer', 'container', 'container.work'],
+      skip: page * pageSize,
+      take: pageSize,
+      order: {
+        created_at: 'DESC',
+      },
     })
-    return { result, pagination: { page, pageSize, total } }
+    const mappedResult = result.map(timesheet => ({
+      id: timesheet.id,
+      day: timesheet.day,
+      week: timesheet.week,
+      created_at: timesheet.created_at,
+      delete_at: timesheet.delete_at,
+      updated_at: timesheet.updated_at,
+      timesheet_workers: timesheet.timesheet_workers.map(tw => ({
+        id: tw.id,
+        worker: {
+          name: tw.worker.name,
+          last_name: tw.worker.last_name,
+          email: tw.worker.email,
+        },
+        pay: tw.pay,
+      })),
+      customer: {
+        id: timesheet.customer.id,
+        email: timesheet.customer.email,
+        name: timesheet.customer.name,
+        last_name: timesheet.customer.last_name,
+      },
+      container: timesheet.container,
+    }))
+
+    return { result: mappedResult, pagination: { page, pageSize, total } }
   }
 
   async findTimesheetsByWeek(week: string, customerId: number) {
