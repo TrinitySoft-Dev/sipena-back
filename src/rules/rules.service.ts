@@ -3,7 +3,7 @@ import { Injectable, NotFoundException } from '@nestjs/common'
 import { CreateRuleDto } from './dto/create-rule.dto'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Rule } from './entities/rule.entity'
-import { In, Repository } from 'typeorm'
+import { ILike, In, Repository } from 'typeorm'
 import { getAllowedConditionFields } from '@/common/decorators/allowed-fields.decorator'
 import { UpdateRuleDto } from './dto/update-rule.dto'
 import { ConditionGroupsService } from '@/condition_groups/condition_groups.service'
@@ -133,11 +133,31 @@ export class RulesService {
     return await this.ruleRepository.find({ where: { active: true } })
   }
 
-  async find({ page, pageSize, includePagination }: { page: number; pageSize: number; includePagination: boolean }) {
+  async find({
+    page,
+    pageSize,
+    includePagination,
+    name,
+    containerSize,
+  }: {
+    page: number
+    pageSize: number
+    includePagination: boolean
+    name: string
+    containerSize: string
+  }) {
+    const whereConditions: any = { active: true }
+    if (name) {
+      whereConditions.name = ILike(`%${name}%`)
+    }
+    if (containerSize) {
+      whereConditions.container_size = { value: containerSize }
+    }
     if (includePagination) {
       const [result, total] = await this.ruleRepository.findAndCount({
         skip: page * pageSize,
         take: pageSize,
+        where: whereConditions,
         relations: ['container_size'],
         order: {
           created_at: 'DESC',
@@ -155,7 +175,7 @@ export class RulesService {
     }
 
     return await this.ruleRepository.find({
-      where: { active: true },
+      where: whereConditions,
       relations: ['container_size'],
       select: {
         id: true,

@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common'
 import { CreateExtraRuleDto } from './dto/create-extra_rule.dto'
 import { InjectRepository } from '@nestjs/typeorm'
 import { ExtraRule } from './entities/extra_rule.entity'
-import { Repository } from 'typeorm'
+import { ILike, Repository } from 'typeorm'
 import { UpdateExtraRuleDto } from './dto/update-extra_rule.dto'
 
 @Injectable()
@@ -13,10 +13,32 @@ export class ExtraRulesService {
     return await this.extraRuleRepository.save(createExtraRuleDto)
   }
 
-  async findAll({ page, pageSize, includePagination }: { page: number; pageSize: number; includePagination: boolean }) {
+  async findAll({
+    page,
+    pageSize,
+    includePagination,
+    name,
+    rate,
+  }: {
+    page: number
+    pageSize: number
+    includePagination: boolean
+    name: string
+    rate: number
+  }) {
+    const whereConditions: any = { active: true }
+
+    if (name) {
+      whereConditions.name = ILike(`%${name}%`)
+    }
+    if (rate) {
+      whereConditions.rate = rate
+    }
+
     if (includePagination) {
       const [result, total] = await this.extraRuleRepository.findAndCount({
         skip: page * pageSize,
+        where: whereConditions,
         take: pageSize,
         order: {
           created_at: 'DESC',

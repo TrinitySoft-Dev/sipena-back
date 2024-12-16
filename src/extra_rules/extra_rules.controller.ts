@@ -19,8 +19,8 @@ import { AuthGuard } from '@/common/guards/auth.guard'
 import { UpdateExtraRuleDto } from './dto/update-extra_rule.dto'
 
 @ApiTags('Extra Rules')
-@ApiBearerAuth()
-@UseGuards(AuthGuard)
+// @ApiBearerAuth()
+// @UseGuards(AuthGuard)
 @Controller('extra-rules')
 export class ExtraRulesController {
   constructor(private readonly extraRulesService: ExtraRulesService) {}
@@ -33,14 +33,18 @@ export class ExtraRulesController {
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'pageSize', required: false, type: Number })
   @ApiQuery({ name: 'includePagination', required: false, type: Boolean })
+  @ApiQuery({ name: 'name', required: false, type: String })
+  @ApiQuery({ name: 'rate', required: false, type: Number })
   @Get()
   @Get('find')
   findAll(
     @Query('page', new DefaultValuePipe(0), ParseIntPipe) page?: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize?: number,
     @Query('includePagination', new DefaultValuePipe(false), ParseBoolPipe) includePagination?: boolean,
+    @Query('rate') rate?: number,
+    @Query('name') name?: string,
   ) {
-    return this.extraRulesService.findAll({ page, pageSize, includePagination })
+    return this.extraRulesService.findAll({ page, pageSize, includePagination,rate,name })
   }
 
   @Get('/rule/:id')

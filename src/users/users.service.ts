@@ -4,7 +4,7 @@ import * as crypto from 'crypto'
 import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { User } from './entities/user.entity'
-import { FindOneOptions, In, Repository } from 'typeorm'
+import { FindOneOptions, ILike, In, Repository } from 'typeorm'
 import { InfoworkersService } from '@/infoworkers/infoworkers.service'
 import { LoginUserDto } from './dto/login-user.dto'
 import { ImagesService } from '@/images/images.service'
@@ -328,7 +328,7 @@ export class UsersService {
     includePagination: boolean
   }) {
     const skip = page * pageSize
-    const where: any = { role: { name: role }, active: true }
+    let where: any = { role: { name: role }, active: true }
 
     const order = { created_at: 'DESC' as const }
 
@@ -346,6 +346,8 @@ export class UsersService {
         .take(pageSize)
         .getManyAndCount()
 
+      console.log(result)
+
       return {
         result,
         pagination: {
@@ -357,8 +359,10 @@ export class UsersService {
     }
 
     if (name) {
-      where.name = { $ilike: `%${name}%` }
-      where.last_name = { $ilike: `%${name}%` }
+      where = [
+        { name: ILike(`%${name}%`), ...where },
+        { last_name: ILike(`%${name}%`), ...where },
+      ]
     }
 
     if (email) {
@@ -370,11 +374,11 @@ export class UsersService {
       skip,
       take: pageSize,
       order,
-      relations: role === ROLES_CONST.WORKER ? ['infoworker'] : [],
+      relations: role === ROLES_CONST.WORKER ? ['infoworker', 'container'] : ['role', 'timesheets'],
     }
-
     if (includePagination) {
       const [result, total] = await this.userRepository.findAndCount(options)
+
       return {
         result,
         pagination: {
@@ -386,6 +390,7 @@ export class UsersService {
     }
 
     const result = await this.userRepository.find(options)
+
     return result
   }
 

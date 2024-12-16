@@ -44,13 +44,17 @@ export class RulesController {
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'pageSize', required: false, type: Number })
   @ApiQuery({ name: 'includePagination', required: false, type: Boolean })
+  @ApiQuery({ name: 'name', required: false, type: String })
+  @ApiQuery({ name: 'containerSize', required: false, type: String })
   @Get('find')
   async find(
     @Query('page', new DefaultValuePipe(0), ParseIntPipe) page?: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize?: number,
     @Query('includePagination', new DefaultValuePipe(false), ParseBoolPipe) includePagination?: boolean,
+    @Query('containerSize') containerSize?: string,
+    @Query('name') name?: string,
   ) {
-    return await this.rulesService.find({ page, pageSize, includePagination })
+    return await this.rulesService.find({ page, pageSize, includePagination, containerSize, name })
   }
 
   @ApiOperation({ summary: 'Find by customer', description: 'This method returns a list of rules by customer' })
