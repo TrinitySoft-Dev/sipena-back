@@ -38,6 +38,11 @@ export class TemplateController {
     return this.templateService.find(page, pageSize)
   }
 
+  @Get('select')
+  findSelect() {
+    return this.templateService.findSelect()
+  }
+
   @Get('fields')
   fields() {
     return this.templateService.fields()

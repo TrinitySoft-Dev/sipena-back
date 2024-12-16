@@ -356,14 +356,38 @@ export class TimesheetService {
   async findWeekByOpenTimesheet() {
     const result = await this.timesheetRepository
       .createQueryBuilder('timesheet')
-      .select('timesheet.week')
-      .where('timesheet.status = :status', { status: 'OPEN' })
-      .orderBy('timesheet.week', 'ASC')
-      .groupBy('timesheet.week')
-      .getRawMany()
+      .leftJoinAndSelect('timesheet.customer', 'customer')
+      .where('timesheet.status_customer_pay = :status_customer_pay', { status_customer_pay: 'OPEN' })
+      .getMany()
 
-    const flattened = result.map(item => item.timesheet_week)
-    return flattened
+    const uniqueCustomers = new Set<string>()
+    const groupedByWeek = result.reduce(
+      (acc, timesheet) => {
+        const week: string = timesheet.week as string
+        if (!acc[week]) {
+          acc[week] = { customers: [] }
+        }
+
+        if (!uniqueCustomers.has(timesheet.customer.name)) {
+          uniqueCustomers.add(timesheet.customer.name)
+          acc[week].customers.push({
+            id: timesheet.customer.id,
+            name: timesheet.customer.name,
+            last_name: timesheet.customer.last_name,
+          })
+        }
+
+        return acc
+      },
+      {} as Record<string, { customers: { id: number; name: string; last_name: string }[] }>,
+    )
+
+    return Object.keys(groupedByWeek)
+      .map(week => ({
+        week,
+        customers: groupedByWeek[week].customers,
+      }))
+      .filter(item => item.customers.length > 0)
   }
 
   async getOpenTimesheetsWorkerByWeek() {

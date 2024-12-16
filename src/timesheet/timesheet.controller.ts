@@ -63,7 +63,7 @@ export class TimesheetController {
     return this.timesheetService.find(req?.payload, page, pageSize)
   }
 
-  @Get('/week')
+  @Get('/open-by-week-customer')
   findWeek() {
     return this.timesheetService.findWeekByOpenTimesheet()
   }

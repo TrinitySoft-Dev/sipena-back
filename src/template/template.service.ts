@@ -32,6 +32,10 @@ export class TemplateService {
     return { result, pagination: { page, pageSize, total } }
   }
 
+  async findSelect() {
+    return this.templateRepository.find({ select: ['id', 'name'] })
+  }
+
   fields() {
     return getSelectedFieldsWithPaths(Timesheet)
   }
