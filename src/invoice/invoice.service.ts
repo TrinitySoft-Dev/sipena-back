@@ -17,8 +17,7 @@ export class InvoiceService {
 
   async create(createInvoiceDto: CreateInvoiceDto) {
     const { reference_week, customer, invoice_number } = createInvoiceDto
-    const timesheets = await this.timesheetService.findTimesheetsByWeek(reference_week, customer)
-
+    let timesheets = await this.timesheetService.findTimesheetsByWeek(reference_week, customer, createInvoiceDto.type)
     const template = await this.templateService.findOne(createInvoiceDto.template)
     const columns = await this.resolverColumns(template, timesheets)
 

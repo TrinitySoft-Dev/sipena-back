@@ -394,15 +394,32 @@ export class TimesheetService {
     return { result: mappedResult, pagination: { page, pageSize, total } }
   }
 
-  async findTimesheetsByWeek(week: string, customerId: number) {
+  async findTimesheetsByWeek(week: string, customerId: number, type: string) {
+    if (type === ROLES_CONST.CUSTOMER) {
+      const result = await this.timesheetRepository
+        .createQueryBuilder('timesheet')
+        .leftJoinAndSelect('timesheet.container', 'container')
+        .leftJoinAndSelect('container.work', 'work')
+        .leftJoinAndSelect('container.product', 'product')
+        .leftJoinAndSelect('timesheet.customer', 'customer')
+        .where('timesheet.week = :week', { week })
+        .andWhere('timesheet.customer = :customerId', { customerId })
+        .andWhere('timesheet.status_customer_pay = :status_customer_pay', { status_customer_pay: 'OPEN' })
+        .getRawMany()
+
+      return result
+    }
+
     const result = await this.timesheetRepository
       .createQueryBuilder('timesheet')
       .leftJoinAndSelect('timesheet.container', 'container')
       .leftJoinAndSelect('container.work', 'work')
       .leftJoinAndSelect('container.product', 'product')
       .leftJoinAndSelect('timesheet.customer', 'customer')
+      .leftJoinAndSelect('timesheet.timesheet_workers', 'timesheet_workers')
+      .leftJoinAndSelect('timesheet_workers.worker', 'worker')
       .where('timesheet.week = :week', { week })
-      .andWhere('timesheet.customer = :customerId', { customerId })
+      .andWhere('worker.id = :customerId', { customerId })
       .andWhere('timesheet.status_customer_pay = :status_customer_pay', { status_customer_pay: 'OPEN' })
       .getRawMany()
 

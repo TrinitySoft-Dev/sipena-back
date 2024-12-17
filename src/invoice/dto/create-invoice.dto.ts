@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsDateString, IsNumber, IsString } from 'class-validator'
+import { IsDateString, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator'
 
 export class CreateInvoiceDto {
   @ApiProperty({
@@ -21,12 +21,14 @@ export class CreateInvoiceDto {
     description: 'The customer id',
   })
   @IsString()
+  @IsOptional()
   customer: number
 
   @ApiProperty({
     example: '2021-01-01',
     description: 'The invoice date',
   })
+  @IsOptional()
   @IsDateString()
   invoice_date: Date
 
@@ -34,8 +36,16 @@ export class CreateInvoiceDto {
     example: '2021-01-07',
     description: 'The due date',
   })
+  @IsOptional()
   @IsDateString()
   due_date: Date
+
+  @ApiProperty({
+    example: 'CUSTOMER',
+    description: 'The invoice status',
+  })
+  @IsEnum(['CUSTOMER', 'WORKER'])
+  type: string
 
   @ApiProperty({
     example: 1,
