@@ -10,12 +10,7 @@ export class InvoiceController {
   constructor(private readonly invoiceService: InvoiceService) {}
 
   @Post()
-  async create(@Body() createInvoiceDto: CreateInvoiceDto, @Res() res: Response) {
-    const stream = await this.invoiceService.create(createInvoiceDto)
-
-    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    res.setHeader('Content-Disposition', `attachment; filename="invoice-${createInvoiceDto.invoice_number}.xlsx"`)
-
-    stream.pipe(res)
+  async create(@Body() createInvoiceDto: CreateInvoiceDto) {
+    return this.invoiceService.create(createInvoiceDto)
   }
 }

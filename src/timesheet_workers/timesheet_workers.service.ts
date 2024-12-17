@@ -30,6 +30,18 @@ export class TimesheetWorkersService {
     return await this.timesheetWorkersRepository.save(entities)
   }
 
+  async updateMany(updateTimesheetWorkerDtos: UpdateTimesheetWorkerDto[]) {
+    if (!updateTimesheetWorkerDtos?.length) return []
+    const entities = updateTimesheetWorkerDtos.map(dto => ({
+      id: dto.id,
+      ...dto,
+      worker: { id: dto.worker },
+      timesheet: { id: dto.timesheet },
+    }))
+
+    return await this.timesheetWorkersRepository.save(entities)
+  }
+
   async getPaysheetd(start, end) {
     const totalWorkerPay = await this.timesheetWorkersRepository
       .createQueryBuilder('timesheetWorker')

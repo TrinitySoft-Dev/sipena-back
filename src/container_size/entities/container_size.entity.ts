@@ -1,3 +1,4 @@
+import { Container } from '@/container/entities/container.entity'
 import { Rule } from '@/rules/entities/rule.entity'
 import { RulesWorker } from '@/rules_workers/entities/rules_worker.entity'
 import {
@@ -33,6 +34,9 @@ export class ContainerSize {
     comment: 'User avatar',
   })
   active: boolean
+
+  @OneToMany(() => Container, container => container.size)
+  container: Container
 
   @OneToMany(() => RulesWorker, rules_worker => rules_worker.container_size)
   rules_worker: RulesWorker[]

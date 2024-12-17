@@ -70,10 +70,65 @@ export class TimesheetService {
       const payWorkers = await this.rulesWorkersService.validateRules(container, String(work_id), newWorkers)
       await this.timesheetWorkersService.createMany(payWorkers)
 
-      return { message: 'Timesheet created successfully' }
+      return { message: 'Timesheet updated successfully' }
     } catch (error) {
       throw error
     }
+  }
+
+  async update(id: number, updateTimesheetDto: UpdateTimesheetDto) {
+    const { timesheet, container } = updateTimesheetDto
+    let { customer_id, workers, work_id, ...restTimesheet } = timesheet
+
+    const existingTimesheet = await this.timesheetRepository.findOne({
+      where: { id },
+      relations: ['container'],
+    })
+    if (!existingTimesheet) throw new NotFoundException('Timesheet not found')
+
+    const customerUser = await this.usersService.findByWorks(customer_id, work_id, container.size)
+    if (!customerUser.rules.length) throw new NotFoundException('Rules not found')
+
+    const rules = customerUser.rules
+    const rate = await this.validateRules(rules, container)
+
+    let updatedContainer = existingTimesheet.container
+    if (container) {
+      updatedContainer = await this.containerService.update(updatedContainer.id, {
+        ...container,
+        product: { id: container.product },
+      })
+    }
+
+    restTimesheet = {
+      day: restTimesheet.day,
+      week: restTimesheet.week,
+      comment: restTimesheet.comment,
+      images: restTimesheet.images,
+    }
+
+    const updatedTimesheet = {
+      ...existingTimesheet,
+      ...restTimesheet,
+      rate: typeof rate === 'object' ? rate.rate : 0,
+      base: typeof rate === 'object' ? rate.base : 0,
+      container: updatedContainer,
+      customer: { id: customer_id },
+      extra_rates: typeof rate === 'object' ? JSON.stringify(rate.json) : null,
+    }
+
+    await this.timesheetRepository.save(updatedTimesheet)
+
+    const updatedWorkers = workers.map(worker => ({
+      ...worker,
+      worker: worker.worker,
+      timesheet: updatedTimesheet.id,
+    }))
+
+    const payWorkers = await this.rulesWorkersService.validateRules(container, String(work_id), updatedWorkers)
+    await this.timesheetWorkersService.updateMany(payWorkers)
+
+    return { message: 'Timesheet updated successfully' }
   }
 
   async getMetricsTimesheet(startDate: string, endDate: string) {
@@ -258,6 +313,7 @@ export class TimesheetService {
         'container',
         'container.work',
         'container.product',
+        'container.size',
       ],
     })
     if (!timesheet) throw new NotFoundException('Timesheet not found')
@@ -347,7 +403,7 @@ export class TimesheetService {
       .leftJoinAndSelect('timesheet.customer', 'customer')
       .where('timesheet.week = :week', { week })
       .andWhere('timesheet.customer = :customerId', { customerId })
-      .andWhere('timesheet.status = :status', { status: 'OPEN' })
+      .andWhere('timesheet.status_customer_pay = :status_customer_pay', { status_customer_pay: 'OPEN' })
       .getRawMany()
 
     return result
@@ -454,15 +510,5 @@ export class TimesheetService {
       where: { week, timesheet_workers: { worker: { role: { name: ROLES_CONST.WORKER }, id } } },
       relations: ['customer', 'container', 'container.work', 'container.product', 'timesheet_workers'],
     })
-  }
-
-  async update(id: number, data: UpdateTimesheetDto) {
-    const timesheet = await this.timesheetRepository.findOne({ where: { id } })
-    if (!timesheet) throw new NotFoundException('Timesheet not found')
-
-    Object.assign(timesheet, data)
-    await this.timesheetRepository.save(timesheet)
-
-    return { message: 'Timesheet updated successfully' }
   }
 }

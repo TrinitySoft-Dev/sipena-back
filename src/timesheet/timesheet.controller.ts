@@ -9,11 +9,13 @@ import {
   Param,
   DefaultValuePipe,
   ParseIntPipe,
+  Put,
 } from '@nestjs/common'
 import { TimesheetService } from './timesheet.service'
 import { CreateTimesheetDto } from './dto/create-timesheet.dto'
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
 import { AuthGuard } from '@/common/guards/auth.guard'
+import { UpdateTimesheetDto } from './dto/update-timesheet.dto'
 
 @ApiTags('Timesheet')
 @ApiBearerAuth()
@@ -139,4 +141,10 @@ export class TimesheetController {
   }
 
   // ================== END GET ==================
+
+  // ================== INIT PUT ==================
+  @Put(':id')
+  update(@Param('id') id: number, @Body() updateTimesheetDto: UpdateTimesheetDto) {
+    return this.timesheetService.update(id, updateTimesheetDto)
+  }
 }

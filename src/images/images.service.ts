@@ -39,6 +39,22 @@ export class ImagesService {
     }
   }
 
+  async uploadOtherFiles(file: Buffer, folder?: string, mimetype?: string) {
+    const shortId = Math.random().toString(36).substring(2, 15)
+    const key = folder ? `sipena/${folder}/${shortId}` : `sipena/${shortId}`
+
+    const command = new PutObjectCommand({
+      Bucket: config.AWS.S3_BUCKET_NAME,
+      Key: key,
+      Body: file,
+      ContentType: mimetype,
+    })
+
+    await this.s3Client.send(command)
+
+    return `${config.SIPENA_FILES}/${folder ? `${folder}/` : ''}${shortId}`
+  }
+
   async uploadMultiple(files: Express.Multer.File[]) {
     const promises = files.map(async file => {
       const shortId = Math.random().toString(36).substring(2, 15)

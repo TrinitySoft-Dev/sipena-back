@@ -1,6 +1,7 @@
 import { OPERATORS } from '@/common/conts/operators'
 import { ConditionField } from '@/common/decorators/condition-field.decorator'
 import { SelectedField } from '@/common/decorators/selected-fields.decorator'
+import { ContainerSize } from '@/container_size/entities/container_size.entity'
 import { Product } from '@/products/entities/product.entity'
 import { Work } from '@/work/entities/work.entity'
 import { IsBoolean } from 'class-validator'
@@ -36,10 +37,11 @@ export class Container {
   })
   work: Work
 
-  @Column({ type: 'integer', nullable: false })
+  // @Column({ type: 'integer', nullable: false })
   @ConditionField({ open: true })
   @SelectedField()
-  size: number
+  @ManyToOne(() => ContainerSize, container_size => container_size.container)
+  size: ContainerSize
 
   @ManyToOne(() => Product, product => product.containers, { cascade: true })
   product: Product

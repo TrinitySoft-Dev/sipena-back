@@ -4,12 +4,15 @@ import { TimesheetService } from '@/timesheet/timesheet.service'
 import { TemplateService } from '@/template/template.service'
 import * as excel4node from 'excel4node'
 import { Readable } from 'stream'
+import { ImagesService } from '@/images/images.service'
+import { TimesheetStatusEnum } from '@/timesheet/entities/timesheet.entity'
 
 @Injectable()
 export class InvoiceService {
   constructor(
     private readonly timesheetService: TimesheetService,
     private readonly templateService: TemplateService,
+    private readonly imageService: ImagesService,
   ) {}
 
   async create(createInvoiceDto: CreateInvoiceDto) {
@@ -56,11 +59,13 @@ export class InvoiceService {
     })
 
     const buffer = await wb.writeToBuffer()
-    const stream = new Readable()
-    stream.push(buffer)
-    stream.push(null)
+    const downloadURL = await this.imageService.uploadOtherFiles(
+      buffer,
+      'invoices',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    )
 
-    return stream
+    return downloadURL
   }
 
   private async resolverColumns(template, timesheets) {
@@ -84,7 +89,7 @@ export class InvoiceService {
           columns[column.name].rows = [...columns[column.name].rows, valueReplacecell]
         }
 
-        this.timesheetService.update(timesheet.id, { status: 'CLOSED' })
+        this.timesheetService.update(timesheet.id, { status_customer_pay: TimesheetStatusEnum.CLOSED })
       })
     })
 

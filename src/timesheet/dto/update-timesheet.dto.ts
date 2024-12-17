@@ -5,5 +5,5 @@ import { IsOptional, IsString } from 'class-validator'
 export class UpdateTimesheetDto extends PartialType(CreateTimesheetDto) {
   @IsOptional()
   @IsString()
-  status: string
+  status_customer_pay: string
 }

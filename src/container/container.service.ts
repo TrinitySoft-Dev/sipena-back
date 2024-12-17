@@ -11,4 +11,12 @@ export class ContainerService {
   async create(createContainerDto: CreateContainerDto) {
     return await this.containerRepository.save(createContainerDto)
   }
+
+  async update(id: number, createContainerDto: CreateContainerDto) {
+    const container = await this.containerRepository.findOne({ where: { id } })
+    if (!container) {
+      throw new NotFoundException('Container not found')
+    }
+    return await this.containerRepository.save({ ...container, ...createContainerDto })
+  }
 }
