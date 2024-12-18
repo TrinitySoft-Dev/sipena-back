@@ -519,13 +519,28 @@ export class TimesheetService {
     if (role === ROLES_CONST.CUSTOMER) {
       return this.timesheetRepository.find({
         where: { week, customer: { role: { name: ROLES_CONST.CUSTOMER }, id } },
-        relations: ['customer', 'container', 'container.work', 'container.product', 'timesheet_workers', 'role'],
+        relations: [
+          'customer',
+          'container',
+          'container.work',
+          'container.product',
+          'timesheet_workers',
+          'container.size',
+          'role',
+        ],
       })
     }
 
     return await this.timesheetRepository.find({
       where: { week, timesheet_workers: { worker: { role: { name: ROLES_CONST.WORKER }, id } } },
-      relations: ['customer', 'container', 'container.work', 'container.product', 'timesheet_workers'],
+      relations: [
+        'customer',
+        'container',
+        'container.work',
+        'container.product',
+        'timesheet_workers',
+        'container.size',
+      ],
     })
   }
 }

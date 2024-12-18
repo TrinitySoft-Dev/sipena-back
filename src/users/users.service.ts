@@ -346,8 +346,6 @@ export class UsersService {
         .take(pageSize)
         .getManyAndCount()
 
-      console.log(result)
-
       return {
         result,
         pagination: {
@@ -374,7 +372,8 @@ export class UsersService {
       skip,
       take: pageSize,
       order,
-      relations: role === ROLES_CONST.WORKER ? ['infoworker', 'container'] : ['role', 'timesheets'],
+      relations:
+        role === ROLES_CONST.WORKER ? ['infoworker', 'timesheet_workers.timesheet.container'] : ['role', 'timesheets'],
     }
     if (includePagination) {
       const [result, total] = await this.userRepository.findAndCount(options)
