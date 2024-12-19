@@ -108,7 +108,7 @@ export class User {
   @Column({
     nullable: false,
     type: 'boolean',
-    default: false,
+    default: true,
     comment: 'User avatar',
   })
   active: boolean
