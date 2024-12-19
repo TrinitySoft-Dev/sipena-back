@@ -18,4 +18,9 @@ export class CityController {
   findAll() {
     return this.cityService.findAll()
   }
+
+  @Get('test')
+  test() {
+    return 'Hello PRE'
+  }
 }
