@@ -61,7 +61,10 @@ export class UsersService {
       rest.city = rest.city ? { id: rest.city } : null
       rest.state = rest.state ? { id: rest.state } : null
 
-      if (rest.create_type !== 'BASIC') obj['infoworker'] = await this.infoworkerService.create({ ...rest })
+      if (rest.create_type !== 'BASIC') {
+        obj['infoworker'] = await this.infoworkerService.create({ ...rest })
+        obj['active'] = true
+      }
 
       await this.userRepository.save(obj)
 
