@@ -36,9 +36,9 @@ export class TimesheetService {
 
       let isValidProduct = false
       let rate = null
-      const existProductsWithPricing = await this.productsService.getProductsCustomerWithPrice(customer_id)
+      const existProductsWithPricing = await this.productsService.findById(container.product)
 
-      if (existProductsWithPricing) {
+      if (existProductsWithPricing && existProductsWithPricing.price > 0) {
         isValidProduct = true
       }
 
