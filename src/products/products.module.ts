@@ -9,5 +9,6 @@ import { AccessJwtService } from '@/common/services/access-jwt.service'
   imports: [TypeOrmModule.forFeature([Product])],
   controllers: [ProductsController],
   providers: [ProductsService, AccessJwtService],
+  exports: [ProductsService],
 })
 export class ProductsModule {}

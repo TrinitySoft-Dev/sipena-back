@@ -37,8 +37,6 @@ export class Container {
   })
   work: Work
 
-  // @Column({ type: 'integer', nullable: false })
-  @ConditionField({ open: true })
   @SelectedField()
   @ManyToOne(() => ContainerSize, container_size => container_size.container)
   size: ContainerSize

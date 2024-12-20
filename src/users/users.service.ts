@@ -295,7 +295,7 @@ export class UsersService {
   }
 
   async findByWorks(userId: number, workId: number, size: number) {
-    const user = await this.userRepository
+    const query = this.userRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.rules', 'rule', 'rule.work = :workId', { workId })
       .leftJoinAndSelect('rule.condition_groups', 'condition_groups')
@@ -306,10 +306,14 @@ export class UsersService {
       .leftJoinAndSelect('rule.container_size', 'container_size')
       .leftJoinAndSelect('user.role', 'role')
       .where('user.id = :userId', { userId })
-      .andWhere('container_size.id = :size', { size })
       .andWhere('user.active = :active', { active: true })
       .andWhere('role.name = :role', { role: ROLES_CONST.CUSTOMER })
-      .getOne()
+
+    if (size) {
+      query.andWhere('container_size.size = :size', { size })
+    }
+
+    const user = await query.getOne()
 
     if (!user) throw new NotFoundException('User not found')
     return user

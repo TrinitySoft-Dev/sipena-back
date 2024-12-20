@@ -10,6 +10,8 @@ import { TimesheetWorkersModule } from '@/timesheet_workers/timesheet_workers.mo
 import { AccessJwtService } from '@/common/services/access-jwt.service'
 import { ContainerSizeModule } from '@/container_size/container_size.module'
 import { RulesWorkersModule } from '@/rules_workers/rules_workers.module'
+import { ProductsService } from '@/products/products.service'
+import { ProductsModule } from '@/products/products.module'
 
 @Module({
   imports: [
@@ -20,6 +22,7 @@ import { RulesWorkersModule } from '@/rules_workers/rules_workers.module'
     TimesheetWorkersModule,
     ContainerSizeModule,
     RulesWorkersModule,
+    ProductsModule,
   ],
   controllers: [TimesheetController],
   providers: [TimesheetService, AccessJwtService],

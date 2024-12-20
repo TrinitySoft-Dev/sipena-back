@@ -15,6 +15,7 @@ import { randomUUID } from 'crypto'
 import { UpdateTimesheetDto } from './dto/update-timesheet.dto'
 import { FILTER_TYPE } from '@/common/enums/enums'
 import { DateTime } from 'luxon'
+import { ProductsService } from '@/products/products.service'
 
 @Injectable()
 export class TimesheetService {
@@ -25,6 +26,7 @@ export class TimesheetService {
     private readonly conditionsService: ConditionsService,
     private readonly timesheetWorkersService: TimesheetWorkersService,
     private readonly rulesWorkersService: RulesWorkersService,
+    private readonly productsService: ProductsService,
   ) {}
 
   async create(createTimesheetDto: CreateTimesheetDto) {
@@ -32,11 +34,21 @@ export class TimesheetService {
       const { timesheet, container } = createTimesheetDto
       let { customer_id, workers, work_id, ...restTimesheet } = timesheet
 
-      const customerUser = await this.usersService.findByWorks(customer_id, work_id, container.size)
-      if (!customerUser.rules.length) throw new NotFoundException('Rules not found')
+      let isValidProduct = false
+      let rate = null
+      const existProductsWithPricing = await this.productsService.getProductsCustomerWithPrice(customer_id)
 
-      const rules = customerUser.rules
-      const rate = await this.validateRules(rules, container)
+      if (existProductsWithPricing) {
+        isValidProduct = true
+      }
+
+      if (!existProductsWithPricing) {
+        const customerUser = await this.usersService.findByWorks(customer_id, work_id, container.size)
+        if (!customerUser.rules.length) throw new NotFoundException('Rules not found')
+
+        const rules = customerUser.rules
+        rate = await this.validateRules(rules, container)
+      }
 
       const createdContainer = await this.containerService.create({
         ...container,
@@ -52,11 +64,18 @@ export class TimesheetService {
 
       const timesheetRes = this.timesheetRepository.create({
         ...restTimesheet,
-        rate: typeof rate === 'object' ? rate.rate : 0,
-        base: typeof rate === 'object' ? rate.base : 0,
+        rate: isValidProduct ? existProductsWithPricing.price : typeof rate === 'object' ? rate.rate : 0,
+        base: isValidProduct ? existProductsWithPricing.price : typeof rate === 'object' ? rate.base : 0,
         container: createdContainer,
         customer: { id: customer_id },
-        extra_rates: typeof rate === 'object' ? JSON.stringify(rate.json) : null,
+        extra_rates: isValidProduct
+          ? JSON.stringify({
+              name: existProductsWithPricing.name,
+              rate: existProductsWithPricing.price,
+            })
+          : typeof rate === 'object'
+            ? JSON.stringify(rate.json)
+            : null,
       })
 
       await this.timesheetRepository.save(timesheetRes)
@@ -67,10 +86,18 @@ export class TimesheetService {
         timesheet: timesheetRes.id,
       }))
 
-      const payWorkers = await this.rulesWorkersService.validateRules(container, String(work_id), newWorkers)
+      let payWorkers = []
+      if (!isValidProduct) {
+        payWorkers = await this.rulesWorkersService.validateRules(container, String(work_id), newWorkers)
+      }
+
+      if (isValidProduct) {
+        payWorkers = newWorkers.map(worker => ({ ...worker, pay: existProductsWithPricing.price / workers.length }))
+      }
+
       await this.timesheetWorkersService.createMany(payWorkers)
 
-      return { message: 'Timesheet updated successfully' }
+      return { message: 'Timesheet create successfully' }
     } catch (error) {
       throw error
     }

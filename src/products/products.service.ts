@@ -13,6 +13,16 @@ export class ProductsService {
     return this.productRepository.save(createProductDto)
   }
 
+  async getProductsCustomerWithPrice(customerId: number) {
+    const result = await this.productRepository
+      .createQueryBuilder('product')
+      .innerJoinAndSelect('product.customers', 'customer', 'customer.id = :customerId', { customerId })
+      .where('product.price > 0')
+      .getOne()
+
+    return result
+  }
+
   async findProductsByCustomer({
     userId,
     page,
