@@ -294,7 +294,7 @@ export class UsersService {
     return await this.userRepository.findOne(options)
   }
 
-  async findByWorks(userId: number, workId: number, size: number) {
+  async findByWorks(userId: number, workId: number, id: number) {
     const query = this.userRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.rules', 'rule', 'rule.work = :workId', { workId })
@@ -309,8 +309,8 @@ export class UsersService {
       .andWhere('user.active = :active', { active: true })
       .andWhere('role.name = :role', { role: ROLES_CONST.CUSTOMER })
 
-    if (size) {
-      query.andWhere('container_size.size = :size', { size })
+    if (id) {
+      query.andWhere('container_size.id = :id', { id })
     }
 
     const user = await query.getOne()

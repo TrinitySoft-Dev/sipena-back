@@ -37,12 +37,13 @@ export class TimesheetService {
       let isValidProduct = false
       let rate = null
       const existProductsWithPricing = await this.productsService.findById(container.product)
+      const appliedPriceProduct = existProductsWithPricing?.price > 0 ? true : false
 
       if (existProductsWithPricing && existProductsWithPricing.price > 0) {
         isValidProduct = true
       }
 
-      if (!existProductsWithPricing) {
+      if (!appliedPriceProduct) {
         const customerUser = await this.usersService.findByWorks(customer_id, work_id, container.size)
         if (!customerUser.rules.length) throw new NotFoundException('Rules not found')
 
@@ -64,8 +65,8 @@ export class TimesheetService {
 
       const timesheetRes = this.timesheetRepository.create({
         ...restTimesheet,
-        rate: isValidProduct ? existProductsWithPricing.price : typeof rate === 'object' ? rate.rate : 0,
-        base: isValidProduct ? existProductsWithPricing.price : typeof rate === 'object' ? rate.base : 0,
+        rate: appliedPriceProduct ? existProductsWithPricing.price : typeof rate === 'object' ? rate.rate : 0,
+        base: appliedPriceProduct ? existProductsWithPricing.price : typeof rate === 'object' ? rate.base : 0,
         container: createdContainer,
         customer: { id: customer_id },
         extra_rates: isValidProduct
