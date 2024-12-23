@@ -310,7 +310,7 @@ export class UsersService {
       .andWhere('role.name = :role', { role: ROLES_CONST.CUSTOMER })
 
     if (size) {
-      query.andWhere('container_size.size = :size', { size })
+      query.andWhere('container_size.id = :size', { size })
     }
 
     const user = await query.getOne()
