@@ -501,13 +501,13 @@ export class TimesheetService {
       (acc, timesheet) => {
         const week: string = timesheet.week as string
         if (!acc[week]) {
-          acc[week] = { workers: [] }
+          acc[week] = { workers: [], uniqueWorkers: new Set<string>() }
         }
 
         for (const timesheetWorker of timesheet.timesheet_workers) {
           const worker = timesheetWorker.worker
-          if (worker && !uniqueWorkers.has(worker.name)) {
-            uniqueWorkers.add(worker.name)
+          if (worker && !acc[week].uniqueWorkers.has(worker.name)) {
+            acc[week].uniqueWorkers.add(worker.name)
             acc[week].workers.push({
               id: worker.id,
               name: worker.name,
@@ -518,8 +518,10 @@ export class TimesheetService {
 
         return acc
       },
-      {} as Record<string, { workers: { id: number; name: string; last_name: string }[] }>,
+      {} as Record<string, { workers: { id: number; name: string; last_name: string }[]; uniqueWorkers: Set<string> }>,
     )
+
+    console.log(groupedByWeek)
 
     return Object.keys(groupedByWeek)
       .map(week => ({
