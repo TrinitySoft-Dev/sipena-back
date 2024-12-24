@@ -106,9 +106,9 @@ export class TimesheetService {
   async update(id: number, updateTimesheetDto: UpdateTimesheetDto) {
     const { timesheet, container } = updateTimesheetDto
 
-    container.trash = (container.trash as unknown as string) === 'true'
-    container.mixed = (container.mixed as unknown as string) === 'true'
-    container.forklift_driver = Boolean(container.forklift_driver)
+    if (container?.trash) container.trash = (container.trash as unknown as string) === 'true'
+    if (container?.mixed) container.mixed = (container.mixed as unknown as string) === 'true'
+    if (container?.forklift_driver) container.forklift_driver = Boolean(container.forklift_driver)
 
     const existingTimesheet = await this.timesheetRepository.findOne({
       where: { id },
