@@ -105,54 +105,83 @@ export class TimesheetService {
 
   async update(id: number, updateTimesheetDto: UpdateTimesheetDto) {
     const { timesheet, container } = updateTimesheetDto
-    let { customer_id, workers, work_id, ...restTimesheet } = timesheet
+
+    container.trash = (container.trash as unknown as string) === 'true'
+    container.mixed = (container.mixed as unknown as string) === 'true'
+    container.forklift_driver = Boolean(container.forklift_driver)
 
     const existingTimesheet = await this.timesheetRepository.findOne({
       where: { id },
-      relations: ['container'],
+      relations: ['container', 'timesheet_workers', 'customer', 'container.work', 'container.size'],
     })
+
     if (!existingTimesheet) throw new NotFoundException('Timesheet not found')
 
-    const customerUser = await this.usersService.findByWorks(customer_id, work_id, container.size)
-    if (!customerUser.rules.length) throw new NotFoundException('Rules not found')
+    // update workers
+    const idWorkers = timesheet.workers.map(worker => worker.id)
+    const workers = existingTimesheet.timesheet_workers
 
-    const rules = customerUser.rules
-    const rate = await this.validateRules(rules, container)
+    const workerUpdate = workers.filter(worker => idWorkers.includes(worker.id))
+    Object.assign(workerUpdate, timesheet.workers)
 
-    let updatedContainer = existingTimesheet.container
-    if (container) {
-      updatedContainer = await this.containerService.update(updatedContainer.id, {
-        ...container,
-        product: { id: container.product },
-      })
+    existingTimesheet.timesheet_workers = workerUpdate
+
+    // update container
+    Object.assign(existingTimesheet.container, container)
+    const customerId = existingTimesheet.customer.id
+
+    let isValidProduct = false
+    let rate = null
+
+    const existProductsWithPricing = await this.productsService.getProductsCustomerWithPrice(customerId)
+
+    if (existProductsWithPricing) {
+      isValidProduct = true
     }
 
-    restTimesheet = {
-      day: restTimesheet.day,
-      week: restTimesheet.week,
-      comment: restTimesheet.comment,
-      images: restTimesheet.images,
+    if (!existProductsWithPricing) {
+      const customerUser = await this.usersService.findByWorks(
+        customerId,
+        Number(existingTimesheet.container.work),
+        Number(existingTimesheet.container.size),
+      )
+      if (!customerUser.rules.length) throw new NotFoundException('Rules not found')
+
+      const rules = customerUser.rules
+      rate = await this.validateRules(rules, container)
     }
 
-    const updatedTimesheet = {
-      ...existingTimesheet,
-      ...restTimesheet,
-      rate: typeof rate === 'object' ? rate.rate : 0,
-      base: typeof rate === 'object' ? rate.base : 0,
-      container: updatedContainer,
-      customer: { id: customer_id },
-      extra_rates: typeof rate === 'object' ? JSON.stringify(rate.json) : null,
+    existingTimesheet.rate = isValidProduct ? existProductsWithPricing.price : typeof rate === 'object' ? rate.rate : 0
+    existingTimesheet.base = isValidProduct ? existProductsWithPricing.price : typeof rate === 'object' ? rate.base : 0
+
+    existingTimesheet.extra_rates = isValidProduct
+      ? JSON.stringify({
+          name: existProductsWithPricing.name,
+          rate: existProductsWithPricing.price,
+        })
+      : typeof rate === 'object'
+        ? JSON.stringify(rate.json)
+        : null
+
+    await this.timesheetRepository.save(existingTimesheet)
+
+    let payWorkers = []
+
+    if (!isValidProduct) {
+      payWorkers = await this.rulesWorkersService.validateRules(
+        container,
+        String(existingTimesheet.container.work),
+        workerUpdate,
+      )
     }
 
-    await this.timesheetRepository.save(updatedTimesheet)
+    if (isValidProduct) {
+      payWorkers = workerUpdate.map(worker => ({
+        ...worker,
+        pay: existProductsWithPricing.price / workerUpdate.length,
+      }))
+    }
 
-    const updatedWorkers = workers.map(worker => ({
-      ...worker,
-      worker: worker.worker,
-      timesheet: updatedTimesheet.id,
-    }))
-
-    const payWorkers = await this.rulesWorkersService.validateRules(container, String(work_id), updatedWorkers)
     await this.timesheetWorkersService.updateMany(payWorkers)
 
     return { message: 'Timesheet updated successfully' }
@@ -496,7 +525,6 @@ export class TimesheetService {
       relations: ['customer', 'timesheet_workers', 'timesheet_workers.worker'],
     })
 
-    const uniqueWorkers = new Set<string>()
     const groupedByWeek = timesheets.reduce(
       (acc, timesheet) => {
         const week: string = timesheet.week as string
@@ -520,8 +548,6 @@ export class TimesheetService {
       },
       {} as Record<string, { workers: { id: number; name: string; last_name: string }[]; uniqueWorkers: Set<string> }>,
     )
-
-    console.log(groupedByWeek)
 
     return Object.keys(groupedByWeek)
       .map(week => ({

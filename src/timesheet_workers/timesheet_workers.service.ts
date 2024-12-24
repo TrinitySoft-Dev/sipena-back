@@ -52,4 +52,9 @@ export class TimesheetWorkersService {
 
     return totalWorkerPay.total
   }
+
+  async deleteMany(ids: number[]) {
+    if (!ids?.length) return
+    return await this.timesheetWorkersRepository.delete(ids)
+  }
 }

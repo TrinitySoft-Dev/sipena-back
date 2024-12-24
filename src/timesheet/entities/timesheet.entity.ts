@@ -48,7 +48,7 @@ export class Timesheet {
   @SelectedField()
   week: String
 
-  @OneToOne(() => Container)
+  @OneToOne(() => Container, { cascade: true })
   @JoinColumn()
   @SelectedField({
     relation: () => Container,
