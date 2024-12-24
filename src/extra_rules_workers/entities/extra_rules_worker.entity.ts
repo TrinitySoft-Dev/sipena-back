@@ -1,25 +1,20 @@
 import { ConditionGroup } from '@/condition_groups/entities/condition_group.entity'
-import { ContainerSize } from '@/container_size/entities/container_size.entity'
-import { ExtraRulesWorker } from '@/extra_rules_workers/entities/extra_rules_worker.entity'
-import { Work } from '@/work/entities/work.entity'
+import { RulesWorker } from '@/rules_workers/entities/rules_worker.entity'
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  JoinColumn,
-  JoinTable,
   ManyToMany,
-  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm'
 
 @Entity({
-  name: 'rules_worker',
+  name: 'extra_rules_workers',
 })
-export class RulesWorker {
+export class ExtraRulesWorker {
   @PrimaryGeneratedColumn()
   id: number
 
@@ -29,9 +24,6 @@ export class RulesWorker {
     nullable: false,
   })
   name: string
-
-  @ManyToOne(() => ContainerSize, container_size => container_size.rules_worker)
-  container_size: ContainerSize
 
   @Column({
     type: 'float',
@@ -53,26 +45,11 @@ export class RulesWorker {
   })
   payment_type: string
 
-  @ManyToOne(() => Work, work => work.rules_worker, { cascade: true })
-  @JoinColumn()
-  work: Work
-
-  @ManyToMany(() => ExtraRulesWorker, rules_worker => rules_worker.rule_worker)
-  @JoinTable({
-    name: 'rules_worker_extra_rules_worker',
-    joinColumn: {
-      name: 'rules_worker_id',
-      referencedColumnName: 'id',
-    },
-    inverseJoinColumn: {
-      name: 'extra_rules_worker_id',
-      referencedColumnName: 'id',
-    },
-  })
-  extra_rules_worker: RulesWorker[]
-
-  @OneToMany(() => ConditionGroup, group => group.rule_workers, { cascade: true, orphanedRowAction: 'delete' })
+  @OneToMany(() => ConditionGroup, group => group.extra_rule_workers, { cascade: true })
   condition_groups: ConditionGroup[]
+
+  @ManyToMany(() => RulesWorker, rule => rule.work)
+  rule_worker: RulesWorker[]
 
   @Column({
     type: 'boolean',
