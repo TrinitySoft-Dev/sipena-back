@@ -5,9 +5,12 @@ import { readFileSync } from 'fs'
 import { join } from 'path'
 import { Resend } from 'resend'
 import { config } from '@/common/config/config'
+import { AdminEmailsService } from '@/admin_emails/admin_emails.service'
 
 @Injectable()
 export class EmailService {
+  constructor(private readonly adminEmailsService: AdminEmailsService) {}
+
   async send(createEmailDto: CreateEmailDto) {
     try {
       const { template, email, data } = createEmailDto
@@ -16,7 +19,7 @@ export class EmailService {
       const resend = new Resend(config.RESEND_API_KEY)
 
       await resend.emails.send({
-        from: 'registro <admin@trinity-soft.com>',
+        from: 'Register <admin@trinity-soft.com>',
         to: [email],
         subject: 'Sipena - Confirmación de registro',
         html: htmlTemplate,
@@ -26,6 +29,25 @@ export class EmailService {
     } catch (error) {
       console.log(error)
     }
+  }
+
+  async sendAdmin(dataAdmin: any) {
+    const { template, data } = dataAdmin
+
+    const htmlTemplate = this.parseTemplate(this.findTemplates(template), data)
+    const resend = new Resend(config.RESEND_API_KEY)
+
+    const emails = await this.adminEmailsService.findAll()
+    const to = emails.map(email => email.email)
+
+    await resend.emails.send({
+      from: 'New user <admin@trinity-soft.com>',
+      to: to,
+      subject: 'Sipena - New user awaiting activation',
+      html: htmlTemplate,
+    })
+
+    return { message: 'Email sent successfully' }
   }
 
   private findTemplates(template: string) {

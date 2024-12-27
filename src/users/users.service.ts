@@ -18,6 +18,7 @@ import { AccessJwtService } from '@/common/services/access-jwt.service'
 import { AccessJwtRefreshService } from '@/common/services/refresh-jwt.service'
 import { UpdateUserDto } from './dto/update-user.dto'
 import { RolesService } from '@/roles/roles.service'
+import { AdminEmailsService } from '@/admin_emails/admin_emails.service'
 
 @Injectable()
 export class UsersService {
@@ -88,6 +89,15 @@ export class UsersService {
             lastname: last_name,
           },
         })
+
+        await this.emailService.sendAdmin({
+          template: 'active.html',
+          data: {
+            username: name,
+            email,
+            url: `${config.SIPENA_URI_FRONT}/users/${email}`,
+          },
+        })
       }
 
       return { message: 'User created successfully' }
@@ -125,6 +135,7 @@ export class UsersService {
           password,
         },
       })
+
       return { message: 'User created successfully' }
     }
 
@@ -335,7 +346,7 @@ export class UsersService {
     includePagination: boolean
   }) {
     const skip = page * pageSize
-    let where: any = { role: { name: role }, active: true }
+    let where: any = { role: { name: role } }
 
     const order = { created_at: 'DESC' as const }
 
@@ -345,7 +356,6 @@ export class UsersService {
         .leftJoinAndSelect('user.infoworker', 'infoworker')
         .leftJoinAndSelect('user.role', 'role')
         .where('role.name = :role', { role })
-        .andWhere('user.active = :active', { active: true })
         .andWhere(name ? '(user.name ILIKE :name OR user.last_name ILIKE :name)' : '1=1', { name: `%${name}%` })
         .andWhere(email ? 'user.email = :email' : '1=1', { email })
         .orderBy('user.created_at', 'DESC')
@@ -458,6 +468,10 @@ export class UsersService {
     }
 
     return { message: 'User updated successfully', user }
+  }
+
+  async updateStatus(id: number, active: boolean) {
+    return this.userRepository.update(id, { active })
   }
 
   updateAvatar(id: number, updateUserDto: UpdateUserDto) {

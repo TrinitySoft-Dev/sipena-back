@@ -14,4 +14,20 @@ export class ExtraRulesWorkersService {
     console.log('createExtraRulesWorkerDto', JSON.stringify(createExtraRulesWorkerDto, null, 2))
     return await this.extraRulesWorkerRepository.save(createExtraRulesWorkerDto)
   }
+
+  async findAll(options) {
+    const { page, pageSize } = options
+
+    const [result, total] = await this.extraRulesWorkerRepository.findAndCount({
+      take: pageSize,
+      skip: page * pageSize,
+      order: {
+        created_at: 'DESC',
+      },
+    })
+
+    return { result: result, pagination: { page, pageSize, total } }
+  }
+
+  async validateExtraRules(extraRules) {}
 }

@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common'
+import { Controller, Post, Body, Get, Query, DefaultValuePipe, ParseIntPipe } from '@nestjs/common'
 import { ExtraRulesWorkersService } from './extra_rules_workers.service'
 import { CreateExtraRulesWorkerDto } from './dto/create-extra_rules_worker.dto'
 import { ApiTags } from '@nestjs/swagger'
@@ -11,5 +11,13 @@ export class ExtraRulesWorkersController {
   @Post()
   create(@Body() createExtraRulesWorkerDto: CreateExtraRulesWorkerDto) {
     return this.extraRulesWorkersService.create(createExtraRulesWorkerDto)
+  }
+
+  @Get('')
+  findAll(
+    @Query('page', new DefaultValuePipe(0), ParseIntPipe) page?: number,
+    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize?: number,
+  ) {
+    return this.extraRulesWorkersService.findAll({ page, pageSize })
   }
 }

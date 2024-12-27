@@ -1,6 +1,5 @@
 import { ConditionGroup } from '@/condition_groups/entities/condition_group.entity'
 import { Rule } from '@/rules/entities/rule.entity'
-import { User } from '@/users/entities/user.entity'
 import {
   Column,
   CreateDateColumn,

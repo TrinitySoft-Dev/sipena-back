@@ -11,6 +11,7 @@ import { PasswordHashModule } from '@/password_hash/password_hash.module'
 import { AccessJwtService } from '@/common/services/access-jwt.service'
 import { AccessJwtRefreshService } from '@/common/services/refresh-jwt.service'
 import { RolesModule } from '@/roles/roles.module'
+import { AdminEmailsModule } from '@/admin_emails/admin_emails.module'
 
 @Module({
   imports: [

@@ -145,4 +145,9 @@ export class UsersController {
   updateAvatar(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.updateAvatar(id, updateUserDto)
   }
+
+  @Patch(':id/status')
+  updateStatus(@Param('id') id: number, @Body() updateUserDto: any) {
+    return this.usersService.updateStatus(id, updateUserDto.status)
+  }
 }
