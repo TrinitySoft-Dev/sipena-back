@@ -81,13 +81,6 @@ export class Timesheet {
     enum: TimesheetStatusEnum,
     default: TimesheetStatusEnum.OPEN,
   })
-  status_worker_pay: TimesheetStatusEnum
-
-  @Column({
-    type: 'enum',
-    enum: TimesheetStatusEnum,
-    default: TimesheetStatusEnum.OPEN,
-  })
   status_customer_pay: TimesheetStatusEnum
 
   @Column({

@@ -9,6 +9,8 @@ import { ConditionsService } from '@/conditions/conditions.service'
 import { DateTime } from 'luxon'
 import { WorkService } from '@/work/work.service'
 import { ContainerSizeService } from '@/container_size/container_size.service'
+import { ExtraRulesWorkersService } from '@/extra_rules_workers/extra_rules_workers.service'
+import { ExtraRulesWorker } from '@/extra_rules_workers/entities/extra_rules_worker.entity'
 
 @Injectable()
 export class RulesWorkersService {
@@ -17,6 +19,7 @@ export class RulesWorkersService {
     private readonly conditionSerce: ConditionsService,
     private readonly workService: WorkService,
     private readonly containerSizeService: ContainerSizeService,
+    private readonly extraRulesWorkersService: ExtraRulesWorkersService,
   ) {}
 
   create(createRulesWorkerDto: CreateRulesWorkerDto) {
@@ -31,6 +34,9 @@ export class RulesWorkersService {
       .leftJoinAndSelect('rules_worker.work', 'work')
       .leftJoinAndSelect('rules_worker.condition_groups', 'condition_groups')
       .leftJoinAndSelect('condition_groups.conditions', 'conditions')
+      .leftJoinAndSelect('rules_worker.extra_rules_worker', 'extra_rules_worker')
+      .leftJoinAndSelect('extra_rules_worker.condition_groups', 'extra_condition_groups')
+      .leftJoinAndSelect('extra_condition_groups.conditions', 'extra_conditions')
       .where('work.id = :work', { work })
       .where('rules_worker.active = :active', { active: true })
       .getMany()
@@ -46,8 +52,16 @@ export class RulesWorkersService {
         for (const condition of conditions) {
           const conditionResult = this.conditionSerce.evalutedConditions(condition, container)
           if (!conditionResult) {
-            groupIsValid = false
-            break
+            const extraRules: ExtraRulesWorker[] = rule.extra_rules_worker
+            const validateExtraRules = await this.extraRulesWorkersService.validateExtraRules(
+              extraRules,
+              container,
+              workers,
+            )
+            if (!validateExtraRules || !extraRules.length) {
+              groupIsValid = false
+              break
+            }
           }
         }
 

@@ -5,11 +5,15 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm'
+
+export enum TimesheetStatusEnum {
+  OPEN = 'OPEN',
+  CLOSED = 'CLOSED',
+}
 
 @Entity({
   name: 'timesheet_workers',
@@ -23,6 +27,13 @@ export class TimesheetWorker {
 
   @ManyToOne(() => Timesheet, timesheet => timesheet.timesheet_workers)
   timesheet: Timesheet
+
+  @Column({
+    type: 'enum',
+    enum: TimesheetStatusEnum,
+    default: TimesheetStatusEnum.OPEN,
+  })
+  status_worker_pay: TimesheetStatusEnum
 
   @Column({
     type: 'timestamp',
@@ -53,6 +64,12 @@ export class TimesheetWorker {
     nullable: false,
   })
   pay: number
+
+  @Column({
+    type: 'json',
+    nullable: true,
+  })
+  extra_rules: any
 
   @Column({
     type: 'varchar',

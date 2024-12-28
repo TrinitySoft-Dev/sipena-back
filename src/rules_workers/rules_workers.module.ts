@@ -6,6 +6,7 @@ import { RulesWorker } from './entities/rules_worker.entity'
 import { ConditionsModule } from '@/conditions/conditions.module'
 import { WorkModule } from '@/work/work.module'
 import { ContainerSizeModule } from '@/container_size/container_size.module'
+import { ExtraRulesWorkersModule } from '@/extra_rules_workers/extra_rules_workers.module'
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { ContainerSizeModule } from '@/container_size/container_size.module'
     ConditionsModule,
     WorkModule,
     ContainerSizeModule,
+    ExtraRulesWorkersModule,
   ],
   controllers: [RulesWorkersController],
   providers: [RulesWorkersService],

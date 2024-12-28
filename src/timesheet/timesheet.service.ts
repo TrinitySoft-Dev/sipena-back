@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { ContainerDto, CreateTimesheetDto } from './dto/create-timesheet.dto'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Timesheet, TimesheetStatusEnum } from './entities/timesheet.entity'
+import { Timesheet } from './entities/timesheet.entity'
 import { Between, In, Repository } from 'typeorm'
 import { ContainerService } from '@/container/container.service'
 import { UsersService } from '@/users/users.service'
@@ -16,6 +16,7 @@ import { UpdateTimesheetDto } from './dto/update-timesheet.dto'
 import { FILTER_TYPE } from '@/common/enums/enums'
 import { DateTime } from 'luxon'
 import { ProductsService } from '@/products/products.service'
+import { TimesheetStatusEnum } from '@/timesheet_workers/entities/timesheet_worker.entity'
 
 @Injectable()
 export class TimesheetService {
@@ -519,17 +520,19 @@ export class TimesheetService {
       .filter(item => item.customers.length > 0)
   }
 
-  async getOpenTimesheetsWorkerByWeek(role: string, workerId?: number) {
-    const whereConditions: any = { status_customer_pay: TimesheetStatusEnum.OPEN }
+  async getOpenTimesheetsWorkerByWeek() {
+    const timesheets = await this.timesheetRepository
+      .createQueryBuilder('timesheet')
+      .innerJoinAndSelect(
+        'timesheet.timesheet_workers',
+        'timesheet_workers',
+        'timesheet_workers.status_worker_pay = :status',
+        { status: TimesheetStatusEnum.OPEN },
+      )
+      .leftJoinAndSelect('timesheet.customer', 'customer')
+      .leftJoinAndSelect('timesheet_workers.worker', 'worker')
+      .getMany()
 
-    if (role === 'WORKER' && workerId) {
-      whereConditions.timesheet_workers = { worker: { id: workerId } }
-    }
-
-    const timesheets = await this.timesheetRepository.find({
-      where: whereConditions,
-      relations: ['customer', 'timesheet_workers', 'timesheet_workers.worker'],
-    })
     const groupedByWeek = timesheets.reduce(
       (acc, timesheet) => {
         const week: string = timesheet.week as string
@@ -562,13 +565,24 @@ export class TimesheetService {
       .filter(item => item.workers.length > 0)
   }
 
-  async closeTimesheetWorker(ids: number[]) {
-    const timesheets = await this.timesheetRepository.find({ where: { id: In(ids) } })
+  async closeTimesheetWorker(ids: number[], idWorker: number) {
+    const timesheets = await this.timesheetRepository
+      .createQueryBuilder('timesheet')
+      .leftJoinAndSelect('timesheet.timesheet_workers', 'timesheet_workers')
+      .where('timesheet.id IN (:...ids)', { ids })
+      .andWhere('timesheet_workers.worker = :idWorker', { idWorker })
+      .getMany()
+
     if (!timesheets.length) throw new NotFoundException('Timesheet not found')
 
     timesheets.forEach(timesheet => {
-      timesheet.status_customer_pay = TimesheetStatusEnum.CLOSED
+      timesheet.timesheet_workers = timesheet.timesheet_workers.map(worker => ({
+        ...worker,
+        status_worker_pay: TimesheetStatusEnum.CLOSED,
+      }))
     })
+
+    console.log(JSON.stringify(timesheets, null, 2))
 
     await this.timesheetRepository.save(timesheets)
 
@@ -590,17 +604,19 @@ export class TimesheetService {
         ],
       })
     }
-
-    return await this.timesheetRepository.find({
-      where: { week, timesheet_workers: { worker: { role: { name: ROLES_CONST.WORKER }, id } } },
-      relations: [
-        'customer',
-        'container',
-        'container.work',
-        'container.product',
+    return this.timesheetRepository
+      .createQueryBuilder('timesheet')
+      .innerJoinAndSelect(
+        'timesheet.timesheet_workers',
         'timesheet_workers',
-        'container.size',
-      ],
-    })
+        'timesheet_workers.status_worker_pay = :status',
+        { status: TimesheetStatusEnum.OPEN },
+      )
+      .leftJoinAndSelect('timesheet_workers.worker', 'worker')
+      .leftJoinAndSelect('worker.role', 'role')
+      .where('timesheet.week = :week', { week })
+      .andWhere('timesheet_workers.worker = :id', { id })
+      .andWhere('role.name = :role', { role: ROLES_CONST.WORKER })
+      .getMany()
   }
 }

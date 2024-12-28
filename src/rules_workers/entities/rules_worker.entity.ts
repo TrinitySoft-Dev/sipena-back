@@ -57,7 +57,7 @@ export class RulesWorker {
   @JoinColumn()
   work: Work
 
-  @ManyToMany(() => ExtraRulesWorker, rules_worker => rules_worker.rule_worker)
+  @ManyToMany(() => ExtraRulesWorker, extraRuleWorker => extraRuleWorker.rule_worker)
   @JoinTable({
     name: 'rules_worker_extra_rules_worker',
     joinColumn: {
@@ -69,7 +69,7 @@ export class RulesWorker {
       referencedColumnName: 'id',
     },
   })
-  extra_rules_worker: RulesWorker[]
+  extra_rules_worker: ExtraRulesWorker[]
 
   @OneToMany(() => ConditionGroup, group => group.rule_workers, { cascade: true, orphanedRowAction: 'delete' })
   condition_groups: ConditionGroup[]

@@ -67,7 +67,7 @@ export class UsersService {
         obj['active'] = true
       }
 
-      await this.userRepository.save(obj)
+      const user = await this.userRepository.save(obj)
 
       if (rest.create_type !== 'BASIC') {
         await this.emailService.send({
@@ -91,11 +91,11 @@ export class UsersService {
         })
 
         await this.emailService.sendAdmin({
-          template: 'active.html',
+          template: 'activate.html',
           data: {
             username: name,
             email,
-            url: `${config.SIPENA_URI_FRONT}/users/${email}`,
+            url: `${config.SIPENA_URI_FRONT}/app/worker/worker-list/${user.id}`,
           },
         })
       }
