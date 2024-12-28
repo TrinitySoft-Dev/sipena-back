@@ -79,7 +79,7 @@ export class TimesheetController {
   @ApiQuery({ name: 'workerId', required: false })
   @Get('/open-by-week-worker')
   findOpenTimesheet(@Query('role') role?: string, @Query('workerId') workerId?: number) {
-    return this.timesheetService.getOpenTimesheetsWorkerByWeek(role, workerId)
+    return this.timesheetService.getOpenTimesheetsWorkerByWeek()
   }
 
   @Get('/week-and-role')
