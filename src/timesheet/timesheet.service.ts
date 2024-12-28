@@ -520,20 +520,24 @@ export class TimesheetService {
       .filter(item => item.customers.length > 0)
   }
 
-  async getOpenTimesheetsWorkerByWeek() {
-    const timesheets = await this.timesheetRepository
+  async getOpenTimesheetsWorkerByWeek(workerId: number, timesheetStatus: string) {
+    const timesheets = this.timesheetRepository
       .createQueryBuilder('timesheet')
       .innerJoinAndSelect(
         'timesheet.timesheet_workers',
         'timesheet_workers',
         'timesheet_workers.status_worker_pay = :status',
-        { status: TimesheetStatusEnum.OPEN },
+        { status: TimesheetStatusEnum[timesheetStatus] },
       )
       .leftJoinAndSelect('timesheet.customer', 'customer')
       .leftJoinAndSelect('timesheet_workers.worker', 'worker')
-      .getMany()
 
-    const groupedByWeek = timesheets.reduce(
+    if (workerId) {
+      timesheets.where('timesheet_workers.worker = :workerId', { workerId })
+    }
+    const resultTimesheets = await timesheets.getMany()
+
+    const groupedByWeek = resultTimesheets.reduce(
       (acc, timesheet) => {
         const week: string = timesheet.week as string
         if (!acc[week]) {
@@ -589,7 +593,7 @@ export class TimesheetService {
     return { message: 'Timesheet closed successfully' }
   }
 
-  async findByWeekAndRole(week: string, role: string, id: number) {
+  async findByWeekAndRole(week: string, role: string, id: number, timesheetStatus: string) {
     if (role === ROLES_CONST.CUSTOMER) {
       return this.timesheetRepository.find({
         where: { week, customer: { role: { name: ROLES_CONST.CUSTOMER }, id } },
@@ -610,7 +614,7 @@ export class TimesheetService {
         'timesheet.timesheet_workers',
         'timesheet_workers',
         'timesheet_workers.status_worker_pay = :status',
-        { status: TimesheetStatusEnum.OPEN },
+        { status: TimesheetStatusEnum[timesheetStatus] },
       )
       .leftJoinAndSelect('timesheet_workers.worker', 'worker')
       .leftJoinAndSelect('worker.role', 'role')
