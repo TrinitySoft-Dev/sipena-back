@@ -519,12 +519,17 @@ export class TimesheetService {
       .filter(item => item.customers.length > 0)
   }
 
-  async getOpenTimesheetsWorkerByWeek() {
+  async getOpenTimesheetsWorkerByWeek(role: string, workerId?: number) {
+    const whereConditions: any = { status_customer_pay: TimesheetStatusEnum.OPEN }
+
+    if (role === 'WORKER' && workerId) {
+      whereConditions.timesheet_workers = { worker: { id: workerId } }
+    }
+
     const timesheets = await this.timesheetRepository.find({
-      where: { status_customer_pay: TimesheetStatusEnum.OPEN },
+      where: whereConditions,
       relations: ['customer', 'timesheet_workers', 'timesheet_workers.worker'],
     })
-
     const groupedByWeek = timesheets.reduce(
       (acc, timesheet) => {
         const week: string = timesheet.week as string
