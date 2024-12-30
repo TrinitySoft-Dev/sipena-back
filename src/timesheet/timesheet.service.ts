@@ -597,15 +597,14 @@ export class TimesheetService {
     if (role === ROLES_CONST.CUSTOMER) {
       return this.timesheetRepository
         .createQueryBuilder('timesheet')
-        .innerJoinAndSelect('timesheet.customer', 'customer')
-        .innerJoinAndSelect('timesheet.container', 'container')
-        .innerJoinAndSelect('container.work', 'work')
-        .innerJoinAndSelect('container.product', 'product')
-        .innerJoinAndSelect('timesheet.timesheet_workers', 'timesheet_workers')
-        .innerJoinAndSelect('container.size', 'size')
+        .leftJoinAndSelect('timesheet.customer', 'customer')
+        .leftJoinAndSelect('customer.role', 'role')
         .where('timesheet.week = :week', { week })
-        .andWhere('customer.id = :id', { id })
-        .andWhere('customer.role = :role', { role: ROLES_CONST.CUSTOMER })
+        .andWhere('timesheet.customer = :id', { id })
+        .andWhere('role.name = :role', { role: ROLES_CONST.CUSTOMER })
+        .andWhere('timesheet.status_customer_pay = :status_customer_pay', {
+          status_customer_pay: TimesheetStatusEnum[timesheetStatus],
+        })
         .getMany()
     }
     return this.timesheetRepository
