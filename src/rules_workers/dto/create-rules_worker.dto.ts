@@ -53,6 +53,7 @@ export class CreateRulesWorkerDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ExtraRuleWorkerDto)
+  @IsOptional()
   extra_rules_worker: ExtraRuleWorkerDto[]
 
   @ApiProperty({
