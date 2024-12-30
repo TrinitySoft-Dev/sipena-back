@@ -1,7 +1,18 @@
-import { Controller, Post, Body, Get, Query, DefaultValuePipe, ParseIntPipe, Param, Put } from '@nestjs/common'
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Query,
+  DefaultValuePipe,
+  ParseIntPipe,
+  Param,
+  Put,
+  ParseBoolPipe,
+} from '@nestjs/common'
 import { ExtraRulesWorkersService } from './extra_rules_workers.service'
 import { CreateExtraRulesWorkerDto } from './dto/create-extra_rules_worker.dto'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiQuery, ApiTags } from '@nestjs/swagger'
 import { UpdateExtraRulesWorkerDto } from './dto/update-extra_rules_worker.dto'
 
 @ApiTags('Extra rules workers')
@@ -13,13 +24,16 @@ export class ExtraRulesWorkersController {
   create(@Body() createExtraRulesWorkerDto: CreateExtraRulesWorkerDto) {
     return this.extraRulesWorkersService.create(createExtraRulesWorkerDto)
   }
-
   @Get('')
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'pageSize', required: false })
+  @ApiQuery({ name: 'includePagination', required: false })
   findAll(
     @Query('page', new DefaultValuePipe(0), ParseIntPipe) page?: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize?: number,
+    @Query('includePagination', new DefaultValuePipe(true), ParseBoolPipe) includePagination?: boolean,
   ) {
-    return this.extraRulesWorkersService.findAll({ page, pageSize })
+    return this.extraRulesWorkersService.findAll({ page, pageSize, includePagination })
   }
 
   @Get(':id')

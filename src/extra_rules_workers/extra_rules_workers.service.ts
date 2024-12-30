@@ -37,7 +37,11 @@ export class ExtraRulesWorkersService {
   }
 
   async findAll(options) {
-    const { page, pageSize } = options
+    const { page, pageSize, includePagination } = options
+
+    if (!includePagination) {
+      return await this.extraRulesWorkerRepository.find()
+    }
 
     const [result, total] = await this.extraRulesWorkerRepository.findAndCount({
       take: pageSize,
