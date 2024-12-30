@@ -6,6 +6,14 @@ export class TimesheetWokers {
     description: 'Worker id of the timesheet',
     example: 1,
   })
+  @IsOptional()
+  @IsNumber()
+  id: number
+
+  @ApiProperty({
+    description: 'Worker id of the timesheet',
+    example: 1,
+  })
   @IsNumber()
   worker: number
 
@@ -110,6 +118,14 @@ export class TimeSheetDto {
 }
 
 export class ContainerDto {
+  @ApiProperty({
+    description: 'Id of the timesheet',
+    example: 1,
+  })
+  @IsOptional()
+  @IsNumber()
+  id?: number
+
   @ApiProperty({
     description: 'Container number of the timesheet',
     example: '1',

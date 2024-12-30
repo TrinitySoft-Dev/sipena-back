@@ -1,5 +1,5 @@
 import { ConditionGroup } from '@/condition_groups/entities/condition_group.entity'
-import { Rule } from '@/rules/entities/rule.entity'
+import { RulesWorker } from '@/rules_workers/entities/rules_worker.entity'
 import {
   Column,
   CreateDateColumn,
@@ -12,51 +12,49 @@ import {
 } from 'typeorm'
 
 @Entity({
-  name: 'extra_rules',
+  name: 'extra_rules_workers',
 })
-export class ExtraRule {
+export class ExtraRulesWorker {
   @PrimaryGeneratedColumn()
   id: number
 
   @Column({
     type: 'varchar',
+    length: 100,
     nullable: false,
-    length: 60,
   })
   name: string
 
-  @OneToMany(() => ConditionGroup, group => group.extra_rule, { cascade: true })
-  condition_groups: ConditionGroup[]
-
-  @ManyToMany(() => Rule, rule => rule.extra_rules)
-  rules: Rule[]
-
   @Column({
-    type: 'decimal',
+    type: 'float',
     nullable: false,
   })
   rate: number
 
   @Column({
     type: 'varchar',
+    length: 100,
     nullable: false,
-    length: 20,
-    comment: 'Tipo de tarfia: porcentaje, fijo, por unidad',
   })
   rate_type: string
 
   @Column({
     type: 'varchar',
-    length: 20,
+    length: 100,
     nullable: false,
-    comment: 'Unidad de medida para el cargo: sku, pallet, etc.',
   })
-  unit: string
+  payment_type: string
+
+  @OneToMany(() => ConditionGroup, group => group.extra_rule_workers, { cascade: true })
+  condition_groups: ConditionGroup[]
+
+  @ManyToMany(() => RulesWorker, rule => rule.extra_rules_worker)
+  rule_worker: RulesWorker[]
 
   @Column({
     type: 'boolean',
+    nullable: false,
     default: true,
-    comment: 'Indicates if the rule is active',
   })
   active: boolean
 
@@ -71,7 +69,7 @@ export class ExtraRule {
     default: () => 'CURRENT_TIMESTAMP',
     onUpdate: 'CURRENT_TIMESTAMP',
   })
-  updated_at: Date
+  update_at: Date
 
   @DeleteDateColumn({
     type: 'timestamp',

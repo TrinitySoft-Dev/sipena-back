@@ -48,7 +48,7 @@ export class Timesheet {
   @SelectedField()
   week: String
 
-  @OneToOne(() => Container)
+  @OneToOne(() => Container, { cascade: true })
   @JoinColumn()
   @SelectedField({
     relation: () => Container,
@@ -75,13 +75,6 @@ export class Timesheet {
   })
   @SelectedField()
   rate: number
-
-  @Column({
-    type: 'enum',
-    enum: TimesheetStatusEnum,
-    default: TimesheetStatusEnum.OPEN,
-  })
-  status_worker_pay: TimesheetStatusEnum
 
   @Column({
     type: 'enum',

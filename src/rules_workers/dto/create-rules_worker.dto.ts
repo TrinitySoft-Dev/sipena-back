@@ -47,6 +47,16 @@ export class CreateRulesWorkerDto {
   payment_type: string
 
   @ApiProperty({
+    description: 'Extra rules worker of the rules_worker',
+    example: [{ id: 1 }],
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ExtraRuleWorkerDto)
+  @IsOptional()
+  extra_rules_worker: ExtraRuleWorkerDto[]
+
+  @ApiProperty({
     description: 'Active of the rules_worker',
     example: true,
   })
@@ -77,4 +87,13 @@ export class CreateRulesWorkerDto {
   @ValidateNested({ each: true })
   @Type(() => CreateConditionGroupDto)
   condition_groups: CreateConditionGroupDto[]
+}
+
+class ExtraRuleWorkerDto {
+  @ApiProperty({
+    description: 'Id of the extra rule worker',
+    example: 1,
+  })
+  @IsNumber()
+  id: number
 }

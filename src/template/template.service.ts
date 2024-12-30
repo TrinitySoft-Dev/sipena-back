@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Template } from './entities/template.entity'
 import { Repository } from 'typeorm'
 import { DateTime } from 'luxon'
+import { UpdateTemplateDto } from './dto/update-template.dto'
 
 @Injectable()
 export class TemplateService {
@@ -15,8 +16,22 @@ export class TemplateService {
     return this.templateRepository.save(createTemplateDto)
   }
 
+  async update(id: number, updateTemplateDto: UpdateTemplateDto) {
+    const template = await this.templateRepository.findOne({ where: { id }, relations: ['columns'] })
+    Object.assign(template, updateTemplateDto)
+    return this.templateRepository.save(template)
+  }
+
   findOne(id: number) {
-    return this.templateRepository.findOne({ where: { id }, relations: ['columns'] })
+    return this.templateRepository.findOne({
+      where: { id },
+      relations: ['columns'],
+      order: {
+        columns: {
+          name: 'ASC',
+        },
+      },
+    })
   }
 
   async find(page, pageSize) {

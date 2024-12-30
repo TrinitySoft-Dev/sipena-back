@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   Query,
   DefaultValuePipe,
+  Put,
 } from '@nestjs/common'
 import { TemplateService } from './template.service'
 import { CreateTemplateDto } from './dto/create-template.dto'
@@ -51,5 +52,10 @@ export class TemplateController {
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.templateService.findOne(id)
+  }
+
+  @Put(':id')
+  update(@Param('id', ParseIntPipe) id: number, @Body() updateTemplateDto: UpdateTemplateDto) {
+    return this.templateService.update(id, updateTemplateDto)
   }
 }

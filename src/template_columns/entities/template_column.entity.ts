@@ -30,6 +30,12 @@ export class TemplateColumn {
   })
   value_cell: string
 
+  @Column({
+    type: 'varchar',
+    nullable: true,
+  })
+  templateId: string
+
   @ManyToOne(() => Template, template => template.columns, { onDelete: 'CASCADE' })
   template: Template
 

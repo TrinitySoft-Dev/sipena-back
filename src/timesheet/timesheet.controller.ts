@@ -16,6 +16,7 @@ import { CreateTimesheetDto } from './dto/create-timesheet.dto'
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
 import { AuthGuard } from '@/common/guards/auth.guard'
 import { UpdateTimesheetDto } from './dto/update-timesheet.dto'
+import { TimesheetStatusEnum } from './entities/timesheet.entity'
 
 @ApiTags('Timesheet')
 @ApiBearerAuth()
@@ -32,8 +33,13 @@ export class TimesheetController {
   }
 
   @Post('/close-timesheets-worker')
-  closeTimesheets(@Body() timesheetIds: number[]) {
-    return this.timesheetService.closeTimesheetWorker(timesheetIds)
+  closeTimesheets(@Body() timesheetIds: number[], @Query('workerId') workerId: number) {
+    return this.timesheetService.closeTimesheetWorker(timesheetIds, workerId)
+  }
+
+  @Post('/close-timesheets-customer')
+  closeTimesheetsCustomer(@Body() timesheetIds: number[], @Query('customerId') customerId: number) {
+    return this.timesheetService.closeTimesheetCustomer(timesheetIds, customerId)
   }
 
   // ================== END POST ==================
@@ -75,14 +81,28 @@ export class TimesheetController {
     return this.timesheetService.getMetricsTimesheet(startDate, endDate)
   }
 
+  @ApiQuery({ name: 'workerId', required: false })
+  @ApiQuery({ name: 'timesheetStatus', required: false })
   @Get('/open-by-week-worker')
-  findOpenTimesheet() {
-    return this.timesheetService.getOpenTimesheetsWorkerByWeek()
+  findOpenTimesheet(
+    @Query('workerId') workerId?: number,
+    @Query('timesheetStatus', new DefaultValuePipe(TimesheetStatusEnum.OPEN)) timesheetStatus?: string,
+  ) {
+    return this.timesheetService.getOpenTimesheetsWorkerByWeek(workerId, timesheetStatus)
   }
 
+  @ApiQuery({ name: 'week', required: true })
+  @ApiQuery({ name: 'role', required: true })
+  @ApiQuery({ name: 'id', required: true })
+  @ApiQuery({ name: 'timesheetStatus', required: false })
   @Get('/week-and-role')
-  findByWeekAndRole(@Query('week') week: string, @Query('role') role: string, @Query('id') id: number) {
-    return this.timesheetService.findByWeekAndRole(week, role, id)
+  findByWeekAndRole(
+    @Query('week') week: string,
+    @Query('role') role: string,
+    @Query('id') id: number,
+    @Query('timesheetStatus', new DefaultValuePipe(TimesheetStatusEnum.OPEN)) timesheetStatus: string,
+  ) {
+    return this.timesheetService.findByWeekAndRole(week, role, id, timesheetStatus)
   }
 
   @ApiOperation({

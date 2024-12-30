@@ -24,8 +24,8 @@ export class RulesWorkersController {
     return this.rulesWorkersService.findById(id)
   }
 
-  @Put(':id')
-  update(@Param(':id') id: number, @Body() updateRuleWorkerDto: UpdateRulesWorkerDto) {
+  @Put('/:id')
+  update(@Param('id') id: number, @Body() updateRuleWorkerDto: UpdateRulesWorkerDto) {
     return this.rulesWorkersService.update(id, updateRuleWorkerDto)
   }
 }

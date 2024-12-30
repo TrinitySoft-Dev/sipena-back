@@ -1,5 +1,6 @@
 import { Condition } from '@/conditions/entities/condition.entity'
 import { ExtraRule } from '@/extra_rules/entities/extra_rule.entity'
+import { ExtraRulesWorker } from '@/extra_rules_workers/entities/extra_rules_worker.entity'
 import { Rule } from '@/rules/entities/rule.entity'
 import { RulesWorker } from '@/rules_workers/entities/rules_worker.entity'
 import {
@@ -27,6 +28,9 @@ export class ConditionGroup {
 
   @ManyToOne(() => ExtraRule, extraRule => extraRule.condition_groups)
   extra_rule: ExtraRule
+
+  @ManyToOne(() => ExtraRulesWorker, extra_rule_worker => extra_rule_worker.condition_groups)
+  extra_rule_workers: ExtraRulesWorker
 
   @RelationId((conditionGroup: ConditionGroup) => conditionGroup.rule)
   rule_id: number

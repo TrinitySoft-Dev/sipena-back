@@ -1,5 +1,6 @@
 import { ConditionGroup } from '@/condition_groups/entities/condition_group.entity'
 import { ContainerSize } from '@/container_size/entities/container_size.entity'
+import { ExtraRulesWorker } from '@/extra_rules_workers/entities/extra_rules_worker.entity'
 import { Work } from '@/work/entities/work.entity'
 import {
   Column,
@@ -7,6 +8,8 @@ import {
   DeleteDateColumn,
   Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -53,6 +56,20 @@ export class RulesWorker {
   @ManyToOne(() => Work, work => work.rules_worker, { cascade: true })
   @JoinColumn()
   work: Work
+
+  @ManyToMany(() => ExtraRulesWorker, extraRuleWorker => extraRuleWorker.rule_worker, { cascade: true })
+  @JoinTable({
+    name: 'rules_worker_extra_rules_worker',
+    joinColumn: {
+      name: 'rules_worker_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'extra_rules_worker_id',
+      referencedColumnName: 'id',
+    },
+  })
+  extra_rules_worker: ExtraRulesWorker[]
 
   @OneToMany(() => ConditionGroup, group => group.rule_workers, { cascade: true, orphanedRowAction: 'delete' })
   condition_groups: ConditionGroup[]

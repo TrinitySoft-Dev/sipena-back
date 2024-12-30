@@ -32,10 +32,12 @@ import { CityModule } from './city/city.module'
 import { StateModule } from './state/state.module'
 import { LoggerModule } from 'nestjs-pino'
 import { TemplateModule } from './template/template.module'
-import { TemplateColumnsModule } from './template_columns/template_columns.module';
-import { InvoiceModule } from './invoice/invoice.module';
-import { WorkFieldsModule } from './work_fields/work_fields.module';
-import { GroupPermissionsModule } from './group_permissions/group_permissions.module';
+import { TemplateColumnsModule } from './template_columns/template_columns.module'
+import { InvoiceModule } from './invoice/invoice.module'
+import { WorkFieldsModule } from './work_fields/work_fields.module'
+import { GroupPermissionsModule } from './group_permissions/group_permissions.module'
+import { ExtraRulesWorkersModule } from './extra_rules_workers/extra_rules_workers.module'
+import { AdminEmailsModule } from './admin_emails/admin_emails.module'
 
 @Module({
   imports: [
@@ -101,6 +103,8 @@ import { GroupPermissionsModule } from './group_permissions/group_permissions.mo
     InvoiceModule,
     WorkFieldsModule,
     GroupPermissionsModule,
+    ExtraRulesWorkersModule,
+    AdminEmailsModule,
   ],
   controllers: [],
   providers: [],

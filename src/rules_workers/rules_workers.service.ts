@@ -9,6 +9,8 @@ import { ConditionsService } from '@/conditions/conditions.service'
 import { DateTime } from 'luxon'
 import { WorkService } from '@/work/work.service'
 import { ContainerSizeService } from '@/container_size/container_size.service'
+import { ExtraRulesWorkersService } from '@/extra_rules_workers/extra_rules_workers.service'
+import { ExtraRulesWorker } from '@/extra_rules_workers/entities/extra_rules_worker.entity'
 
 @Injectable()
 export class RulesWorkersService {
@@ -17,6 +19,7 @@ export class RulesWorkersService {
     private readonly conditionSerce: ConditionsService,
     private readonly workService: WorkService,
     private readonly containerSizeService: ContainerSizeService,
+    private readonly extraRulesWorkersService: ExtraRulesWorkersService,
   ) {}
 
   create(createRulesWorkerDto: CreateRulesWorkerDto) {
@@ -31,6 +34,9 @@ export class RulesWorkersService {
       .leftJoinAndSelect('rules_worker.work', 'work')
       .leftJoinAndSelect('rules_worker.condition_groups', 'condition_groups')
       .leftJoinAndSelect('condition_groups.conditions', 'conditions')
+      .leftJoinAndSelect('rules_worker.extra_rules_worker', 'extra_rules_worker')
+      .leftJoinAndSelect('extra_rules_worker.condition_groups', 'extra_condition_groups')
+      .leftJoinAndSelect('extra_condition_groups.conditions', 'extra_conditions')
       .where('work.id = :work', { work })
       .where('rules_worker.active = :active', { active: true })
       .getMany()
@@ -46,8 +52,16 @@ export class RulesWorkersService {
         for (const condition of conditions) {
           const conditionResult = this.conditionSerce.evalutedConditions(condition, container)
           if (!conditionResult) {
-            groupIsValid = false
-            break
+            const extraRules: ExtraRulesWorker[] = rule.extra_rules_worker
+            const validateExtraRules = await this.extraRulesWorkersService.validateExtraRules(
+              extraRules,
+              container,
+              workers,
+            )
+            if (!validateExtraRules || !extraRules.length) {
+              groupIsValid = false
+              break
+            }
           }
         }
 
@@ -76,7 +90,7 @@ export class RulesWorkersService {
 
   async update(id: number, updateRuleDto: UpdateRulesWorkerDto) {
     try {
-      const { condition_groups, work, container_size, ...rest } = updateRuleDto
+      const { work, container_size, ...rest } = updateRuleDto
       const rule = await this.rulesWorkerRepository.findOne({
         where: { id },
         relations: ['condition_groups', 'condition_groups.conditions'],
@@ -86,63 +100,10 @@ export class RulesWorkersService {
         throw new NotFoundException('Regla no encontrada')
       }
 
-      Object.assign(rule, rest)
-
       if (work) rule.work = await this.workService.findById(work)
       if (container_size) rule.container_size = await this.containerSizeService.findById(container_size)
 
-      if (condition_groups) {
-        const incomingConditionGroupIds = condition_groups.map(cg => cg.id).filter(id => id)
-        const conditionGroupsToRemove = rule.condition_groups.filter(cg => !incomingConditionGroupIds.includes(cg.id))
-
-        if (conditionGroupsToRemove.length > 0) {
-          rule.condition_groups = rule.condition_groups.filter(cg => incomingConditionGroupIds.includes(cg.id))
-        }
-
-        for (const cgDto of condition_groups) {
-          let conditionGroup
-          if (cgDto.id) {
-            conditionGroup = rule.condition_groups.find(cg => cg.id === cgDto.id)
-            if (conditionGroup) {
-              Object.assign(conditionGroup, cgDto)
-            } else {
-              conditionGroup = this.rulesWorkerRepository.manager.create('ConditionGroup', cgDto)
-              rule.condition_groups.push(conditionGroup)
-            }
-          } else {
-            conditionGroup = this.rulesWorkerRepository.manager.create('ConditionGroup', cgDto)
-            rule.condition_groups.push(conditionGroup)
-          }
-
-          if (cgDto.conditions) {
-            const incomingConditionIds = cgDto.conditions.map(cond => cond.id).filter(id => id)
-
-            const conditionsToRemove = conditionGroup.conditions.filter(cond => !incomingConditionIds.includes(cond.id))
-
-            if (conditionsToRemove.length > 0) {
-              conditionGroup.conditions = conditionGroup.conditions.filter(cond =>
-                incomingConditionIds.includes(cond.id),
-              )
-            }
-
-            for (const condDto of cgDto.conditions) {
-              let condition
-              if (condDto.id) {
-                condition = conditionGroup.conditions.find(cond => cond.id === condDto.id)
-                if (condition) {
-                  Object.assign(condition, condDto)
-                } else {
-                  condition = this.rulesWorkerRepository.manager.create('Condition', condDto)
-                  conditionGroup.conditions.push(condition)
-                }
-              } else {
-                condition = this.rulesWorkerRepository.manager.create('Condition', condDto)
-                conditionGroup.conditions.push(condition)
-              }
-            }
-          }
-        }
-      }
+      Object.assign(rule, rest)
 
       await this.rulesWorkerRepository.save(rule)
 

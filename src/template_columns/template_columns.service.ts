@@ -15,12 +15,15 @@ export class TemplateColumnsService {
     return 'This action adds a new templateColumn'
   }
 
-  findAll() {
-    return `This action returns all templateColumns`
-  }
+  // findAll() {
+  //   return `This action returns all templateColumns`
+  // }
 
-  findOne(id: number) {
-    return `This action returns a #${id} templateColumn`
+  async findByTemplateId(id: string) {
+    return await this.templateColumnRepository.find({
+      where: { templateId: id },
+      select: ['id', 'name'],
+    })
   }
 
   update(id: number, updateTemplateColumnDto: UpdateTemplateColumnDto) {

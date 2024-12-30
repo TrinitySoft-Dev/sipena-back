@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { ContainerDto, CreateTimesheetDto } from './dto/create-timesheet.dto'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Timesheet, TimesheetStatusEnum } from './entities/timesheet.entity'
+import { Timesheet } from './entities/timesheet.entity'
 import { Between, In, Repository } from 'typeorm'
 import { ContainerService } from '@/container/container.service'
 import { UsersService } from '@/users/users.service'
@@ -16,6 +16,7 @@ import { UpdateTimesheetDto } from './dto/update-timesheet.dto'
 import { FILTER_TYPE } from '@/common/enums/enums'
 import { DateTime } from 'luxon'
 import { ProductsService } from '@/products/products.service'
+import { TimesheetStatusEnum } from '@/timesheet_workers/entities/timesheet_worker.entity'
 
 @Injectable()
 export class TimesheetService {
@@ -106,54 +107,83 @@ export class TimesheetService {
 
   async update(id: number, updateTimesheetDto: UpdateTimesheetDto) {
     const { timesheet, container } = updateTimesheetDto
-    let { customer_id, workers, work_id, ...restTimesheet } = timesheet
+
+    if (container?.trash) container.trash = (container.trash as unknown as string) === 'true'
+    if (container?.mixed) container.mixed = (container.mixed as unknown as string) === 'true'
+    if (container?.forklift_driver) container.forklift_driver = Boolean(container.forklift_driver)
 
     const existingTimesheet = await this.timesheetRepository.findOne({
       where: { id },
-      relations: ['container'],
+      relations: ['container', 'timesheet_workers', 'customer', 'container.work', 'container.size'],
     })
+
     if (!existingTimesheet) throw new NotFoundException('Timesheet not found')
 
-    const customerUser = await this.usersService.findByWorks(customer_id, work_id, container.size)
-    if (!customerUser.rules.length) throw new NotFoundException('Rules not found')
+    // update workers
+    const idWorkers = timesheet.workers.map(worker => worker.id)
+    const workers = existingTimesheet.timesheet_workers
 
-    const rules = customerUser.rules
-    const rate = await this.validateRules(rules, container)
+    const workerUpdate = workers.filter(worker => idWorkers.includes(worker.id))
+    Object.assign(workerUpdate, timesheet.workers)
 
-    let updatedContainer = existingTimesheet.container
-    if (container) {
-      updatedContainer = await this.containerService.update(updatedContainer.id, {
-        ...container,
-        product: { id: container.product },
-      })
+    existingTimesheet.timesheet_workers = workerUpdate
+
+    // update container
+    Object.assign(existingTimesheet.container, container)
+    const customerId = existingTimesheet.customer.id
+
+    let isValidProduct = false
+    let rate = null
+
+    const existProductsWithPricing = await this.productsService.getProductsCustomerWithPrice(customerId)
+
+    if (existProductsWithPricing) {
+      isValidProduct = true
     }
 
-    restTimesheet = {
-      day: restTimesheet.day,
-      week: restTimesheet.week,
-      comment: restTimesheet.comment,
-      images: restTimesheet.images,
+    if (!existProductsWithPricing) {
+      const customerUser = await this.usersService.findByWorks(
+        customerId,
+        Number(existingTimesheet.container.work),
+        Number(existingTimesheet.container.size),
+      )
+      if (!customerUser.rules.length) throw new NotFoundException('Rules not found')
+
+      const rules = customerUser.rules
+      rate = await this.validateRules(rules, container)
     }
 
-    const updatedTimesheet = {
-      ...existingTimesheet,
-      ...restTimesheet,
-      rate: typeof rate === 'object' ? rate.rate : 0,
-      base: typeof rate === 'object' ? rate.base : 0,
-      container: updatedContainer,
-      customer: { id: customer_id },
-      extra_rates: typeof rate === 'object' ? JSON.stringify(rate.json) : null,
+    existingTimesheet.rate = isValidProduct ? existProductsWithPricing.price : typeof rate === 'object' ? rate.rate : 0
+    existingTimesheet.base = isValidProduct ? existProductsWithPricing.price : typeof rate === 'object' ? rate.base : 0
+
+    existingTimesheet.extra_rates = isValidProduct
+      ? JSON.stringify({
+          name: existProductsWithPricing.name,
+          rate: existProductsWithPricing.price,
+        })
+      : typeof rate === 'object'
+        ? JSON.stringify(rate.json)
+        : null
+
+    await this.timesheetRepository.save(existingTimesheet)
+
+    let payWorkers = []
+
+    if (!isValidProduct) {
+      payWorkers = await this.rulesWorkersService.validateRules(
+        container,
+        String(existingTimesheet.container.work),
+        workerUpdate,
+      )
     }
 
-    await this.timesheetRepository.save(updatedTimesheet)
+    if (isValidProduct) {
+      payWorkers = workerUpdate.map(worker => ({
+        ...worker,
+        pay: existProductsWithPricing.price / workerUpdate.length,
+      }))
+    }
 
-    const updatedWorkers = workers.map(worker => ({
-      ...worker,
-      worker: worker.worker,
-      timesheet: updatedTimesheet.id,
-    }))
-
-    const payWorkers = await this.rulesWorkersService.validateRules(container, String(work_id), updatedWorkers)
     await this.timesheetWorkersService.updateMany(payWorkers)
 
     return { message: 'Timesheet updated successfully' }
@@ -491,24 +521,34 @@ export class TimesheetService {
       .filter(item => item.customers.length > 0)
   }
 
-  async getOpenTimesheetsWorkerByWeek() {
-    const timesheets = await this.timesheetRepository.find({
-      where: { status_customer_pay: TimesheetStatusEnum.OPEN },
-      relations: ['customer', 'timesheet_workers', 'timesheet_workers.worker'],
-    })
+  async getOpenTimesheetsWorkerByWeek(workerId: number, timesheetStatus: string) {
+    const timesheets = this.timesheetRepository
+      .createQueryBuilder('timesheet')
+      .innerJoinAndSelect(
+        'timesheet.timesheet_workers',
+        'timesheet_workers',
+        'timesheet_workers.status_worker_pay = :status',
+        { status: TimesheetStatusEnum[timesheetStatus] },
+      )
+      .leftJoinAndSelect('timesheet.customer', 'customer')
+      .leftJoinAndSelect('timesheet_workers.worker', 'worker')
 
-    const uniqueWorkers = new Set<string>()
-    const groupedByWeek = timesheets.reduce(
+    if (workerId) {
+      timesheets.where('timesheet_workers.worker = :workerId', { workerId })
+    }
+    const resultTimesheets = await timesheets.getMany()
+
+    const groupedByWeek = resultTimesheets.reduce(
       (acc, timesheet) => {
         const week: string = timesheet.week as string
         if (!acc[week]) {
-          acc[week] = { workers: [] }
+          acc[week] = { workers: [], uniqueWorkers: new Set<string>() }
         }
 
         for (const timesheetWorker of timesheet.timesheet_workers) {
           const worker = timesheetWorker.worker
-          if (worker && !uniqueWorkers.has(worker.name)) {
-            uniqueWorkers.add(worker.name)
+          if (worker && !acc[week].uniqueWorkers.has(worker.name)) {
+            acc[week].uniqueWorkers.add(worker.name)
             acc[week].workers.push({
               id: worker.id,
               name: worker.name,
@@ -519,7 +559,7 @@ export class TimesheetService {
 
         return acc
       },
-      {} as Record<string, { workers: { id: number; name: string; last_name: string }[] }>,
+      {} as Record<string, { workers: { id: number; name: string; last_name: string }[]; uniqueWorkers: Set<string> }>,
     )
 
     return Object.keys(groupedByWeek)
@@ -530,8 +570,35 @@ export class TimesheetService {
       .filter(item => item.workers.length > 0)
   }
 
-  async closeTimesheetWorker(ids: number[]) {
-    const timesheets = await this.timesheetRepository.find({ where: { id: In(ids) } })
+  async closeTimesheetWorker(ids: number[], idWorker: number) {
+    const timesheets = await this.timesheetRepository
+      .createQueryBuilder('timesheet')
+      .leftJoinAndSelect('timesheet.timesheet_workers', 'timesheet_workers')
+      .where('timesheet.id IN (:...ids)', { ids })
+      .andWhere('timesheet_workers.worker = :idWorker', { idWorker })
+      .getMany()
+
+    if (!timesheets.length) throw new NotFoundException('Timesheet not found')
+
+    timesheets.forEach(timesheet => {
+      timesheet.timesheet_workers = timesheet.timesheet_workers.map(worker => ({
+        ...worker,
+        status_worker_pay: TimesheetStatusEnum.CLOSED,
+      }))
+    })
+
+    await this.timesheetRepository.save(timesheets)
+
+    return { message: 'Timesheet closed successfully' }
+  }
+
+  async closeTimesheetCustomer(ids: number[], idCustomer: number) {
+    const timesheets = await this.timesheetRepository
+      .createQueryBuilder('timesheet')
+      .where('timesheet.id IN (:...ids)', { ids })
+      .andWhere('timesheet.customer = :idCustomer', { idCustomer })
+      .getMany()
+
     if (!timesheets.length) throw new NotFoundException('Timesheet not found')
 
     timesheets.forEach(timesheet => {
@@ -543,32 +610,43 @@ export class TimesheetService {
     return { message: 'Timesheet closed successfully' }
   }
 
-  async findByWeekAndRole(week: string, role: string, id: number) {
+  async findByWeekAndRole(week: string, role: string, id: number, timesheetStatus: string) {
     if (role === ROLES_CONST.CUSTOMER) {
-      return this.timesheetRepository.find({
-        where: { week, customer: { role: { name: ROLES_CONST.CUSTOMER }, id } },
-        relations: [
-          'customer',
-          'container',
-          'container.work',
-          'container.product',
-          'timesheet_workers',
-          'container.size',
-          'role',
-        ],
-      })
+      return this.timesheetRepository
+        .createQueryBuilder('timesheet')
+        .leftJoinAndSelect('timesheet.customer', 'customer')
+        .leftJoinAndSelect('customer.role', 'role')
+        .leftJoinAndSelect('timesheet.container', 'container')
+        .leftJoinAndSelect('container.work', 'work')
+        .leftJoinAndSelect('container.product', 'product')
+        .leftJoinAndSelect('container.size', 'size')
+        .leftJoinAndSelect('timesheet.timesheet_workers', 'timesheet_workers')
+        .where('timesheet.week = :week', { week })
+        .andWhere('timesheet.customer = :id', { id })
+        .andWhere('role.name = :role', { role: ROLES_CONST.CUSTOMER })
+        .andWhere('timesheet.status_customer_pay = :status_customer_pay', {
+          status_customer_pay: TimesheetStatusEnum[timesheetStatus],
+        })
+        .getMany()
     }
-
-    return await this.timesheetRepository.find({
-      where: { week, timesheet_workers: { worker: { role: { name: ROLES_CONST.WORKER }, id } } },
-      relations: [
-        'customer',
-        'container',
-        'container.work',
-        'container.product',
+    return this.timesheetRepository
+      .createQueryBuilder('timesheet')
+      .innerJoinAndSelect(
+        'timesheet.timesheet_workers',
         'timesheet_workers',
-        'container.size',
-      ],
-    })
+        'timesheet_workers.status_worker_pay = :status',
+        { status: TimesheetStatusEnum[timesheetStatus] },
+      )
+      .leftJoinAndSelect('timesheet_workers.worker', 'worker')
+      .leftJoinAndSelect('worker.role', 'role')
+      .leftJoinAndSelect('timesheet.customer', 'customer')
+      .leftJoinAndSelect('timesheet.container', 'container')
+      .leftJoinAndSelect('container.work', 'work')
+      .leftJoinAndSelect('container.product', 'product')
+      .leftJoinAndSelect('container.size', 'size')
+      .where('timesheet.week = :week', { week })
+      .andWhere('timesheet_workers.worker = :id', { id })
+      .andWhere('role.name = :role', { role: ROLES_CONST.WORKER })
+      .getMany()
   }
 }

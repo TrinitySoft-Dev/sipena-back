@@ -1,0 +1,109 @@
+<mjml>
+  <mj-head>
+    <mj-style inline="inline">
+      .thanks-title div {
+        color: #F2652E!important;
+        font-size: 32px!important;
+        font-weight: bold!important;
+        text-align: center!important;
+      }
+
+      .email-body div {
+        color: #252D3C!important;
+        font-size: 16px!important;
+        text-align: center!important;
+        line-height: 27px!important;
+        margin: 10px 0!important;
+      }
+
+      .footer div {
+        color: #fff!important;
+        font-size: 13px!important;
+        text-align: center!important;
+        line-height: 20px!important;
+      }
+
+      .items {
+        color: #252D3C!important;
+        font-size: 16px!important;
+        text-align: center!important;
+        line-height: 27px!important;
+      }
+
+      .items span {
+        color: #252D3C!important;
+        font-size: 16px!important;
+        font-weight: bold!important;
+      }
+
+      .link-button a {
+        display: inline-block;
+        background-color: #F2652E;
+        color: #ffffff!important;
+        font-size: 16px!important;
+        font-weight: bold!important;
+        padding: 10px 20px;
+        text-decoration: none;
+        border-radius: 5px;
+      }
+
+      .user-info-table {
+          width: 50%;
+          margin-left: auto;
+          margin-right: auto;
+      }
+
+      .user-info-table td {
+          padding: 5px 10px;
+      }
+      .user-info-table tr {
+        padding: 2px;
+      }
+    </mj-style>
+    <mj-attributes>
+      <mj-text padding="0px" />
+      <mj-section padding="20px 0" />
+      <mj-table padding="0px" />
+    </mj-attributes>
+  </mj-head>
+  <mj-body background-color="#fff">
+    <mj-section background-color="#ffffff" padding-top="30px" padding-bottom="0">
+      <mj-column width="100%">
+        <mj-image src="https://sipena-back-eta.vercel.app/public/email.png" alt="Logo" width="80px" align="center" padding-bottom="15px"/>
+        <mj-text css-class="thanks-title" align="center">Hello administrators</mj-text>
+        <mj-text css-class="email-body" align="center" padding-bottom="10px">
+          This email is to inform you that a new user has registered on Sipena and requires approval to activate their account
+        </mj-text>
+
+        <mj-table css-class="user-info-table" >
+          <tr style="text-align: center">
+            <td style="text-align: right; font-weight: bold; padding: 2px 10px">Username:</td>
+            <td style="text-align: left; padding: 2px 10px">{{username}}</td>
+          </tr>
+          <tr style="text-align: center">
+            <td style="text-align: right; font-weight: bold; padding: 2px 10px">Email:</td>
+            <td style="text-align: left; padding: 2px 10px">{{email}}</td>
+          </tr>
+        </mj-table>
+
+        <mj-button background-color="#F2652E" color="#ffffff" href="{{url}}" font-size="16px" font-weight="bold" align="center" padding-top="20px">
+          Activate account
+        </mj-button>
+
+        <mj-text css-class="items" align="center" padding="20px">
+          Once the account is activated, the user will receive a confirmation email and will be able to access Sipena
+        </mj-text>
+
+      </mj-column>
+    </mj-section>
+    <mj-section background-color="#252D3C" padding="30px">
+      <mj-column width="100%">
+        <mj-image src="https://sipena-back-eta.vercel.app/public/logo.png" alt="Logo" width="100px" align="center" padding-bottom="10px"/>
+        <mj-text css-class="footer" align="center">
+          If you have questions, do not forget to write to <a href="mailto:soporte@sipnea.com.co" style="color: #ffffff;">soporte@sipena.com.co</a><br />
+          Sipena Team
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
