@@ -37,6 +37,11 @@ export class TimesheetController {
     return this.timesheetService.closeTimesheetWorker(timesheetIds, workerId)
   }
 
+  @Post('/close-timesheets-customer')
+  closeTimesheetsCustomer(@Body() timesheetIds: number[], @Query('customerId') customerId: number) {
+    return this.timesheetService.closeTimesheetCustomer(timesheetIds, customerId)
+  }
+
   // ================== END POST ==================
 
   // ================== INIT GET ==================

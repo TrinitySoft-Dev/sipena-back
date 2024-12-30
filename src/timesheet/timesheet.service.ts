@@ -591,6 +591,24 @@ export class TimesheetService {
     return { message: 'Timesheet closed successfully' }
   }
 
+  async closeTimesheetCustomer(ids: number[], idCustomer: number) {
+    const timesheets = await this.timesheetRepository
+      .createQueryBuilder('timesheet')
+      .where('timesheet.id IN (:...ids)', { ids })
+      .andWhere('timesheet.customer = :idCustomer', { idCustomer })
+      .getMany()
+
+    if (!timesheets.length) throw new NotFoundException('Timesheet not found')
+
+    timesheets.forEach(timesheet => {
+      timesheet.status_customer_pay = TimesheetStatusEnum.CLOSED
+    })
+
+    await this.timesheetRepository.save(timesheets)
+
+    return { message: 'Timesheet closed successfully' }
+  }
+
   async findByWeekAndRole(week: string, role: string, id: number, timesheetStatus: string) {
     if (role === ROLES_CONST.CUSTOMER) {
       return this.timesheetRepository
