@@ -586,8 +586,6 @@ export class TimesheetService {
       }))
     })
 
-    console.log(JSON.stringify(timesheets, null, 2))
-
     await this.timesheetRepository.save(timesheets)
 
     return { message: 'Timesheet closed successfully' }
