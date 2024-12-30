@@ -27,10 +27,12 @@ export class ExtraRulesWorkersService {
   }
 
   async findExtraRuleWorker(ruleId: number) {
-    return await this.extraRulesWorkerRepository.find({
-      where: { rule_worker: { id: ruleId } },
-      relations: ['condition_groups', 'condition_groups.conditions'],
-    })
+    return this.extraRulesWorkerRepository
+      .createQueryBuilder('extra_rules_worker')
+      .leftJoinAndSelect('extra_rules_worker.condition_groups', 'condition_groups')
+      .leftJoinAndSelect('condition_groups.conditions', 'conditions')
+      .leftJoinAndSelect('extra_rules_worker.rule_worker', 'rule_worker')
+      .getMany()
   }
 
   async findAll(options) {

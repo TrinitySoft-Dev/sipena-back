@@ -48,7 +48,7 @@ export class ExtraRulesWorker {
   @OneToMany(() => ConditionGroup, group => group.extra_rule_workers, { cascade: true })
   condition_groups: ConditionGroup[]
 
-  @ManyToMany(() => RulesWorker, rule => rule.work)
+  @ManyToMany(() => RulesWorker, rule => rule.extra_rules_worker)
   rule_worker: RulesWorker[]
 
   @Column({
