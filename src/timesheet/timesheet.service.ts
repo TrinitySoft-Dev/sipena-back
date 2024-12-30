@@ -595,18 +595,18 @@ export class TimesheetService {
 
   async findByWeekAndRole(week: string, role: string, id: number, timesheetStatus: string) {
     if (role === ROLES_CONST.CUSTOMER) {
-      return this.timesheetRepository.find({
-        where: { week, customer: { role: { name: ROLES_CONST.CUSTOMER }, id } },
-        relations: [
-          'customer',
-          'container',
-          'container.work',
-          'container.product',
-          'timesheet_workers',
-          'container.size',
-          'role',
-        ],
-      })
+      return this.timesheetRepository
+        .createQueryBuilder('timesheet')
+        .innerJoinAndSelect('timesheet.customer', 'customer')
+        .innerJoinAndSelect('timesheet.container', 'container')
+        .innerJoinAndSelect('container.work', 'work')
+        .innerJoinAndSelect('container.product', 'product')
+        .innerJoinAndSelect('timesheet.timesheet_workers', 'timesheet_workers')
+        .innerJoinAndSelect('container.size', 'size')
+        .where('timesheet.week = :week', { week })
+        .andWhere('customer.id = :id', { id })
+        .andWhere('customer.role = :role', { role: ROLES_CONST.CUSTOMER })
+        .getMany()
     }
     return this.timesheetRepository
       .createQueryBuilder('timesheet')
