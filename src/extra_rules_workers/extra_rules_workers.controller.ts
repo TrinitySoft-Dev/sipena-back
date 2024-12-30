@@ -27,6 +27,11 @@ export class ExtraRulesWorkersController {
     return this.extraRulesWorkersService.findById(id)
   }
 
+  @Get('rule/:ruleId')
+  findExtraRuleWorkerByRuleId(@Param('ruleId') ruleId: number) {
+    return this.extraRulesWorkersService.findExtraRuleWorker(ruleId)
+  }
+
   @Put(':id')
   update(@Param('id') id: number, @Body() updateExtraRulesWorkerDto: UpdateExtraRulesWorkerDto) {
     return this.extraRulesWorkersService.update(id, updateExtraRulesWorkerDto)

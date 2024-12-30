@@ -26,6 +26,13 @@ export class ExtraRulesWorkersService {
     })
   }
 
+  async findExtraRuleWorker(ruleId: number) {
+    return await this.extraRulesWorkerRepository.find({
+      where: { rule_worker: { id: ruleId } },
+      relations: ['condition_groups', 'condition_groups.conditions'],
+    })
+  }
+
   async findAll(options) {
     const { page, pageSize } = options
 
