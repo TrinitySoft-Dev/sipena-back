@@ -249,7 +249,7 @@ export class UsersService {
     return await this.userRepository.findOne({
       where: { id },
       relations: ['infoworker', 'infoworker.city', 'infoworker.state'],
-      select: ['id', 'email', 'role', 'completed', 'infoworker', 'name', 'last_name'],
+      select: ['id', 'active', 'email', 'role', 'completed', 'infoworker', 'name', 'last_name'],
     })
   }
 
