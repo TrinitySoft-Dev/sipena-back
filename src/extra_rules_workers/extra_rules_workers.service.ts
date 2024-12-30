@@ -26,13 +26,13 @@ export class ExtraRulesWorkersService {
     })
   }
 
-  async findExtraRuleWorker(ruleId: number) {
+  findExtraRuleWorker(id: number) {
     return this.extraRulesWorkerRepository
       .createQueryBuilder('extra_rules_worker')
       .leftJoinAndSelect('extra_rules_worker.condition_groups', 'condition_groups')
       .leftJoinAndSelect('condition_groups.conditions', 'conditions')
       .leftJoinAndSelect('extra_rules_worker.rule_worker', 'rule_worker')
-      .where('extra_rules_worker.id = :ruleId', { ruleId })
+      .where('rule_worker.id IN (:...id)', { id: [id] })
       .getMany()
   }
 
