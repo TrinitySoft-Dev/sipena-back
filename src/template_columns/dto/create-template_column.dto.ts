@@ -1,6 +1,6 @@
 import { Valuecell } from '@/common/validators/Valuecell'
 import { ApiProperty } from '@nestjs/swagger'
-import { IsString, Validate } from 'class-validator'
+import { IsNumber, IsOptional, IsString, Validate } from 'class-validator'
 
 export class CreateTemplateColumnDto {
   @ApiProperty({

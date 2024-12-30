@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { CreateExtraRulesWorkerDto } from './dto/create-extra_rules_worker.dto'
 import { InjectRepository } from '@nestjs/typeorm'
 import { ExtraRulesWorker } from './entities/extra_rules_worker.entity'
@@ -6,6 +6,7 @@ import { Repository } from 'typeorm'
 import { ConditionsService } from '@/conditions/conditions.service'
 import { ContainerDto } from '@/timesheet/dto/create-timesheet.dto'
 import { DateTime } from 'luxon'
+import { UpdateExtraRulesWorkerDto } from './dto/update-extra_rules_worker.dto'
 
 @Injectable()
 export class ExtraRulesWorkersService {
@@ -16,6 +17,13 @@ export class ExtraRulesWorkersService {
 
   async create(createExtraRulesWorkerDto: CreateExtraRulesWorkerDto) {
     return await this.extraRulesWorkerRepository.save(createExtraRulesWorkerDto)
+  }
+
+  async findById(id: number) {
+    return await this.extraRulesWorkerRepository.findOne({
+      where: { id },
+      relations: ['condition_groups', 'condition_groups.conditions'],
+    })
   }
 
   async findAll(options) {
@@ -30,6 +38,81 @@ export class ExtraRulesWorkersService {
     })
 
     return { result: result, pagination: { page, pageSize, total } }
+  }
+
+  async update(id: number, updateRuleDto: UpdateExtraRulesWorkerDto) {
+    try {
+      const { condition_groups, ...rest } = updateRuleDto
+      const rule = await this.extraRulesWorkerRepository.findOne({
+        where: { id },
+        relations: ['condition_groups', 'condition_groups.conditions'],
+      })
+
+      if (!rule) {
+        throw new NotFoundException('Regla no encontrada')
+      }
+
+      Object.assign(rule, rest)
+
+      if (condition_groups) {
+        const incomingConditionGroupIds = condition_groups.map(cg => cg.id).filter(id => id)
+        const conditionGroupsToRemove = rule.condition_groups.filter(cg => !incomingConditionGroupIds.includes(cg.id))
+
+        if (conditionGroupsToRemove.length > 0) {
+          rule.condition_groups = rule.condition_groups.filter(cg => incomingConditionGroupIds.includes(cg.id))
+        }
+
+        for (const cgDto of condition_groups) {
+          let conditionGroup
+          if (cgDto.id) {
+            conditionGroup = rule.condition_groups.find(cg => cg.id === cgDto.id)
+            if (conditionGroup) {
+              Object.assign(conditionGroup, cgDto)
+            } else {
+              conditionGroup = this.extraRulesWorkerRepository.manager.create('ConditionGroup', cgDto)
+              rule.condition_groups.push(conditionGroup)
+            }
+          } else {
+            conditionGroup = this.extraRulesWorkerRepository.manager.create('ConditionGroup', cgDto)
+            rule.condition_groups.push(conditionGroup)
+          }
+
+          if (cgDto.conditions) {
+            const incomingConditionIds = cgDto.conditions.map(cond => cond.id).filter(id => id)
+
+            const conditionsToRemove = conditionGroup.conditions.filter(cond => !incomingConditionIds.includes(cond.id))
+
+            if (conditionsToRemove.length > 0) {
+              conditionGroup.conditions = conditionGroup.conditions.filter(cond =>
+                incomingConditionIds.includes(cond.id),
+              )
+            }
+
+            for (const condDto of cgDto.conditions) {
+              let condition
+              if (condDto.id) {
+                condition = conditionGroup.conditions.find(cond => cond.id === condDto.id)
+                if (condition) {
+                  Object.assign(condition, condDto)
+                } else {
+                  condition = this.extraRulesWorkerRepository.manager.create('Condition', condDto)
+                  conditionGroup.conditions.push(condition)
+                }
+              } else {
+                condition = this.extraRulesWorkerRepository.manager.create('Condition', condDto)
+                conditionGroup.conditions.push(condition)
+              }
+            }
+          }
+        }
+      }
+
+      await this.extraRulesWorkerRepository.save(rule)
+
+      return { message: 'Regla actualizada exitosamente' }
+    } catch (error) {
+      throw error
+    }
   }
 
   async validateExtraRules(extraRules: ExtraRulesWorker[], container: ContainerDto, workers: any) {
