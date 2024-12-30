@@ -33,15 +33,22 @@ export class HttpExceptionFilter implements ExceptionFilter {
       code = exception.name || 'InternalServerError'
     }
 
-    console.error({
-      statusCode: status,
-      timestamp: new Date().toISOString(),
-      path: request.url,
-      method: request.method,
-      message: message,
-      code: code,
-      stack: exception.stack,
-    })
+    console.error(
+      JSON.stringify(
+        {
+          statusCode: status,
+          timestamp: new Date().toISOString(),
+          path: request.url,
+          method: request.method,
+          message: message,
+          code: code,
+          stack: exception.stack,
+          exception,
+        },
+        null,
+        2,
+      ),
+    )
 
     response.status(status).json(GlobalResponseError(status, message, code, request))
   }

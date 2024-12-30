@@ -90,7 +90,7 @@ export class RulesWorkersService {
 
   async update(id: number, updateRuleDto: UpdateRulesWorkerDto) {
     try {
-      const { condition_groups, work, container_size, ...rest } = updateRuleDto
+      const { work, container_size, ...rest } = updateRuleDto
       const rule = await this.rulesWorkerRepository.findOne({
         where: { id },
         relations: ['condition_groups', 'condition_groups.conditions'],
@@ -100,63 +100,10 @@ export class RulesWorkersService {
         throw new NotFoundException('Regla no encontrada')
       }
 
-      Object.assign(rule, rest)
-
       if (work) rule.work = await this.workService.findById(work)
       if (container_size) rule.container_size = await this.containerSizeService.findById(container_size)
 
-      if (condition_groups) {
-        const incomingConditionGroupIds = condition_groups.map(cg => cg.id).filter(id => id)
-        const conditionGroupsToRemove = rule.condition_groups.filter(cg => !incomingConditionGroupIds.includes(cg.id))
-
-        if (conditionGroupsToRemove.length > 0) {
-          rule.condition_groups = rule.condition_groups.filter(cg => incomingConditionGroupIds.includes(cg.id))
-        }
-
-        for (const cgDto of condition_groups) {
-          let conditionGroup
-          if (cgDto.id) {
-            conditionGroup = rule.condition_groups.find(cg => cg.id === cgDto.id)
-            if (conditionGroup) {
-              Object.assign(conditionGroup, cgDto)
-            } else {
-              conditionGroup = this.rulesWorkerRepository.manager.create('ConditionGroup', cgDto)
-              rule.condition_groups.push(conditionGroup)
-            }
-          } else {
-            conditionGroup = this.rulesWorkerRepository.manager.create('ConditionGroup', cgDto)
-            rule.condition_groups.push(conditionGroup)
-          }
-
-          if (cgDto.conditions) {
-            const incomingConditionIds = cgDto.conditions.map(cond => cond.id).filter(id => id)
-
-            const conditionsToRemove = conditionGroup.conditions.filter(cond => !incomingConditionIds.includes(cond.id))
-
-            if (conditionsToRemove.length > 0) {
-              conditionGroup.conditions = conditionGroup.conditions.filter(cond =>
-                incomingConditionIds.includes(cond.id),
-              )
-            }
-
-            for (const condDto of cgDto.conditions) {
-              let condition
-              if (condDto.id) {
-                condition = conditionGroup.conditions.find(cond => cond.id === condDto.id)
-                if (condition) {
-                  Object.assign(condition, condDto)
-                } else {
-                  condition = this.rulesWorkerRepository.manager.create('Condition', condDto)
-                  conditionGroup.conditions.push(condition)
-                }
-              } else {
-                condition = this.rulesWorkerRepository.manager.create('Condition', condDto)
-                conditionGroup.conditions.push(condition)
-              }
-            }
-          }
-        }
-      }
+      Object.assign(rule, rest)
 
       await this.rulesWorkerRepository.save(rule)
 

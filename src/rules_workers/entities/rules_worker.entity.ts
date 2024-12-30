@@ -57,7 +57,7 @@ export class RulesWorker {
   @JoinColumn()
   work: Work
 
-  @ManyToMany(() => ExtraRulesWorker, extraRuleWorker => extraRuleWorker.rule_worker)
+  @ManyToMany(() => ExtraRulesWorker, extraRuleWorker => extraRuleWorker.rule_worker, { cascade: true })
   @JoinTable({
     name: 'rules_worker_extra_rules_worker',
     joinColumn: {
