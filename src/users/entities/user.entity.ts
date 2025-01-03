@@ -1,5 +1,6 @@
 import { SelectedField } from '@/common/decorators/selected-fields.decorator'
 import { Infoworker } from '@/infoworkers/entities/infoworker.entity'
+import { NormalSchedule } from '@/normal_schedule/entities/normal_schedule.entity'
 import { Product } from '@/products/entities/product.entity'
 import { Role } from '@/roles/entities/role.entity'
 import { Rule } from '@/rules/entities/rule.entity'
@@ -97,6 +98,9 @@ export class User {
   @ManyToMany(() => Product, product => product.customers)
   @JoinTable()
   products: Product[]
+
+  @OneToOne(() => NormalSchedule, normalSchedule => normalSchedule.customer, { cascade: true })
+  normal_schedule: NormalSchedule
 
   @Column({
     type: 'boolean',

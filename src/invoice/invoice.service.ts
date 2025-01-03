@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { CreateInvoiceDto } from './dto/create-invoice.dto'
 import { TimesheetService } from '@/timesheet/timesheet.service'
 import { TemplateService } from '@/template/template.service'
@@ -64,7 +64,24 @@ export class InvoiceService {
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     )
 
+    console.log(downloadURL)
+
     return downloadURL
+  }
+
+  async generatePDF(createInvoiceDto: CreateInvoiceDto) {
+    const { reference_week, template, customer } = createInvoiceDto
+    const resultTemplate = this.templateService.findOne(template)
+
+    if (!resultTemplate) throw new NotFoundException('Template not found')
+    const timesheets = await this.timesheetService.findTimesheetsByWeek(
+      reference_week,
+      createInvoiceDto.customer,
+      createInvoiceDto.type,
+    )
+
+    const columns = await this.resolverColumns(resultTemplate, timesheets)
+    console.log(columns)
   }
 
   private async resolverColumns(template, timesheets) {

@@ -18,7 +18,6 @@ import { AccessJwtService } from '@/common/services/access-jwt.service'
 import { AccessJwtRefreshService } from '@/common/services/refresh-jwt.service'
 import { UpdateUserDto } from './dto/update-user.dto'
 import { RolesService } from '@/roles/roles.service'
-import { AdminEmailsService } from '@/admin_emails/admin_emails.service'
 
 @Injectable()
 export class UsersService {

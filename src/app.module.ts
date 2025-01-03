@@ -38,6 +38,7 @@ import { WorkFieldsModule } from './work_fields/work_fields.module'
 import { GroupPermissionsModule } from './group_permissions/group_permissions.module'
 import { ExtraRulesWorkersModule } from './extra_rules_workers/extra_rules_workers.module'
 import { AdminEmailsModule } from './admin_emails/admin_emails.module'
+import { NormalScheduleModule } from './normal_schedule/normal_schedule.module';
 
 @Module({
   imports: [
@@ -105,6 +106,7 @@ import { AdminEmailsModule } from './admin_emails/admin_emails.module'
     GroupPermissionsModule,
     ExtraRulesWorkersModule,
     AdminEmailsModule,
+    NormalScheduleModule,
   ],
   controllers: [],
   providers: [],
