@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Param, ParseIntPipe, Get } from '@nestjs/common'
+import { Controller, Post, Body, Param, ParseIntPipe, Get, Query, DefaultValuePipe } from '@nestjs/common'
 import { NormalScheduleService } from './normal_schedule.service'
 import { CreateNormalScheduleDto } from './dto/create-normal_schedule.dto'
 import { ApiTags } from '@nestjs/swagger'
@@ -9,15 +9,15 @@ export class NormalScheduleController {
   constructor(private readonly normalScheduleService: NormalScheduleService) {}
 
   @Post(':customerId')
-  create(
-    @Body() createNormalScheduleDto: CreateNormalScheduleDto,
-    @Param('customerId', ParseIntPipe) customerId: number,
-  ) {
-    return this.normalScheduleService.create(createNormalScheduleDto, customerId)
+  create(@Body() createNormalScheduleDto: CreateNormalScheduleDto) {
+    return this.normalScheduleService.create(createNormalScheduleDto)
   }
 
-  @Get(':customerId')
-  findByCustomerId(@Param('customerId', ParseIntPipe) customerId: number) {
-    return this.normalScheduleService.findByCustomerId(customerId)
+  @Get('/')
+  findAll(
+    @Query('page', ParseIntPipe, new DefaultValuePipe(0)) page: number,
+    @Query('pageSize', ParseIntPipe, new DefaultValuePipe(10)) pageSize: number,
+  ) {
+    return this.normalScheduleService.findAll({ page, pageSize })
   }
 }

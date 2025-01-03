@@ -99,8 +99,8 @@ export class User {
   @JoinTable()
   products: Product[]
 
-  @OneToOne(() => NormalSchedule, normalSchedule => normalSchedule.customer, { cascade: true })
-  normal_schedule: NormalSchedule
+  @ManyToMany(() => NormalSchedule, normalSchedule => normalSchedule.customer, { cascade: true })
+  normal_schedule: NormalSchedule[]
 
   @Column({
     type: 'boolean',

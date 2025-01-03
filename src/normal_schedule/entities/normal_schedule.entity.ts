@@ -6,6 +6,8 @@ import {
   DeleteDateColumn,
   Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -37,9 +39,18 @@ export class NormalSchedule {
   })
   rate: number
 
-  @OneToOne(() => User, user => user.normal_schedule)
-  @JoinColumn()
-  customer: User
+  @ManyToMany(() => User, user => user.normal_schedule)
+  @JoinTable({
+    joinColumn: {
+      name: 'normal_schedule_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'customer_id',
+      referencedColumnName: 'id',
+    },
+  })
+  customer: User[]
 
   @Column({
     type: 'boolean',
