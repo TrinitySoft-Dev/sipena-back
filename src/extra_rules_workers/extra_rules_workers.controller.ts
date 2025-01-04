@@ -9,6 +9,7 @@ import {
   Param,
   Put,
   ParseBoolPipe,
+  Delete,
 } from '@nestjs/common'
 import { ExtraRulesWorkersService } from './extra_rules_workers.service'
 import { CreateExtraRulesWorkerDto } from './dto/create-extra_rules_worker.dto'
@@ -49,5 +50,9 @@ export class ExtraRulesWorkersController {
   @Put(':id')
   update(@Param('id') id: number, @Body() updateExtraRulesWorkerDto: UpdateExtraRulesWorkerDto) {
     return this.extraRulesWorkersService.update(id, updateExtraRulesWorkerDto)
+  }
+  @Delete(':id')
+  delete(@Param('id') id: number) {
+    return this.extraRulesWorkersService.delete(id)
   }
 }

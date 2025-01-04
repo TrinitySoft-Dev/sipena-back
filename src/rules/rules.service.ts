@@ -220,4 +220,7 @@ export class RulesService {
   async allowedFields() {
     return getAllowedConditionFields()
   }
+  async delete(id: number) {
+    return await this.ruleRepository.softDelete(id)
+  }
 }

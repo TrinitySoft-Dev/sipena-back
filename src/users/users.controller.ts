@@ -17,6 +17,7 @@ import {
   Patch,
   DefaultValuePipe,
   ParseBoolPipe,
+  Delete,
 } from '@nestjs/common'
 import { UsersService } from './users.service'
 import { CreateUserDto } from './dto/worker-user.dto'
@@ -149,5 +150,10 @@ export class UsersController {
   @Patch(':id/status')
   updateStatus(@Param('id') id: number, @Body() updateUserDto: any) {
     return this.usersService.updateStatus(id, updateUserDto.status)
+  }
+
+  @Delete(':id')
+  delete(@Param('id') id: number) {
+    return this.usersService.delete(id)
   }
 }

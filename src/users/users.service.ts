@@ -482,4 +482,8 @@ export class UsersService {
     const hash = await bcrypt.hash(password, salt)
     return hash
   }
+
+  async delete(id: number) {
+    return await this.userRepository.softDelete(id)
+  }
 }

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { CreateRoleDto } from './dto/create-role.dto'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Role } from './entities/role.entity'
@@ -60,6 +60,11 @@ export class RolesService {
   }
 
   async delete(id: string) {
-    return this.roleRepository.softDelete(id)
+    const roleById = await this.roleRepository.findOne({ where: { id } })
+    const roleName = roleById.name
+    if (roleName !== 'SUPER_ADMIN' && roleName !== 'CUSTOMER' && roleName !== 'WORKER') {
+      return this.roleRepository.softDelete(id)
+    }
+    throw new UnauthorizedException('You cannot delete this role')
   }
 }

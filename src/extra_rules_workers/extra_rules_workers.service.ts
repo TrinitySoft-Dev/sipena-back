@@ -160,6 +160,10 @@ export class ExtraRulesWorkersService {
     }
   }
 
+  async delete(id: number) {
+    return await this.extraRulesWorkerRepository.softDelete(id)
+  }
+
   private calculateOverUnitsOverLimit(
     rule: ExtraRulesWorker,
     container: ContainerDto,

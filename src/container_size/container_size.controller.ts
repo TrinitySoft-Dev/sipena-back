@@ -10,6 +10,7 @@ import {
   ParseIntPipe,
   Query,
   ParseBoolPipe,
+  Delete,
 } from '@nestjs/common'
 import { ContainerSizeService } from './container_size.service'
 import { CreateContainerSizeDto } from './dto/create-container_size.dto'
@@ -60,5 +61,10 @@ export class ContainerSizeController {
   @Put('/:id')
   update(@Param('id') id: number, @Body() createContainerSizeDto: CreateContainerSizeDto) {
     return this.containerSizeService.update(id, createContainerSizeDto)
+  }
+
+  @Delete(':id')
+  delete(@Param('id') id: number) {
+    return this.containerSizeService.delete(id)
   }
 }
