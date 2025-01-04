@@ -1,16 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsArray, IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator'
+import { IsArray, IsBoolean, IsNumber, IsString } from 'class-validator'
 
 export class CreateNormalScheduleDto {
-  @ApiProperty({
-    type: 'number',
-    description: 'ID',
-    example: 1,
-  })
-  @IsOptional()
-  @IsNumber()
-  id?: number
-
   @ApiProperty({
     type: 'number',
     description: 'Work ID',

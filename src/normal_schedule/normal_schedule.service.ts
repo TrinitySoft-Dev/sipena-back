@@ -17,12 +17,26 @@ export class NormalScheduleService {
     })
   }
 
+  async findOne(id: number) {
+    return this.normalScheduleRepository.findOne({ where: { id }, relations: ['work'] })
+  }
+
   async findAll({ page, pageSize }) {
     const [result, total] = await this.normalScheduleRepository.findAndCount({
       skip: page * pageSize,
       take: pageSize,
+      relations: ['work'],
     })
 
-    return { result, total }
+    return { result, pagination: { page, pageSize, total } }
+  }
+
+  async remove(id: number) {
+    const result = await this.normalScheduleRepository.softDelete(id)
+    if (result.affected === 0) {
+      throw new NotFoundException('Normal schedule not found')
+    }
+
+    return { message: 'Normal schedule deleted' }
   }
 }
