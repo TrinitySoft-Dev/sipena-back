@@ -473,6 +473,23 @@ export class UsersService {
     return this.userRepository.update(id, { active })
   }
 
+  async updatePassword(id: number, oldPassword: string, newPassword: string) {
+    const user = await this.userRepository.findOne({ where: { id } })
+
+    if (!user) {
+      throw new Error('User not found')
+    }
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password)
+    if (!isMatch) {
+      throw new Error('Old password is incorrect')
+    }
+
+    const hashedPassword = await this.encryptPassword(newPassword)
+
+    return this.userRepository.update(id, { password: hashedPassword })
+  }
+
   updateAvatar(id: number, updateUserDto: UpdateUserDto) {
     return this.userRepository.update(id, { avatar: updateUserDto.avatar })
   }

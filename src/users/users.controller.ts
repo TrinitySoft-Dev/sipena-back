@@ -21,7 +21,7 @@ import {
 } from '@nestjs/common'
 import { UsersService } from './users.service'
 import { CreateUserDto } from './dto/worker-user.dto'
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger'
 import { exampleUserSchema, userSchema } from './schemas/users.schema'
 import { LoginUserDto } from './dto/login-user.dto'
 import { ClientUserDto } from './dto/client.user.dto'
@@ -145,6 +145,23 @@ export class UsersController {
   @Patch(':id/avatar')
   updateAvatar(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.updateAvatar(id, updateUserDto)
+  }
+
+  @Patch(':id/update-password')
+  @ApiParam({ name: 'id', required: true, type: Number, description: 'User ID' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        oldPassword: { type: 'string', description: 'The current password of the user' },
+        newPassword: { type: 'string', description: 'The new password to set' },
+      },
+      required: ['oldPassword', 'newPassword'],
+    },
+  })
+  updatePassword(@Param('id') id: number, @Body() updatePasswordDto: { oldPassword: string; newPassword: string }) {
+    const { oldPassword, newPassword } = updatePasswordDto
+    return this.usersService.updatePassword(id, oldPassword, newPassword)
   }
 
   @Patch(':id/status')
