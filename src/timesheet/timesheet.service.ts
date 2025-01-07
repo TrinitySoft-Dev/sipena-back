@@ -17,6 +17,9 @@ import { FILTER_TYPE } from '@/common/enums/enums'
 import { DateTime } from 'luxon'
 import { ProductsService } from '@/products/products.service'
 import { TimesheetStatusEnum } from '@/timesheet_workers/entities/timesheet_worker.entity'
+import { NormalSchedule } from '@/normal_schedule/entities/normal_schedule.entity'
+import { Container } from '@/container/entities/container.entity'
+import { NormalScheduleService } from '@/normal_schedule/normal_schedule.service'
 
 @Injectable()
 export class TimesheetService {
@@ -28,6 +31,7 @@ export class TimesheetService {
     private readonly timesheetWorkersService: TimesheetWorkersService,
     private readonly rulesWorkersService: RulesWorkersService,
     private readonly productsService: ProductsService,
+    private readonly normalScheduleService: NormalScheduleService,
   ) {}
 
   async create(createTimesheetDto: CreateTimesheetDto) {
@@ -36,6 +40,8 @@ export class TimesheetService {
       let { customer_id, workers, work_id, ...restTimesheet } = timesheet
 
       let isValidProduct = false
+      let isValidSchedule = false
+      let totalOvertimes = 0
       let rate = null
       const existProductsWithPricing = await this.productsService.getProductsCustomerWithPrice(customer_id)
 
@@ -45,10 +51,29 @@ export class TimesheetService {
 
       if (!existProductsWithPricing) {
         const customerUser = await this.usersService.findByWorks(customer_id, work_id, container.size)
-        if (!customerUser.rules.length) throw new NotFoundException('Rules not found')
+        if (customerUser.normal_schedule?.length) {
+          const validNormalSchedule: any = this.normalScheduleService.validateNormalSchedule(
+            customerUser.normal_schedule,
+            work_id,
+            container,
+            timesheet.day.toString(),
+          )
 
-        const rules = customerUser.rules
-        rate = await this.validateRules(rules, container)
+          if (validNormalSchedule?.rate) {
+            isValidSchedule = true
+            rate = validNormalSchedule.rate
+
+            if (validNormalSchedule?.overtime) {
+              totalOvertimes = validNormalSchedule.overtime
+            }
+          }
+        }
+
+        if (!isValidProduct && !isValidSchedule) {
+          if (!customerUser.rules.length) throw new NotFoundException('Rules not found')
+          const rules = customerUser.rules
+          rate = await this.validateRules(rules, container)
+        }
       }
 
       const createdContainer = await this.containerService.create({
@@ -65,18 +90,17 @@ export class TimesheetService {
 
       const timesheetRes = this.timesheetRepository.create({
         ...restTimesheet,
-        rate: isValidProduct ? existProductsWithPricing.price : typeof rate === 'object' ? rate.rate : 0,
-        base: isValidProduct ? existProductsWithPricing.price : typeof rate === 'object' ? rate.base : 0,
+        rate: this.calculateRate({ isValidProduct, isValidSchedule, rate, existProductsWithPricing, totalOvertimes }),
+        base: this.calculateBase({ isValidProduct, isValidSchedule, rate, existProductsWithPricing, totalOvertimes }),
         container: createdContainer,
         customer: { id: customer_id },
-        extra_rates: isValidProduct
-          ? JSON.stringify({
-              name: existProductsWithPricing.name,
-              rate: existProductsWithPricing.price,
-            })
-          : typeof rate === 'object'
-            ? JSON.stringify(rate.json)
-            : null,
+        extra_rates: this.calculateExtraRates({
+          isValidProduct,
+          isValidSchedule,
+          rate,
+          existProductsWithPricing,
+          totalOvertimes,
+        }),
       })
 
       await this.timesheetRepository.save(timesheetRes)
@@ -88,12 +112,16 @@ export class TimesheetService {
       }))
 
       let payWorkers = []
-      if (!isValidProduct) {
+      if (!isValidProduct && !isValidSchedule) {
         payWorkers = await this.rulesWorkersService.validateRules(container, String(work_id), newWorkers)
       }
 
       if (isValidProduct) {
         payWorkers = newWorkers.map(worker => ({ ...worker, pay: existProductsWithPricing.price / workers.length }))
+      }
+
+      if (isValidSchedule) {
+        payWorkers = newWorkers.map(worker => ({ ...worker, pay: rate / workers.length }))
       }
 
       await this.timesheetWorkersService.createMany(payWorkers)
@@ -231,133 +259,6 @@ export class TimesheetService {
         netGain: parseFloat(data.net_gain || '0'),
       })),
     }
-  }
-
-  private async validateRules(rules: Rule[], container: ContainerDto) {
-    let totalExtraCharges = 0
-    for (const rule of rules) {
-      const listExtraCharges = []
-      const conditionGroups = rule.condition_groups
-      let ruleIsValid = false
-      const extraRules = rule.extra_rules
-
-      for (const group of conditionGroups) {
-        const conditions = group.conditions
-        let groupIsValid = true
-        for (const condition of conditions) {
-          const conditionResult = this.conditionsService.evalutedConditions(condition, container)
-          if (!conditionResult) {
-            const isAppliedExtraRule = this.isValidExtraRules(
-              extraRules,
-              container,
-              condition.field,
-              listExtraCharges,
-              rule.rate,
-            )
-            if (!isAppliedExtraRule || !isAppliedExtraRule.rate) {
-              groupIsValid = false
-              break
-            }
-          }
-        }
-
-        if (groupIsValid) {
-          ruleIsValid = true
-          break
-        }
-      }
-
-      if (ruleIsValid) {
-        if (listExtraCharges.length) totalExtraCharges = listExtraCharges.reduce((acc, curr) => acc + curr.rate, 0)
-        const obj = { name: rule.name, rate: rule.rate, extraCharge: listExtraCharges }
-        return { rate: Number(rule.rate) + Number(totalExtraCharges), base: Number(rule.rate), json: obj }
-      }
-    }
-
-    return 0
-  }
-
-  private isValidExtraRules(
-    extraRules: ExtraRule[],
-    container: ContainerDto,
-    field: string,
-    listExtraCharges: any[],
-    baseRate = 0,
-  ) {
-    if (!extraRules.length) return false
-    const filterExtraRules = extraRules.filter(rule => rule.unit === field)
-    let valueTotal = 0
-    const extraRulesApplied = []
-    for (const extraRule of filterExtraRules) {
-      let fields = new Set()
-      const conditionGroups = extraRule.condition_groups
-      let ruleIsValid = false
-
-      for (const group of conditionGroups) {
-        const conditions = group.conditions
-        let groupIsValid = true
-
-        for (const condition of conditions) {
-          const conditionResult = this.conditionsService.evalutedConditions(condition, container)
-          if (!conditionResult) {
-            groupIsValid = false
-            break
-          }
-          fields.add(condition.field)
-        }
-
-        if (groupIsValid) {
-          ruleIsValid = true
-          break
-        }
-      }
-
-      if (ruleIsValid) {
-        const extraRate = this.calculateUnitsOverLimit(fields, container, extraRule, baseRate)
-        valueTotal += extraRate
-        listExtraCharges.push({ name: extraRule.name, rate: extraRate })
-      }
-    }
-    return { rate: valueTotal, json: extraRulesApplied }
-  }
-
-  private calculateUnitsOverLimit(fields: Set<any>, container: ContainerDto, extraRule: ExtraRule, baseRate = 0) {
-    let value = 0
-    for (const field of fields) {
-      const fieldValueContainer = container[field]
-      if (fieldValueContainer) {
-        const maxValue = this.getMaxValue(extraRule, extraRule.unit)
-        if (extraRule.rate_type === 'per_item') {
-          const diff = fieldValueContainer - maxValue
-          value = extraRule.rate * diff
-        }
-
-        if (extraRule.rate_type === 'percentage') {
-          value = (extraRule.rate / 100) * baseRate
-        }
-
-        if (extraRule.rate_type === 'fixed') {
-          value = Number(extraRule.rate)
-        }
-      }
-    }
-
-    return value
-  }
-
-  private getMaxValue(rule: Rule | ExtraRule, unit: string) {
-    let value = 0
-    const conditionGroups = rule.condition_groups
-    for (const group of conditionGroups) {
-      const conditions = group.conditions.filter(condition => condition.field === unit)
-
-      for (const condition of conditions) {
-        const conditionValue = Number(condition.value)
-        value = value > conditionValue ? value : conditionValue
-      }
-    }
-
-    return value
   }
 
   async findTimesheetById(id: number) {
@@ -647,5 +548,166 @@ export class TimesheetService {
       .andWhere('timesheet_workers.worker = :id', { id })
       .andWhere('role.name = :role', { role: ROLES_CONST.WORKER })
       .getMany()
+  }
+
+  private async validateRules(rules: Rule[], container: ContainerDto) {
+    let totalExtraCharges = 0
+    for (const rule of rules) {
+      const listExtraCharges = []
+      const conditionGroups = rule.condition_groups
+      let ruleIsValid = false
+      const extraRules = rule.extra_rules
+
+      for (const group of conditionGroups) {
+        const conditions = group.conditions
+        let groupIsValid = true
+        for (const condition of conditions) {
+          const conditionResult = this.conditionsService.evalutedConditions(condition, container)
+          if (!conditionResult) {
+            const isAppliedExtraRule = this.isValidExtraRules(
+              extraRules,
+              container,
+              condition.field,
+              listExtraCharges,
+              rule.rate,
+            )
+            if (!isAppliedExtraRule || !isAppliedExtraRule.rate) {
+              groupIsValid = false
+              break
+            }
+          }
+        }
+
+        if (groupIsValid) {
+          ruleIsValid = true
+          break
+        }
+      }
+
+      if (ruleIsValid) {
+        if (listExtraCharges.length) totalExtraCharges = listExtraCharges.reduce((acc, curr) => acc + curr.rate, 0)
+        const obj = { name: rule.name, rate: rule.rate, extraCharge: listExtraCharges }
+        return { rate: Number(rule.rate) + Number(totalExtraCharges), base: Number(rule.rate), json: obj }
+      }
+    }
+
+    return 0
+  }
+
+  private isValidExtraRules(
+    extraRules: ExtraRule[],
+    container: ContainerDto,
+    field: string,
+    listExtraCharges: any[],
+    baseRate = 0,
+  ) {
+    if (!extraRules.length) return false
+    const filterExtraRules = extraRules.filter(rule => rule.unit === field)
+    let valueTotal = 0
+    const extraRulesApplied = []
+    for (const extraRule of filterExtraRules) {
+      let fields = new Set()
+      const conditionGroups = extraRule.condition_groups
+      let ruleIsValid = false
+
+      for (const group of conditionGroups) {
+        const conditions = group.conditions
+        let groupIsValid = true
+
+        for (const condition of conditions) {
+          const conditionResult = this.conditionsService.evalutedConditions(condition, container)
+          if (!conditionResult) {
+            groupIsValid = false
+            break
+          }
+          fields.add(condition.field)
+        }
+
+        if (groupIsValid) {
+          ruleIsValid = true
+          break
+        }
+      }
+
+      if (ruleIsValid) {
+        const extraRate = this.calculateUnitsOverLimit(fields, container, extraRule, baseRate)
+        valueTotal += extraRate
+        listExtraCharges.push({ name: extraRule.name, rate: extraRate })
+      }
+    }
+    return { rate: valueTotal, json: extraRulesApplied }
+  }
+
+  private calculateUnitsOverLimit(fields: Set<any>, container: ContainerDto, extraRule: ExtraRule, baseRate = 0) {
+    let value = 0
+    for (const field of fields) {
+      const fieldValueContainer = container[field]
+      if (fieldValueContainer) {
+        const maxValue = this.getMaxValue(extraRule, extraRule.unit)
+        if (extraRule.rate_type === 'per_item') {
+          const diff = fieldValueContainer - maxValue
+          value = extraRule.rate * diff
+        }
+
+        if (extraRule.rate_type === 'percentage') {
+          value = (extraRule.rate / 100) * baseRate
+        }
+
+        if (extraRule.rate_type === 'fixed') {
+          value = Number(extraRule.rate)
+        }
+      }
+    }
+
+    return value
+  }
+
+  private getMaxValue(rule: Rule | ExtraRule, unit: string) {
+    let value = 0
+    const conditionGroups = rule.condition_groups
+    for (const group of conditionGroups) {
+      const conditions = group.conditions.filter(condition => condition.field === unit)
+
+      for (const condition of conditions) {
+        const conditionValue = Number(condition.value)
+        value = value > conditionValue ? value : conditionValue
+      }
+    }
+
+    return value
+  }
+
+  private calculateRate = data => {
+    const { isValidProduct, isValidSchedule, rate, existProductsWithPricing, totalOvertimes } = data
+    if (isValidProduct) return existProductsWithPricing.price
+    if (isValidSchedule) return rate + totalOvertimes
+    if (typeof rate === 'object') return rate.rate
+    return 0
+  }
+
+  private calculateBase = data => {
+    const { isValidProduct, isValidSchedule, rate, existProductsWithPricing, totalOvertimes } = data
+    if (isValidProduct) return existProductsWithPricing.price
+    if (isValidSchedule) return rate
+    if (typeof rate === 'object') return rate.base
+    return 0
+  }
+
+  private calculateExtraRates = data => {
+    const { isValidProduct, isValidSchedule, rate, existProductsWithPricing, totalOvertimes } = data
+    if (isValidProduct) {
+      return JSON.stringify({
+        name: existProductsWithPricing.name,
+        rate: existProductsWithPricing.price,
+      })
+    }
+    if (isValidSchedule) {
+      return JSON.stringify({
+        name: 'Overtime',
+        rate: totalOvertimes,
+      })
+    }
+    if (typeof rate === 'object') return JSON.stringify(rate.json)
+    return null
   }
 }

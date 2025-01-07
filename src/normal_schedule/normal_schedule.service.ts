@@ -3,11 +3,15 @@ import { CreateNormalScheduleDto } from './dto/create-normal_schedule.dto'
 import { InjectRepository } from '@nestjs/typeorm'
 import { NormalSchedule } from './entities/normal_schedule.entity'
 import { Repository } from 'typeorm'
+import { DateTime } from 'luxon'
+import { ContainerDto } from '@/timesheet/dto/create-timesheet.dto'
+import { OvertimesService } from '@/overtimes/overtimes.service'
 
 @Injectable()
 export class NormalScheduleService {
   constructor(
     @InjectRepository(NormalSchedule) private readonly normalScheduleRepository: Repository<NormalSchedule>,
+    private readonly overtimeService: OvertimesService,
   ) {}
 
   async create(createNormalScheduleDto: CreateNormalScheduleDto) {
@@ -54,5 +58,37 @@ export class NormalScheduleService {
     }
 
     return { message: 'Normal schedule deleted' }
+  }
+
+  validateNormalSchedule(normalSchedules: NormalSchedule[], workId: number, container: ContainerDto, day: string) {
+    const existNormalScheduleByWork = normalSchedules.filter(normalSchedule => normalSchedule.work.id === workId)
+    if (!existNormalScheduleByWork) return false
+
+    for (const schedule of normalSchedules) {
+      const dayWorked = DateTime.fromISO(day).weekdayLong
+      const dayIncludeInSchedule = schedule.days.includes(dayWorked)
+
+      if (!dayIncludeInSchedule) continue
+
+      const start = DateTime.fromISO(container.start.toString())
+      const finish = DateTime.fromISO(container.finish.toString())
+
+      const hoursWorked = finish.diff(start, 'hours').hours
+
+      if (hoursWorked > schedule.up_hours) {
+        const appliedOvertime = this.overtimeService.validateOvertimes(
+          schedule.overtimes,
+          hoursWorked,
+          schedule.up_hours,
+        )
+
+        if (!appliedOvertime) continue
+
+        return { rate: schedule.rate, overtime: appliedOvertime }
+      }
+
+      return { rate: schedule.rate }
+    }
+    // const hoursWorked = DateTime.fromJSDate(container.finish).diff(DateTime.fromJSDate(container.start), 'hours').hours
   }
 }
