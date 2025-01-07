@@ -84,11 +84,15 @@ export class NormalScheduleService {
 
         if (!appliedOvertime) continue
 
-        return { rate: schedule.rate, overtime: appliedOvertime }
+        return {
+          rate: schedule.rate,
+          name: schedule.name,
+          rate_worker: schedule.rate_worker,
+          overtime: appliedOvertime,
+        }
       }
 
       return { rate: schedule.rate }
     }
-    // const hoursWorked = DateTime.fromJSDate(container.finish).diff(DateTime.fromJSDate(container.start), 'hours').hours
   }
 }

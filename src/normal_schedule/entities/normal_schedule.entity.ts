@@ -47,6 +47,12 @@ export class NormalSchedule {
   })
   rate: number
 
+  @Column({
+    type: 'float',
+    nullable: false,
+  })
+  rate_worker: number
+
   @ManyToMany(() => User, user => user.normal_schedule)
   @JoinTable({
     joinColumn: {

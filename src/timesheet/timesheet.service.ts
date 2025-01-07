@@ -41,7 +41,9 @@ export class TimesheetService {
 
       let isValidProduct = false
       let isValidSchedule = false
+      let nameSchedule = null
       let totalOvertimes = 0
+      let totalPayWorker = 0
       let rate = null
       const existProductsWithPricing = await this.productsService.getProductsCustomerWithPrice(customer_id)
 
@@ -62,6 +64,8 @@ export class TimesheetService {
           if (validNormalSchedule?.rate) {
             isValidSchedule = true
             rate = validNormalSchedule.rate
+            nameSchedule = validNormalSchedule.name
+            totalPayWorker = validNormalSchedule.rate_worker
 
             if (validNormalSchedule?.overtime) {
               totalOvertimes = validNormalSchedule.overtime
@@ -100,6 +104,7 @@ export class TimesheetService {
           rate,
           existProductsWithPricing,
           totalOvertimes,
+          nameSchedule,
         }),
       })
 
@@ -121,7 +126,7 @@ export class TimesheetService {
       }
 
       if (isValidSchedule) {
-        payWorkers = newWorkers.map(worker => ({ ...worker, pay: rate / workers.length }))
+        payWorkers = newWorkers.map(worker => ({ ...worker, pay: totalPayWorker / workers.length }))
       }
 
       await this.timesheetWorkersService.createMany(payWorkers)
@@ -680,7 +685,7 @@ export class TimesheetService {
   private calculateRate = data => {
     const { isValidProduct, isValidSchedule, rate, existProductsWithPricing, totalOvertimes } = data
     if (isValidProduct) return existProductsWithPricing.price
-    if (isValidSchedule) return rate + totalOvertimes
+    if (isValidSchedule) return rate + totalOvertimes.rate
     if (typeof rate === 'object') return rate.rate
     return 0
   }
@@ -694,7 +699,7 @@ export class TimesheetService {
   }
 
   private calculateExtraRates = data => {
-    const { isValidProduct, isValidSchedule, rate, existProductsWithPricing, totalOvertimes } = data
+    const { isValidProduct, isValidSchedule, rate, existProductsWithPricing, totalOvertimes, nameSchedule } = data
     if (isValidProduct) {
       return JSON.stringify({
         name: existProductsWithPricing.name,
@@ -703,8 +708,14 @@ export class TimesheetService {
     }
     if (isValidSchedule) {
       return JSON.stringify({
-        name: 'Overtime',
-        rate: totalOvertimes,
+        name: nameSchedule,
+        rate,
+        extraCharge: [
+          {
+            name: totalOvertimes.name,
+            rate: totalOvertimes.rate,
+          },
+        ],
       })
     }
     if (typeof rate === 'object') return JSON.stringify(rate.json)

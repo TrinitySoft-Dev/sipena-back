@@ -43,7 +43,7 @@ export class OvertimesService {
     const diffHours = hoursWorked - upHours
 
     for (const overtime of overtimes) {
-      if (overtime.hours <= diffHours) {
+      if (diffHours <= overtime.hours) {
         return overtime
       }
     }

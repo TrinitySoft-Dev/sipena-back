@@ -34,6 +34,13 @@ export class CreateNormalScheduleDto {
   rate: number
 
   @ApiProperty({
+    description: 'Rate worker',
+    example: 8,
+  })
+  @IsNumber()
+  rate_worker: number
+
+  @ApiProperty({
     description: 'Hours worked',
     example: 8,
   })
