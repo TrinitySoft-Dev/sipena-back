@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { CreateOvertimeDto } from './dto/create-overtime.dto'
 import { UpdateOvertimeDto } from './dto/update-overtime.dto'
 import { InjectRepository } from '@nestjs/typeorm'
@@ -11,5 +11,13 @@ export class OvertimesService {
 
   create(createOvertimeDto: CreateOvertimeDto) {
     return this.overtimeRepository.save(createOvertimeDto)
+  }
+
+  async update(id: number, updateOvertimeDto: UpdateOvertimeDto) {
+    const overtime = await this.overtimeRepository.findOne({ where: { id } })
+    if (!overtime) throw new NotFoundException(`Overtime with ID ${id} not found`)
+
+    Object.assign(overtime, updateOvertimeDto)
+    return this.overtimeRepository.save(overtime)
   }
 }
