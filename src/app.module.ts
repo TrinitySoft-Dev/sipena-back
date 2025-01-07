@@ -39,6 +39,7 @@ import { GroupPermissionsModule } from './group_permissions/group_permissions.mo
 import { ExtraRulesWorkersModule } from './extra_rules_workers/extra_rules_workers.module'
 import { AdminEmailsModule } from './admin_emails/admin_emails.module'
 import { NormalScheduleModule } from './normal_schedule/normal_schedule.module';
+import { OvertimesModule } from './overtimes/overtimes.module';
 
 @Module({
   imports: [
@@ -107,6 +108,7 @@ import { NormalScheduleModule } from './normal_schedule/normal_schedule.module';
     ExtraRulesWorkersModule,
     AdminEmailsModule,
     NormalScheduleModule,
+    OvertimesModule,
   ],
   controllers: [],
   providers: [],

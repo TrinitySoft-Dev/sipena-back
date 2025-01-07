@@ -14,6 +14,7 @@ export class NormalScheduleService {
     return this.normalScheduleRepository.save({
       ...createNormalScheduleDto,
       work: { id: createNormalScheduleDto.work },
+      overtimes: createNormalScheduleDto.overtimes.map(overtime => ({ id: overtime })),
     })
   }
 
@@ -23,6 +24,21 @@ export class NormalScheduleService {
 
   async findAll({ page, pageSize }) {
     const [result, total] = await this.normalScheduleRepository.findAndCount({
+      skip: page * pageSize,
+      take: pageSize,
+      relations: ['work'],
+    })
+
+    return { result, pagination: { page, pageSize, total } }
+  }
+
+  async selectAll() {
+    return this.normalScheduleRepository.find()
+  }
+
+  async findByCustomer(customerId: number, { page, pageSize }) {
+    const [result, total] = await this.normalScheduleRepository.findAndCount({
+      where: { customer: { id: customerId } },
       skip: page * pageSize,
       take: pageSize,
       relations: ['work'],

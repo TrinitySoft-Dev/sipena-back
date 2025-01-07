@@ -460,6 +460,9 @@ export class UsersService {
       user.name = updateUserDto?.name ?? user.name
       user.last_name = updateUserDto?.last_name ?? user.last_name
       user.rules = updateUserDto?.rules
+      user.normal_schedule = updateUserDto?.normal_schedule
+
+      console.log(user)
 
       await this.userRepository.save(user)
 

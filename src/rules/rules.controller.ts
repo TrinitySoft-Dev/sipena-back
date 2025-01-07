@@ -80,6 +80,7 @@ export class RulesController {
   async update(@Param('id') id: number, @Body() updateRuleDto: UpdateRuleDto) {
     return await this.rulesService.update(id, updateRuleDto)
   }
+
   @Delete(':id')
   delete(@Param('id') id: number) {
     return this.rulesService.delete(id)

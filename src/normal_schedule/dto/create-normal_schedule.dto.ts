@@ -3,6 +3,14 @@ import { IsArray, IsBoolean, IsNumber, IsString } from 'class-validator'
 
 export class CreateNormalScheduleDto {
   @ApiProperty({
+    type: String,
+    description: 'The name of the normal schedule',
+    example: 'Normal Schedule 1',
+  })
+  @IsString()
+  name: string
+
+  @ApiProperty({
     type: 'number',
     description: 'Work ID',
     example: 1,
@@ -31,6 +39,14 @@ export class CreateNormalScheduleDto {
   })
   @IsNumber()
   up_hours: number
+
+  @ApiProperty({
+    description: 'Overtimes',
+    example: [1, 2],
+  })
+  @IsArray()
+  @IsNumber({}, { each: true })
+  overtimes: number[]
 
   @ApiProperty({
     description: 'Active status',

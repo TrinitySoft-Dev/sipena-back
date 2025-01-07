@@ -97,6 +97,14 @@ export class UpdateUserDto {
   extra_rules: number[]
 
   @ApiProperty({
+    description: 'Normal schedule of the user',
+    example: [{ id: 1 }],
+  })
+  @IsOptional()
+  @IsArray()
+  normal_schedule: number[]
+
+  @ApiProperty({
     description: 'Information worker of the user',
     example: {
       phone: '123456789',

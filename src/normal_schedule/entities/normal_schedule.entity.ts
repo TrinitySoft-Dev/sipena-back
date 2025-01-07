@@ -1,3 +1,4 @@
+import { Overtime } from '@/overtimes/entities/overtime.entity'
 import { User } from '@/users/entities/user.entity'
 import { Work } from '@/work/entities/work.entity'
 import {
@@ -20,6 +21,13 @@ import {
 export class NormalSchedule {
   @PrimaryGeneratedColumn()
   id: number
+
+  @Column({
+    type: 'varchar',
+    length: 255,
+    nullable: false,
+  })
+  name: string
 
   @ManyToOne(() => Work, work => work.normal_schedule, { cascade: true })
   work: Work
@@ -51,6 +59,19 @@ export class NormalSchedule {
     },
   })
   customer: User[]
+
+  @ManyToMany(() => Overtime, overtime => overtime.normal_schedules)
+  @JoinTable({
+    joinColumn: {
+      name: 'normal_schedule_id',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'overtime_id',
+      referencedColumnName: 'id',
+    },
+  })
+  overtimes: Overtime[]
 
   @Column({
     type: 'boolean',

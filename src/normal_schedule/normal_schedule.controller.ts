@@ -21,9 +21,23 @@ export class NormalScheduleController {
     return this.normalScheduleService.findAll({ page, pageSize })
   }
 
+  @Get('/select')
+  selectAll() {
+    return this.normalScheduleService.selectAll()
+  }
+
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.normalScheduleService.findOne(id)
+  }
+
+  @Get('customer/:customerId')
+  findByCustomer(
+    @Param('customerId', ParseIntPipe) customerId: number,
+    @Query('page', ParseIntPipe, new DefaultValuePipe(0)) page: number,
+    @Query('pageSize', ParseIntPipe, new DefaultValuePipe(10)) pageSize: number,
+  ) {
+    return this.normalScheduleService.findByCustomer(customerId, { page, pageSize })
   }
 
   @Delete(':id')
