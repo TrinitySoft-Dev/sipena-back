@@ -17,6 +17,10 @@ export class OvertimesService {
     return this.overtimeRepository.find()
   }
 
+  findById(id: number) {
+    return this.overtimeRepository.findOne({ where: { id } })
+  }
+
   async selectAll({ page, pageSize }: { page: number; pageSize: number }) {
     const [result, total] = await this.overtimeRepository.findAndCount({
       skip: page * pageSize,

@@ -37,6 +37,10 @@ export class OvertimesController {
     return this.overtimesService.select()
   }
 
+  findById(@Param('id', new ParseIntPipe()) id: number) {
+    return this.overtimesService.findById(id)
+  }
+
   @Post()
   create(@Body() createOvertimeDto: CreateOvertimeDto) {
     return this.overtimesService.create(createOvertimeDto)
