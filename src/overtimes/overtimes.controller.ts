@@ -37,6 +37,7 @@ export class OvertimesController {
     return this.overtimesService.select()
   }
 
+  @Get(':id')
   findById(@Param('id', new ParseIntPipe()) id: number) {
     return this.overtimesService.findById(id)
   }
