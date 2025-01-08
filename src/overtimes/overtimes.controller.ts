@@ -25,10 +25,12 @@ export class OvertimesController {
   find(
     @Query('page', new ParseIntPipe(), new DefaultValuePipe(0)) page: number,
     @Query('pageSize', new ParseIntPipe(), new DefaultValuePipe(10)) pageSize: number,
+    @Query('name') name?: string,
   ) {
     return this.overtimesService.selectAll({
       page,
       pageSize,
+      name,
     })
   }
 
@@ -50,5 +52,10 @@ export class OvertimesController {
   @Put(':id')
   update(@Param('id', new ParseIntPipe()) id: number, @Body() updateOvertimeDto: UpdateOvertimeDto) {
     return this.overtimesService.update(id, updateOvertimeDto)
+  }
+
+  @Delete(':id')
+  remove(@Param('id', new ParseIntPipe()) id: number) {
+    return this.overtimesService.remove(id)
   }
 }

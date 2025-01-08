@@ -21,15 +21,19 @@ export class OvertimesService {
     return this.overtimeRepository.findOne({ where: { id } })
   }
 
-  async selectAll({ page, pageSize }: { page: number; pageSize: number }) {
-    const [result, total] = await this.overtimeRepository.findAndCount({
-      skip: page * pageSize,
-      take: pageSize,
-    })
-
-    return { result, pagination: { page, pageSize, total } }
+  async selectAll({ page, pageSize, name }: { page: number; pageSize: number; name?: string }) {
+      const query = this.overtimeRepository.createQueryBuilder('overtime')
+        .skip(page * pageSize)
+        .take(pageSize);
+  
+      if (name) {
+        query.where('LOWER(overtime.name) LIKE LOWER(:name)', { name: `%${name}%` });
+      }
+  
+      const [result, total] = await query.getManyAndCount();
+  
+      return { result, pagination: { page, pageSize, total } };
   }
-
   async update(id: number, updateOvertimeDto: UpdateOvertimeDto) {
     const overtime = await this.overtimeRepository.findOne({ where: { id } })
     if (!overtime) throw new NotFoundException(`Overtime with ID ${id} not found`)
@@ -49,5 +53,14 @@ export class OvertimesService {
     }
 
     return false
+  }
+
+  async remove(id: number) {
+    const result = await this.overtimeRepository.softDelete(id)
+    if (result.affected === 0) {
+      throw new NotFoundException('Overtime not found')
+    }
+
+    return { message: 'Overtime deleted' }
   }
 }
