@@ -44,6 +44,11 @@ export class OvertimesController {
     return this.overtimesService.findById(id)
   }
 
+  @Get('/normal-schedule/:normalScheduleId')
+  findByIdNormalSchedule(@Param('normalScheduleId', new ParseIntPipe()) normalScheduleId: number) {
+    return this.overtimesService.findByIdNormalSchedule(normalScheduleId)
+  }
+
   @Post()
   create(@Body() createOvertimeDto: CreateOvertimeDto) {
     return this.overtimesService.create(createOvertimeDto)

@@ -22,17 +22,18 @@ export class OvertimesService {
   }
 
   async selectAll({ page, pageSize, name }: { page: number; pageSize: number; name?: string }) {
-      const query = this.overtimeRepository.createQueryBuilder('overtime')
-        .skip(page * pageSize)
-        .take(pageSize);
-  
-      if (name) {
-        query.where('LOWER(overtime.name) LIKE LOWER(:name)', { name: `%${name}%` });
-      }
-  
-      const [result, total] = await query.getManyAndCount();
-  
-      return { result, pagination: { page, pageSize, total } };
+    const query = this.overtimeRepository
+      .createQueryBuilder('overtime')
+      .skip(page * pageSize)
+      .take(pageSize)
+
+    if (name) {
+      query.where('LOWER(overtime.name) LIKE LOWER(:name)', { name: `%${name}%` })
+    }
+
+    const [result, total] = await query.getManyAndCount()
+
+    return { result, pagination: { page, pageSize, total } }
   }
   async update(id: number, updateOvertimeDto: UpdateOvertimeDto) {
     const overtime = await this.overtimeRepository.findOne({ where: { id } })
@@ -62,5 +63,13 @@ export class OvertimesService {
     }
 
     return { message: 'Overtime deleted' }
+  }
+
+  async findByIdNormalSchedule(normalScheduleId: number) {
+    return await this.overtimeRepository
+      .createQueryBuilder('overtime')
+      .leftJoin('overtime.normal_schedules', 'normal_schedules')
+      .where('normal_schedules.id = :normalScheduleId', { normalScheduleId })
+      .getMany()
   }
 }

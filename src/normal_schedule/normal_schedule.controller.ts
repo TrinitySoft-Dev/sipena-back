@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Param, ParseIntPipe, Get, Query, DefaultValuePipe, Delete } from '@nestjs/common'
+import { Controller, Post, Body, Param, ParseIntPipe, Get, Query, DefaultValuePipe, Delete, Put } from '@nestjs/common'
 import { NormalScheduleService } from './normal_schedule.service'
 import { CreateNormalScheduleDto } from './dto/create-normal_schedule.dto'
 import { ApiTags } from '@nestjs/swagger'
@@ -29,6 +29,11 @@ export class NormalScheduleController {
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.normalScheduleService.findOne(id)
+  }
+
+  @Put(':id')
+  update(@Param('id', ParseIntPipe) id: number, @Body() updateNormalScheduleDto: CreateNormalScheduleDto) {
+    return this.normalScheduleService.update(id, updateNormalScheduleDto)
   }
 
   @Get('customer/:customerId')

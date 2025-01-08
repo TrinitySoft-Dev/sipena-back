@@ -6,6 +6,7 @@ import { Repository } from 'typeorm'
 import { DateTime } from 'luxon'
 import { ContainerDto } from '@/timesheet/dto/create-timesheet.dto'
 import { OvertimesService } from '@/overtimes/overtimes.service'
+import { UpdateOvertimeDto } from '@/overtimes/dto/update-overtime.dto'
 
 @Injectable()
 export class NormalScheduleService {
@@ -49,6 +50,15 @@ export class NormalScheduleService {
     })
 
     return { result, pagination: { page, pageSize, total } }
+  }
+
+  async update(id: number, updateNormalScheduleDto: UpdateOvertimeDto) {
+    const normalSchedule = await this.normalScheduleRepository.findOne({ where: { id } })
+    if (!normalSchedule) {
+      throw new NotFoundException('Normal schedule not found')
+    }
+    Object.assign(normalSchedule, updateNormalScheduleDto)
+    return this.normalScheduleRepository.save(normalSchedule)
   }
 
   async remove(id: number) {
