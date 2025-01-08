@@ -75,8 +75,10 @@ export class NormalScheduleService {
   }
 
   validateNormalSchedule(normalSchedules: NormalSchedule[], workId: number, container: ContainerDto, day: string) {
-    const existNormalScheduleByWork = normalSchedules.filter(normalSchedule => normalSchedule.work.id === workId)
-    if (!existNormalScheduleByWork) return false
+    const existNormalScheduleByWork = normalSchedules.filter(
+      normalSchedule => normalSchedule.work.id === Number(workId),
+    )
+    if (!existNormalScheduleByWork.length) return false
 
     for (const schedule of normalSchedules) {
       const dayWorked = DateTime.fromISO(day).weekdayLong
@@ -99,14 +101,14 @@ export class NormalScheduleService {
         if (!appliedOvertime) continue
 
         return {
-          rate: schedule.rate,
+          rate: schedule.rate * (hoursWorked > schedule.up_hours ? schedule.up_hours : schedule.rate * hoursWorked),
           name: schedule.name,
           rate_worker: schedule.rate_worker,
           overtime: appliedOvertime,
         }
       }
 
-      return { rate: schedule.rate }
+      return { rate: schedule.rate * hoursWorked, name: schedule.name, rate_worker: schedule.rate_worker }
     }
   }
 }

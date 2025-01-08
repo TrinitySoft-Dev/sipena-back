@@ -49,6 +49,7 @@ export class OvertimesService {
 
     for (const overtime of overtimes) {
       if (diffHours <= overtime.hours) {
+        overtime.rate = overtime.rate * diffHours
         return overtime
       }
     }

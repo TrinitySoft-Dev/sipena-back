@@ -63,7 +63,7 @@ export class TimesheetService {
 
           if (validNormalSchedule?.rate) {
             isValidSchedule = true
-            rate = validNormalSchedule.rate
+            rate = validNormalSchedule.rate * workers.length
             nameSchedule = validNormalSchedule.name
             totalPayWorker = validNormalSchedule.rate_worker
 
@@ -80,10 +80,13 @@ export class TimesheetService {
         }
       }
 
-      const createdContainer = await this.containerService.create({
+      const objContainer = {
         ...container,
-        product: { id: container.product },
-      })
+      }
+      if (container.product) {
+        objContainer['product'] = container.product
+      }
+      const createdContainer = await this.containerService.create(objContainer)
 
       restTimesheet = {
         day: restTimesheet.day,
@@ -685,7 +688,7 @@ export class TimesheetService {
   private calculateRate = data => {
     const { isValidProduct, isValidSchedule, rate, existProductsWithPricing, totalOvertimes } = data
     if (isValidProduct) return existProductsWithPricing.price
-    if (isValidSchedule) return rate + totalOvertimes.rate
+    if (isValidSchedule) return rate + (totalOvertimes?.rate ? totalOvertimes.rate : 0)
     if (typeof rate === 'object') return rate.rate
     return 0
   }
@@ -707,16 +710,21 @@ export class TimesheetService {
       })
     }
     if (isValidSchedule) {
-      return JSON.stringify({
+      const obj = {
         name: nameSchedule,
         rate,
-        extraCharge: [
+      }
+
+      if (totalOvertimes) {
+        obj['extraCharge'] = [
           {
             name: totalOvertimes.name,
             rate: totalOvertimes.rate,
           },
-        ],
-      })
+        ]
+      }
+
+      return JSON.stringify(obj)
     }
     if (typeof rate === 'object') return JSON.stringify(rate.json)
     return null
