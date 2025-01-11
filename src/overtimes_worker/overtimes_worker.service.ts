@@ -33,10 +33,16 @@ export class OvertimesWorkerService {
   }
 
   async getAllOvertimes(params) {
-    const { page, pageSize } = params
+    const { page, pageSize, name } = params
+    let where = {}
+
+    if (name) where = { ...where, name: name }
+
     const [result, total] = await this.overtimesWorkerRepository.findAndCount({
       take: pageSize,
       skip: page * pageSize,
+      where,
+      order: { created_at: 'DESC' },
     })
 
     return { result, pagination: { page, pageSize, total } }

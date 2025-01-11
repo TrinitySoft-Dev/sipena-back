@@ -30,8 +30,9 @@ export class OvertimesWorkerController {
   getAll(
     @Query('page', new DefaultValuePipe(0)) page: number,
     @Query('pageSize', new DefaultValuePipe(10)) pageSize: number,
+    @Query('name') name?: string,
   ) {
-    return this.overtimesWorkerService.getAllOvertimes({ page, pageSize })
+    return this.overtimesWorkerService.getAllOvertimes({ page, pageSize, name })
   }
 
   @Get('select')
