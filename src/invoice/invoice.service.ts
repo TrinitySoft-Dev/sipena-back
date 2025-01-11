@@ -64,8 +64,6 @@ export class InvoiceService {
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     )
 
-    console.log(downloadURL)
-
     return downloadURL
   }
 
@@ -81,7 +79,6 @@ export class InvoiceService {
     )
 
     const columns = await this.resolverColumns(resultTemplate, timesheets)
-    console.log(columns)
   }
 
   private async resolverColumns(template, timesheets) {
@@ -94,9 +91,10 @@ export class InvoiceService {
           rows: [],
         }
       }
-
       timesheets.forEach(timesheet => {
         const valueReplacecell = valueCell?.replace(/@path:([\w.]+)/g, (match, p1) => {
+          if (!p1.includes('_')) p1 = `timesheet_${p1}`
+          console.log(p1)
           return timesheet[p1]
         })
 
@@ -105,7 +103,7 @@ export class InvoiceService {
           columns[column.name].rows = [...columns[column.name].rows, valueReplacecell]
         }
 
-        this.timesheetService.update(timesheet.id, { status_customer_pay: TimesheetStatusEnum.CLOSED })
+        this.timesheetService.closeTimesheet(timesheet.id)
       })
     })
 

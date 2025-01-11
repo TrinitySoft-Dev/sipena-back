@@ -155,7 +155,6 @@ export class TimesheetService {
 
     if (!existingTimesheet) throw new NotFoundException('Timesheet not found')
 
-    // update workers
     const idWorkers = timesheet.workers.map(worker => worker.id)
     const workers = existingTimesheet.timesheet_workers
 
@@ -223,6 +222,14 @@ export class TimesheetService {
     await this.timesheetWorkersService.updateMany(payWorkers)
 
     return { message: 'Timesheet updated successfully' }
+  }
+
+  async closeTimesheet(id: number) {
+    const timesheet = await this.timesheetRepository.findOne({ where: { id } })
+    if (!timesheet) throw new NotFoundException('Timesheet not found')
+
+    timesheet.status_customer_pay = TimesheetStatusEnum.CLOSED
+    await this.timesheetRepository.save(timesheet)
   }
 
   async getMetricsTimesheet(startDate: string, endDate: string) {
