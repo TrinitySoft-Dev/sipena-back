@@ -33,6 +33,7 @@ export class OvertimesWorkerController {
     return this.overtimesWorkerService.getAllOvertimes({ page, pageSize })
   }
 
+  @Get('select')
   select() {
     return this.overtimesWorkerService.select()
   }
