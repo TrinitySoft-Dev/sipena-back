@@ -20,6 +20,7 @@ import { TimesheetStatusEnum } from '@/timesheet_workers/entities/timesheet_work
 import { NormalSchedule } from '@/normal_schedule/entities/normal_schedule.entity'
 import { Container } from '@/container/entities/container.entity'
 import { NormalScheduleService } from '@/normal_schedule/normal_schedule.service'
+import { OvertimesWorkerService } from '@/overtimes_worker/overtimes_worker.service'
 
 @Injectable()
 export class TimesheetService {
@@ -54,7 +55,7 @@ export class TimesheetService {
       if (!existProductsWithPricing) {
         const customerUser = await this.usersService.findByWorks(customer_id, work_id, container.size)
         if (customerUser.normal_schedule?.length) {
-          const validNormalSchedule: any = this.normalScheduleService.validateNormalSchedule(
+          const validNormalSchedule: any = await this.normalScheduleService.validateNormalSchedule(
             customerUser.normal_schedule,
             work_id,
             container,

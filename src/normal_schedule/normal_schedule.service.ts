@@ -8,12 +8,14 @@ import { ContainerDto } from '@/timesheet/dto/create-timesheet.dto'
 import { OvertimesService } from '@/overtimes/overtimes.service'
 import { UpdateOvertimeDto } from '@/overtimes/dto/update-overtime.dto'
 import { UpdateNormalScheduleDto } from './dto/update-normal_schedule.dto'
+import { OvertimesWorkerService } from '@/overtimes_worker/overtimes_worker.service'
 
 @Injectable()
 export class NormalScheduleService {
   constructor(
     @InjectRepository(NormalSchedule) private readonly normalScheduleRepository: Repository<NormalSchedule>,
     private readonly overtimeService: OvertimesService,
+    private readonly overtimesWorkerService: OvertimesWorkerService,
   ) {}
 
   async create(createNormalScheduleDto: CreateNormalScheduleDto) {
@@ -74,7 +76,12 @@ export class NormalScheduleService {
     return { message: 'Normal schedule deleted' }
   }
 
-  validateNormalSchedule(normalSchedules: NormalSchedule[], workId: number, container: ContainerDto, day: string) {
+  async validateNormalSchedule(
+    normalSchedules: NormalSchedule[],
+    workId: number,
+    container: ContainerDto,
+    day: string,
+  ) {
     const existNormalScheduleByWork = normalSchedules.filter(
       normalSchedule => normalSchedule.work.id === Number(workId),
     )
@@ -100,15 +107,17 @@ export class NormalScheduleService {
 
         if (!appliedOvertime) continue
 
+        const overtimeWorker = await this.overtimesWorkerService.validateOvertimes(hoursWorked, schedule.up_hours)
+
         return {
           rate: schedule.rate * (hoursWorked > schedule.up_hours ? schedule.up_hours : schedule.rate * hoursWorked),
           name: schedule.name,
-          rate_worker: schedule.rate_worker,
+          rate_worker: schedule.rate_worker + (overtimeWorker || 0),
           overtime: appliedOvertime,
         }
       }
 
-      return { rate: schedule.rate * hoursWorked, name: schedule.name, rate_worker: schedule.rate_worker }
+      return { rate: schedule.rate * hoursWorked, name: schedule.name, rate_worker: schedule.rate_worker * hoursWorked }
     }
   }
 }

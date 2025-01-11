@@ -12,6 +12,7 @@ import { ContainerSizeModule } from '@/container_size/container_size.module'
 import { RulesWorkersModule } from '@/rules_workers/rules_workers.module'
 import { ProductsModule } from '@/products/products.module'
 import { NormalScheduleModule } from '@/normal_schedule/normal_schedule.module'
+import { OvertimesWorkerModule } from '@/overtimes_worker/overtimes_worker.module'
 
 @Module({
   imports: [

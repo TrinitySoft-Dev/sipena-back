@@ -40,6 +40,7 @@ import { ExtraRulesWorkersModule } from './extra_rules_workers/extra_rules_worke
 import { AdminEmailsModule } from './admin_emails/admin_emails.module'
 import { NormalScheduleModule } from './normal_schedule/normal_schedule.module';
 import { OvertimesModule } from './overtimes/overtimes.module';
+import { OvertimesWorkerModule } from './overtimes_worker/overtimes_worker.module';
 
 @Module({
   imports: [
@@ -109,6 +110,7 @@ import { OvertimesModule } from './overtimes/overtimes.module';
     AdminEmailsModule,
     NormalScheduleModule,
     OvertimesModule,
+    OvertimesWorkerModule,
   ],
   controllers: [],
   providers: [],
