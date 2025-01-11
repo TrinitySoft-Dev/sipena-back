@@ -36,7 +36,7 @@ export class OvertimesWorkerService {
     const { page, pageSize, name } = params
     let where = {}
 
-    if (name) where = { ...where, name: name }
+    if (name) where = { ...where, name: { $regex: name, $options: 'i' } }
 
     const [result, total] = await this.overtimesWorkerRepository.findAndCount({
       take: pageSize,
