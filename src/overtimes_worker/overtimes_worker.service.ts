@@ -73,11 +73,6 @@ export class OvertimesWorkerService {
   }
 
   async remove(id: number) {
-    const overtime = await this.overtimesWorkerRepository.findOne({ where: { id } })
-    if (!overtime) {
-      throw new NotFoundException('Overtime not found')
-    }
-
-    return this.overtimesWorkerRepository.softDelete(overtime)
+    return this.overtimesWorkerRepository.softDelete(id)
   }
 }
