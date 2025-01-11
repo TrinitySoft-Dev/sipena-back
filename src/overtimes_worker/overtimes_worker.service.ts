@@ -18,10 +18,13 @@ export class OvertimesWorkerService {
 
   async validateOvertimes(hoursWorkerd: number, up_hours: number) {
     const overtimes = await this.overtimesWorkerRepository.find()
+    overtimes.sort((a, b) => a.hours - b.hours)
+
+    const diff = hoursWorkerd - up_hours
 
     if (hoursWorkerd > up_hours) {
       for (const overtime of overtimes) {
-        if (hoursWorkerd < overtime.hours) {
+        if (diff <= overtime.hours) {
           const payOvertimeWorker = overtime.rate * hoursWorkerd
           return payOvertimeWorker
         }
