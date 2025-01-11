@@ -113,4 +113,7 @@ export class ProductsService {
       throw new NotFoundException(`Product with id ${id} not found`)
     }
   }
+  async delete(id: number) {
+    return await this.productRepository.softDelete(id)
+  }
 }

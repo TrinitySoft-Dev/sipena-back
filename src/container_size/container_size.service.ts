@@ -43,4 +43,8 @@ export class ContainerSizeService {
     Object.assign(containerSize, createContainerSizeDto)
     return this.containerSizeRepository.save(containerSize)
   }
+
+  async delete(id: number) {
+    return await this.containerSizeRepository.softDelete(id)
+  }
 }

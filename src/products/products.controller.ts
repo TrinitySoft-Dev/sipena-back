@@ -127,9 +127,14 @@ export class ProductsController {
     return await this.productsService.update(id, updateProductDto)
   }
 
+  // @Delete(':id')
+  // async delete(@Param('id') id: number) {
+  //   await this.productsService.deleteById(id)
+  //   return { message: `Product with id ${id} has been deleted` }
+  // }
+
   @Delete(':id')
-  async delete(@Param('id') id: number) {
-    await this.productsService.deleteById(id)
-    return { message: `Product with id ${id} has been deleted` }
+  delete(@Param('id') id: number) {
+    return this.productsService.delete(id)
   }
 }

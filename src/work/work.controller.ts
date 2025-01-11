@@ -10,6 +10,7 @@ import {
   ParseIntPipe,
   Query,
   ParseBoolPipe,
+  Delete,
 } from '@nestjs/common'
 import { WorkService } from './work.service'
 import { CreateWorkDto } from './dto/create-work.dto'
@@ -60,5 +61,10 @@ export class WorkController {
   @Put(':id')
   update(@Param('id') id: number, @Body() updateWorkDto: UpdateWorkDto) {
     return this.workService.update(id, updateWorkDto)
+  }
+
+  @Delete(':id')
+  delete(@Param('id') id: number) {
+    return this.workService.delete(id)
   }
 }

@@ -13,4 +13,9 @@ export class InvoiceController {
   async create(@Body() createInvoiceDto: CreateInvoiceDto) {
     return this.invoiceService.create(createInvoiceDto)
   }
+
+  @Post('pdf')
+  generatePDF(@Body() createInvoiceDTO: CreateInvoiceDto) {
+    return this.invoiceService.generatePDF(createInvoiceDTO)
+  }
 }

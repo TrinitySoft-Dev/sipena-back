@@ -18,7 +18,6 @@ import { AccessJwtService } from '@/common/services/access-jwt.service'
 import { AccessJwtRefreshService } from '@/common/services/refresh-jwt.service'
 import { UpdateUserDto } from './dto/update-user.dto'
 import { RolesService } from '@/roles/roles.service'
-import { AdminEmailsService } from '@/admin_emails/admin_emails.service'
 
 @Injectable()
 export class UsersService {
@@ -314,6 +313,9 @@ export class UsersService {
       .leftJoinAndSelect('rule.extra_rules', 'extra_rules')
       .leftJoinAndSelect('extra_rules.condition_groups', 'extra_condition_groups')
       .leftJoinAndSelect('extra_condition_groups.conditions', 'extra_conditions')
+      .leftJoinAndSelect('user.normal_schedule', 'normal_schedule')
+      .leftJoinAndSelect('normal_schedule.work', 'work')
+      .leftJoinAndSelect('normal_schedule.overtimes', 'overtimes')
       .leftJoinAndSelect('rule.container_size', 'container_size')
       .leftJoinAndSelect('user.role', 'role')
       .where('user.id = :userId', { userId })
@@ -461,6 +463,9 @@ export class UsersService {
       user.name = updateUserDto?.name ?? user.name
       user.last_name = updateUserDto?.last_name ?? user.last_name
       user.rules = updateUserDto?.rules
+      user.normal_schedule = updateUserDto?.normal_schedule
+
+      console.log(user)
 
       await this.userRepository.save(user)
 
@@ -474,6 +479,23 @@ export class UsersService {
     return this.userRepository.update(id, { active })
   }
 
+  async updatePassword(id: number, oldPassword: string, newPassword: string) {
+    const user = await this.userRepository.findOne({ where: { id } })
+
+    if (!user) {
+      throw new Error('User not found')
+    }
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password)
+    if (!isMatch) {
+      throw new Error('Old password is incorrect')
+    }
+
+    const hashedPassword = await this.encryptPassword(newPassword)
+
+    return this.userRepository.update(id, { password: hashedPassword })
+  }
+
   updateAvatar(id: number, updateUserDto: UpdateUserDto) {
     return this.userRepository.update(id, { avatar: updateUserDto.avatar })
   }
@@ -482,5 +504,9 @@ export class UsersService {
     const salt = await bcrypt.genSalt(10)
     const hash = await bcrypt.hash(password, salt)
     return hash
+  }
+
+  async delete(id: number) {
+    return await this.userRepository.softDelete(id)
   }
 }

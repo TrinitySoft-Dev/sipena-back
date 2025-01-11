@@ -58,4 +58,8 @@ export class TemplateController {
   update(@Param('id', ParseIntPipe) id: number, @Body() updateTemplateDto: UpdateTemplateDto) {
     return this.templateService.update(id, updateTemplateDto)
   }
+  @Delete(':id')
+  delete(@Param('id') id: number) {
+    return this.templateService.delete(id)
+  }
 }

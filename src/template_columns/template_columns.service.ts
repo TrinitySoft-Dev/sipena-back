@@ -15,10 +15,6 @@ export class TemplateColumnsService {
     return 'This action adds a new templateColumn'
   }
 
-  // findAll() {
-  //   return `This action returns all templateColumns`
-  // }
-
   async findByTemplateId(id: string) {
     return await this.templateColumnRepository.find({
       where: { templateId: id },

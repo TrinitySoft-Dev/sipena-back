@@ -92,4 +92,7 @@ export class WorkService {
 
     return this.findById(work.id)
   }
+  async delete(id: number) {
+    return await this.workRepository.softDelete(id)
+  }
 }

@@ -11,6 +11,7 @@ import {
   Put,
   Param,
   ParseBoolPipe,
+  Delete,
 } from '@nestjs/common'
 import { RulesService } from './rules.service'
 import { CreateRuleDto } from './dto/create-rule.dto'
@@ -78,5 +79,10 @@ export class RulesController {
   @Put(':id')
   async update(@Param('id') id: number, @Body() updateRuleDto: UpdateRuleDto) {
     return await this.rulesService.update(id, updateRuleDto)
+  }
+
+  @Delete(':id')
+  delete(@Param('id') id: number) {
+    return this.rulesService.delete(id)
   }
 }

@@ -1,8 +1,21 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put } from '@nestjs/common'
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Put,
+  Query,
+  DefaultValuePipe,
+  ParseIntPipe,
+  ParseBoolPipe,
+} from '@nestjs/common'
 import { RulesWorkersService } from './rules_workers.service'
 import { CreateRulesWorkerDto } from './dto/create-rules_worker.dto'
 import { UpdateRulesWorkerDto } from './dto/update-rules_worker.dto'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiQuery, ApiTags } from '@nestjs/swagger'
 
 @ApiTags('Rules Workers')
 @Controller('rules-workers')
@@ -14,9 +27,16 @@ export class RulesWorkersController {
     return this.rulesWorkersService.create(createRulesWorkerDto)
   }
 
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'pageSize', required: false, type: Number })
+  @ApiQuery({ name: 'includePagination', required: false, type: Boolean })
   @Get()
-  find() {
-    return this.rulesWorkersService.find()
+  find(
+    @Query('page', new DefaultValuePipe(0), ParseIntPipe) page?: number,
+    @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize?: number,
+    @Query('includePagination', new DefaultValuePipe(false), ParseBoolPipe) includePagination?: boolean,
+  ) {
+    return this.rulesWorkersService.find({ page, pageSize, includePagination })
   }
 
   @Get(':id')
@@ -27,5 +47,9 @@ export class RulesWorkersController {
   @Put('/:id')
   update(@Param('id') id: number, @Body() updateRuleWorkerDto: UpdateRulesWorkerDto) {
     return this.rulesWorkersService.update(id, updateRuleWorkerDto)
+  }
+  @Delete(':id')
+  delete(@Param('id') id: number) {
+    return this.rulesWorkersService.delete(id)
   }
 }

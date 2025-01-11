@@ -84,8 +84,27 @@ export class RulesWorkersService {
     })
   }
 
-  find() {
-    return this.rulesWorkerRepository.find({ relations: ['container_size'] })
+  async find({ page, pageSize, includePagination }: { page: number; pageSize: number; includePagination: boolean }) {
+    if (includePagination) {
+      const [result, total] = await this.rulesWorkerRepository.findAndCount({
+        skip: page * pageSize,
+
+        take: pageSize,
+        relations: ['container_size'],
+        order: {
+          created_at: 'DESC',
+        },
+      })
+
+      return { result, pagination: { page, pageSize, total } }
+    }
+
+    return await this.rulesWorkerRepository.find({
+      relations: ['container_size'],
+      order: {
+        created_at: 'DESC',
+      },
+    })
   }
 
   async update(id: number, updateRuleDto: UpdateRulesWorkerDto) {
@@ -111,6 +130,10 @@ export class RulesWorkersService {
     } catch (error) {
       throw error
     }
+  }
+
+  async delete(id: number) {
+    return await this.rulesWorkerRepository.softDelete(id)
   }
 
   private calculateOverUnitsOverLimit(

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { CreateInvoiceDto } from './dto/create-invoice.dto'
 import { TimesheetService } from '@/timesheet/timesheet.service'
 import { TemplateService } from '@/template/template.service'
@@ -67,6 +67,20 @@ export class InvoiceService {
     return downloadURL
   }
 
+  async generatePDF(createInvoiceDto: CreateInvoiceDto) {
+    const { reference_week, template, customer } = createInvoiceDto
+    const resultTemplate = this.templateService.findOne(template)
+
+    if (!resultTemplate) throw new NotFoundException('Template not found')
+    const timesheets = await this.timesheetService.findTimesheetsByWeek(
+      reference_week,
+      createInvoiceDto.customer,
+      createInvoiceDto.type,
+    )
+
+    const columns = await this.resolverColumns(resultTemplate, timesheets)
+  }
+
   private async resolverColumns(template, timesheets) {
     const columns = {}
 
@@ -77,9 +91,10 @@ export class InvoiceService {
           rows: [],
         }
       }
-
       timesheets.forEach(timesheet => {
         const valueReplacecell = valueCell?.replace(/@path:([\w.]+)/g, (match, p1) => {
+          if (!p1.includes('_')) p1 = `timesheet_${p1}`
+          console.log(p1)
           return timesheet[p1]
         })
 
@@ -88,7 +103,7 @@ export class InvoiceService {
           columns[column.name].rows = [...columns[column.name].rows, valueReplacecell]
         }
 
-        this.timesheetService.update(timesheet.id, { status_customer_pay: TimesheetStatusEnum.CLOSED })
+        this.timesheetService.closeTimesheet(timesheet.id)
       })
     })
 

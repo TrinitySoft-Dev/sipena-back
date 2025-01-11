@@ -176,4 +176,8 @@ export class TemplateService {
 
     return this.templateRepository.save(obj)
   }
+
+  async delete(id: number) {
+    return await this.templateRepository.softDelete(id)
+  }
 }

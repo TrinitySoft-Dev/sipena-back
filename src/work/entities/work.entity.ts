@@ -15,6 +15,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 import { WorkFieldVisibility } from './workFieldVisibility.entity'
+import { NormalSchedule } from '@/normal_schedule/entities/normal_schedule.entity'
 
 @Entity({
   name: 'works',
@@ -50,6 +51,9 @@ export class Work {
 
   @OneToMany(() => WorkFieldVisibility, wfv => wfv.work, { cascade: true })
   workFieldVisibilities: WorkFieldVisibility[]
+
+  @OneToMany(() => NormalSchedule, normal_schedule => normal_schedule.work)
+  normal_schedule: NormalSchedule[]
 
   @Column({
     nullable: false,
