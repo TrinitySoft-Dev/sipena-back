@@ -9,6 +9,7 @@ import {
   Query,
   DefaultValuePipe,
   ParseIntPipe,
+  Put,
 } from '@nestjs/common'
 import { OvertimesWorkerService } from './overtimes_worker.service'
 import { CreateOvertimesWorkerDto } from './dto/create-overtimes_worker.dto'
@@ -43,7 +44,7 @@ export class OvertimesWorkerController {
     return this.overtimesWorkerService.getById(id)
   }
 
-  @Patch(':id')
+  @Put(':id')
   update(@Param('id', new ParseIntPipe()) id: number, @Body() updateOvertimesWorkerDto: UpdateOvertimesWorkerDto) {
     return this.overtimesWorkerService.update(id, updateOvertimesWorkerDto)
   }
