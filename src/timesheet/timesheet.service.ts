@@ -61,6 +61,7 @@ export class TimesheetService {
             work_id,
             container,
             timesheet.day.toString(),
+            workers,
           )
 
           if (validNormalSchedule?.rate) {
