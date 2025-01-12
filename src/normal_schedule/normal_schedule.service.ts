@@ -88,7 +88,7 @@ export class NormalScheduleService {
     if (!existNormalScheduleByWork.length) return false
 
     for (const schedule of normalSchedules) {
-      const dayWorked = DateTime.fromISO(container.start.toString()).setLocale('en').toFormat('EEEE')
+      const dayWorked = DateTime.fromISO(day.toString()).setLocale('en').toFormat('EEEE')
       const dayIncludeInSchedule = schedule.days.includes(dayWorked)
 
       if (!dayIncludeInSchedule) continue
