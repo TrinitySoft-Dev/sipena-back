@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { JwtModule } from '@nestjs/jwt'
 import { ServeStaticModule } from '@nestjs/serve-static'
@@ -38,9 +38,10 @@ import { WorkFieldsModule } from './work_fields/work_fields.module'
 import { GroupPermissionsModule } from './group_permissions/group_permissions.module'
 import { ExtraRulesWorkersModule } from './extra_rules_workers/extra_rules_workers.module'
 import { AdminEmailsModule } from './admin_emails/admin_emails.module'
-import { NormalScheduleModule } from './normal_schedule/normal_schedule.module';
-import { OvertimesModule } from './overtimes/overtimes.module';
-import { OvertimesWorkerModule } from './overtimes_worker/overtimes_worker.module';
+import { NormalScheduleModule } from './normal_schedule/normal_schedule.module'
+import { OvertimesModule } from './overtimes/overtimes.module'
+import { OvertimesWorkerModule } from './overtimes_worker/overtimes_worker.module'
+import { TimezoneMiddleware } from './middlewares/timezone.middleware'
 
 @Module({
   imports: [
@@ -115,4 +116,8 @@ import { OvertimesWorkerModule } from './overtimes_worker/overtimes_worker.modul
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(TimezoneMiddleware).forRoutes('*')
+  }
+}
