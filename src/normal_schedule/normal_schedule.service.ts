@@ -81,6 +81,7 @@ export class NormalScheduleService {
     workId: number,
     container: ContainerDto,
     day: string,
+    workers: any,
   ) {
     const existNormalScheduleByWork = normalSchedules.filter(
       normalSchedule => normalSchedule.work.id === Number(workId),
@@ -96,7 +97,16 @@ export class NormalScheduleService {
       const start = DateTime.fromISO(container.start.toString())
       const finish = DateTime.fromISO(container.finish.toString())
 
-      const hoursWorked = finish.diff(start, 'hours').hours
+      const totalBreak = workers.reduce((acc, worker) => {
+        const workerBreak = DateTime.fromISO(worker.break)
+        if (!workerBreak.isValid) {
+          return acc
+        }
+        const totalMinutes = workerBreak.hour * 60 + workerBreak.minute
+        return acc + totalMinutes
+      }, 0)
+
+      const hoursWorked = finish.diff(start, 'hours').hours - totalBreak / 60
 
       if (hoursWorked > schedule.up_hours) {
         const appliedOvertime = this.overtimeService.validateOvertimes(
