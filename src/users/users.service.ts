@@ -348,7 +348,6 @@ export class UsersService {
         .leftJoinAndSelect('user.infoworker', 'infoworker')
         .leftJoinAndSelect('user.role', 'role')
         .where('role.name = :role', { role })
-        .andWhere('user.completed = :completed', { completed: true })
         .andWhere(name ? '(user.name ILIKE :name OR user.last_name ILIKE :name)' : '1=1', { name: `%${name}%` })
         .andWhere(email ? 'user.email = :email' : '1=1', { email })
         .orderBy('user.created_at', 'DESC')
@@ -386,7 +385,7 @@ export class UsersService {
         role === ROLES_CONST.WORKER ? ['infoworker', 'timesheet_workers.timesheet.container'] : ['role', 'timesheets'],
     }
 
-    if (role === ROLES_CONST.WORKER) {
+    if (role === ROLES_CONST.WORKER && !includePagination) {
       options.where = { ...where, completed: true }
     }
 
