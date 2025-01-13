@@ -29,14 +29,14 @@ export class Infoworker {
   @Column({
     type: 'varchar',
     nullable: false,
-    length: 9,
+    length: 50,
   })
   tfn: string
 
   @Column({
     type: 'varchar',
     nullable: false,
-    length: 11,
+    length: 50,
   })
   abn: string
 
@@ -89,7 +89,7 @@ export class Infoworker {
   @Column({
     type: 'varchar',
     nullable: false,
-    length: 12,
+    length: 50,
   })
   bank_account_number: string
 
