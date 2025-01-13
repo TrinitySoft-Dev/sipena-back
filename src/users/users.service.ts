@@ -465,8 +465,6 @@ export class UsersService {
       user.rules = updateUserDto?.rules
       user.normal_schedule = updateUserDto?.normal_schedule
 
-      console.log(user)
-
       await this.userRepository.save(user)
 
       return { message: 'User updated successfully', user }
