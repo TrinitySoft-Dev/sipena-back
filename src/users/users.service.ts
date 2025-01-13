@@ -63,10 +63,11 @@ export class UsersService {
 
       if (rest.create_type !== 'BASIC') {
         obj['infoworker'] = await this.infoworkerService.create({ ...rest })
-        obj['active'] = true
       }
 
       const user = await this.userRepository.save(obj)
+
+      if (user.infoworker) user.completed = true
 
       if (rest.create_type !== 'BASIC') {
         await this.emailService.send({
@@ -172,19 +173,13 @@ export class UsersService {
     const isPasswordCorrect = await bcrypt.compare(password, user.password)
     if (!isPasswordCorrect) throw new UnauthorizedException('Email or password incorrect')
 
-    let completed = true
-
-    if (user.role.name === ROLES_CONST.WORKER) {
-      completed = this.infoworkerService.validateInfoworker(user.infoworker)
-    }
-
     const permissions = user.role.permissions.map(permission => permission.name)
 
     const payload = {
       email: user.email,
       role: user.role.name,
       id: user.id,
-      completedInfoworker: completed,
+      completedInfoworker: user.completed,
       name: user.name,
       lastname: user.last_name,
       avatar_url: user.avatar,
@@ -220,18 +215,13 @@ export class UsersService {
     })
     if (!user) throw new UnauthorizedException('Email or password incorrect')
 
-    let completed = true
-    if (user.role.name === ROLES_CONST.WORKER) {
-      completed = this.infoworkerService.validateInfoworker(user.infoworker)
-    }
-
     const permissions = user.role.permissions.map(permission => permission.name)
 
     const payload = {
       email: user.email,
-      role: user.role,
+      role: user.role.name,
       id: user.id,
-      completedInfoworker: completed,
+      completedInfoworker: user.completed,
       name: user.name,
       lastname: user.last_name,
       avatar_url: user.avatar,
@@ -358,6 +348,7 @@ export class UsersService {
         .leftJoinAndSelect('user.infoworker', 'infoworker')
         .leftJoinAndSelect('user.role', 'role')
         .where('role.name = :role', { role })
+        .andWhere('user.completed = :completed', { completed: true })
         .andWhere(name ? '(user.name ILIKE :name OR user.last_name ILIKE :name)' : '1=1', { name: `%${name}%` })
         .andWhere(email ? 'user.email = :email' : '1=1', { email })
         .orderBy('user.created_at', 'DESC')
@@ -394,6 +385,11 @@ export class UsersService {
       relations:
         role === ROLES_CONST.WORKER ? ['infoworker', 'timesheet_workers.timesheet.container'] : ['role', 'timesheets'],
     }
+
+    if (role === ROLES_CONST.WORKER) {
+      options.where = { ...where, completed: true }
+    }
+
     if (includePagination) {
       const [result, total] = await this.userRepository.findAndCount(options)
 
@@ -451,6 +447,27 @@ export class UsersService {
         user.infoworker = infoworker
       }
 
+      const isValid = await this.userRepository
+        .createQueryBuilder('user')
+        .innerJoin('user.infoworker', 'infoworker')
+        .select('CASE WHEN COUNT(user.id) > 0 THEN TRUE ELSE FALSE END', 'isComplete')
+        .where("infoworker.phone IS NOT NULL AND infoworker.phone != ''")
+        .andWhere("infoworker.tfn IS NOT NULL AND infoworker.tfn != ''")
+        .andWhere("infoworker.abn IS NOT NULL AND infoworker.abn != ''")
+        .andWhere('infoworker.birthday IS NOT NULL')
+        .andWhere("infoworker.passport_url IS NOT NULL AND infoworker.passport_url != ''")
+        .andWhere("infoworker.address IS NOT NULL AND infoworker.address != ''")
+        .andWhere('infoworker.city IS NOT NULL')
+        .andWhere('infoworker.state IS NOT NULL')
+        .andWhere("infoworker.bank_name IS NOT NULL AND infoworker.bank_name != ''")
+        .andWhere("infoworker.bank_account_name IS NOT NULL AND infoworker.bank_account_name != ''")
+        .andWhere("infoworker.bank_account_number IS NOT NULL AND infoworker.bank_account_number != ''")
+        .andWhere("infoworker.postal_code IS NOT NULL AND infoworker.postal_code != ''")
+        .andWhere("infoworker.bsb IS NOT NULL AND infoworker.bsb != ''")
+        .andWhere("infoworker.visa_url IS NOT NULL AND infoworker.visa_url != ''")
+        .getRawOne()
+
+      user.completed = isValid.isComplete
       user.name = updateUserDto?.name ?? user.name
       user.last_name = updateUserDto?.last_name ?? user.last_name
 
