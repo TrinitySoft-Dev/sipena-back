@@ -165,7 +165,7 @@ export class UsersService {
 
     const user = await this.userRepository.findOne({
       where: { email, active: true },
-      relations: ['infoworker', 'role', 'role.permissions'],
+      relations: ['infoworker', 'role', 'role.permissions', 'infoworker.state'],
     })
 
     if (!user) throw new UnauthorizedException('Email or password incorrect')
@@ -184,6 +184,7 @@ export class UsersService {
       lastname: user.last_name,
       avatar_url: user.avatar,
       permissions,
+      state: user.infoworker?.state?.name,
     }
 
     const token = await this.jwtService.signAsync(payload)
@@ -211,7 +212,7 @@ export class UsersService {
 
     const user = await this.userRepository.findOne({
       where: { email: validToken.email, active: true },
-      relations: ['infoworker', 'role', 'role.permissions'],
+      relations: ['infoworker', 'role', 'role.permissions', 'infoworker.state'],
     })
     if (!user) throw new UnauthorizedException('Email or password incorrect')
 
@@ -226,6 +227,7 @@ export class UsersService {
       lastname: user.last_name,
       avatar_url: user.avatar,
       permissions,
+      state: user.infoworker?.state?.name,
     }
 
     const token = await this.jwtService.signAsync(payload)
@@ -329,6 +331,7 @@ export class UsersService {
     page,
     pageSize,
     includePagination,
+    currentUser,
   }: {
     role: string
     name: string
@@ -336,10 +339,10 @@ export class UsersService {
     page: number
     pageSize: number
     includePagination: boolean
+    currentUser: any
   }) {
     const skip = page * pageSize
     let where: any = { role: { name: role } }
-
     const order = { created_at: 'DESC' as const }
 
     if (role === ROLES_CONST.WORKER && includePagination) {
@@ -387,6 +390,10 @@ export class UsersService {
 
     if (role === ROLES_CONST.WORKER && !includePagination) {
       options.where = { ...where, completed: true }
+    }
+
+    if (currentUser?.role === ROLES_CONST.WORKER) {
+      options.where = { ...where, infoworker: { state: { name: currentUser?.state } } }
     }
 
     if (includePagination) {
