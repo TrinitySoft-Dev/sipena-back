@@ -94,7 +94,6 @@ export class InvoiceService {
       timesheets.forEach(timesheet => {
         const valueReplacecell = valueCell?.replace(/@path:([\w.]+)/g, (match, p1) => {
           if (!p1.includes('_')) p1 = `timesheet_${p1}`
-          console.log(p1)
           return timesheet[p1]
         })
 
