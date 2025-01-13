@@ -18,6 +18,7 @@ import {
   DefaultValuePipe,
   ParseBoolPipe,
   Delete,
+  Req,
 } from '@nestjs/common'
 import { UsersService } from './users.service'
 import { CreateUserDto } from './dto/worker-user.dto'
@@ -87,8 +88,8 @@ export class UsersController {
     return this.usersService.resetPassword(resetPasswordDto)
   }
 
-  // @ApiBearerAuth()
-  // @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   @ApiOperation({
     summary: 'Find users by role, name, and email',
     description: 'This method returns users by role, name, and email',
@@ -97,6 +98,7 @@ export class UsersController {
   @ApiQuery({ name: 'email', required: false })
   @Get('role')
   findByRole(
+    @Req() req: any,
     @Query('role') role: string,
     @Query('name') name?: string,
     @Query('email') email?: string,
@@ -104,7 +106,15 @@ export class UsersController {
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe) pageSize?: number,
     @Query('includePagination', new DefaultValuePipe(false), ParseBoolPipe) includePagination?: boolean,
   ) {
-    return this.usersService.findByRole({ role, name, email, page, pageSize, includePagination })
+    return this.usersService.findByRole({
+      role,
+      name,
+      email,
+      page,
+      pageSize,
+      includePagination,
+      currentUser: req.payload,
+    })
   }
 
   @ApiBearerAuth()
@@ -147,6 +157,8 @@ export class UsersController {
     return this.usersService.updateAvatar(id, updateUserDto)
   }
 
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   @Patch(':id/update-password')
   @ApiParam({ name: 'id', required: true, type: Number, description: 'User ID' })
   @ApiBody({
@@ -164,11 +176,15 @@ export class UsersController {
     return this.usersService.updatePassword(id, oldPassword, newPassword)
   }
 
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   @Patch(':id/status')
   updateStatus(@Param('id') id: number, @Body() updateUserDto: any) {
     return this.usersService.updateStatus(id, updateUserDto.status)
   }
 
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   @Delete(':id')
   delete(@Param('id') id: number) {
     return this.usersService.delete(id)
