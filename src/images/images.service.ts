@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 import { config } from '@/common/config/config'
+import * as sharp from 'sharp'
+import { Readable } from 'typeorm/platform/PlatformTools'
 
 @Injectable()
 export class ImagesService {
@@ -59,13 +61,29 @@ export class ImagesService {
     const promises = files.map(async file => {
       const shortId = Math.random().toString(36).substring(2, 15)
       const key = `sipena/${shortId}`
+
+      const image = await sharp(file.buffer)
+        .webp({ quality: 80 })
+        .resize({
+          width: 500,
+          height: 500,
+          fit: 'cover',
+        })
+        .toBuffer()
+
+      const contentLength = image.byteLength
+      const stream = Readable.from(image)
+
       const command = new PutObjectCommand({
         Bucket: config.AWS.S3_BUCKET_NAME,
         Key: key,
-        Body: file.buffer,
+        Body: stream,
         ContentType: file.mimetype,
+        ContentLength: contentLength,
       })
       await this.s3Client.send(command)
+
+      console.log(shortId)
       return `${config.SIPENA_FILES}/${shortId}`
     })
 
