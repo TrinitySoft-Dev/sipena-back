@@ -44,7 +44,8 @@ export class UsersService {
       if (!role) role = ROLES_CONST.WORKER
 
       if (files.length == 2) {
-        const [passport_url, visa_url] = await this.imagesService.uploadMultiple(files)
+        const passport_url = await this.imagesService.upload(files[0], 'passport')
+        const visa_url = await this.imagesService.upload(files[1], 'visa')
         rest.visa_url = visa_url
         rest.passport_url = passport_url
       }
@@ -392,7 +393,7 @@ export class UsersService {
       options.where = { ...where, completed: true }
     }
 
-    if (currentUser?.role === ROLES_CONST.WORKER) {
+    if (currentUser?.role === ROLES_CONST.WORKER && role === ROLES_CONST.WORKER) {
       options.where = { ...where, infoworker: { state: { name: currentUser?.state } } }
     }
 
@@ -427,12 +428,12 @@ export class UsersService {
       if (user?.infoworker) {
         Object.assign(user.infoworker, JSON.parse(updateUserDto.infoworker))
         if (visa) {
-          const visa_url = await this.imagesService.upload(visa)
+          const visa_url = await this.imagesService.upload(visa, 'visa')
           user.infoworker.visa_url = visa_url
         }
 
         if (passport) {
-          const passport_url = await this.imagesService.upload(passport)
+          const passport_url = await this.imagesService.upload(passport, 'passport')
           user.infoworker.passport_url = passport_url
         }
       } else {

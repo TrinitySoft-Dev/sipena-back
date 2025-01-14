@@ -20,11 +20,11 @@ export class ImagesService {
     this.s3Client = s3Client
   }
 
-  async upload(file: Express.Multer.File) {
+  async upload(file: Express.Multer.File, folder?: string) {
     try {
       const shortId = Math.random().toString(36).substring(2, 15)
 
-      const key = `sipena/${shortId}`
+      let key = folder ? `sipena/${folder}/${shortId}` : `sipena/${shortId}`
 
       const command = new PutObjectCommand({
         Bucket: config.AWS.S3_BUCKET_NAME,
@@ -35,7 +35,8 @@ export class ImagesService {
 
       await this.s3Client.send(command)
 
-      return `${config.SIPENA_FILES}/${shortId}`
+      const url = `${config.SIPENA_FILES}/${folder ? `${folder}/` : 'timesheets/'}${shortId}`
+      return url
     } catch (error) {
       console.log(error)
     }
@@ -57,10 +58,10 @@ export class ImagesService {
     return `${config.SIPENA_FILES}/${folder ? `${folder}/` : ''}${shortId}`
   }
 
-  async uploadMultiple(files: Express.Multer.File[]) {
+  async uploadMultiple(files: Express.Multer.File[], folder?: string) {
     const promises = files.map(async file => {
       const shortId = Math.random().toString(36).substring(2, 15)
-      const key = `sipena/${shortId}`
+      const key = folder ? `sipena/${folder}/${shortId}` : `sipena/timesheets/${shortId}`
 
       const image = await sharp(file.buffer)
         .webp({ quality: 80 })
@@ -83,8 +84,8 @@ export class ImagesService {
       })
       await this.s3Client.send(command)
 
-      console.log(shortId)
-      return `${config.SIPENA_FILES}/${shortId}`
+      const url = `${config.SIPENA_FILES}/${folder ? `${folder}/` : 'timesheets/'}${shortId}`
+      return url
     })
 
     return await Promise.all(promises)
