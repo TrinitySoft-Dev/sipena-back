@@ -52,7 +52,14 @@ export class TemplateService {
   }
 
   fields() {
-    return getSelectedFieldsWithPaths(Timesheet)
+    const otherEntities = [
+      { label: 'invoice_number', path: 'invoice_number' },
+      { label: 'reference_week', path: 'reference_week' },
+      { label: 'invoice_date', path: 'invoice_date' },
+      { label: 'due_date', path: 'due_date' },
+    ]
+    const fields = getSelectedFieldsWithPaths(Timesheet).concat(otherEntities)
+    return fields
   }
 
   createDefaultTemplate() {

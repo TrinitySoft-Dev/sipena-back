@@ -31,6 +31,13 @@ export class TemplateColumn {
   value_cell: string
 
   @Column({
+    type: 'int',
+    nullable: false,
+    default: 0,
+  })
+  order: number
+
+  @Column({
     type: 'varchar',
     nullable: true,
   })
