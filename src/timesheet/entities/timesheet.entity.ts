@@ -61,6 +61,14 @@ export class Timesheet {
   @Column('varchar', { array: true })
   images: string[]
 
+  @SelectedField()
+  @Column({
+    type: 'varchar',
+    nullable: true,
+    length: 100,
+  })
+  item_code: string
+
   @Column({
     nullable: false,
     type: 'decimal',

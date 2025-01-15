@@ -84,7 +84,6 @@ export class InvoiceService {
 
   private async resolverColumns(template, timesheets, body: CreateInvoiceDto) {
     const columns = {}
-
     template.columns.forEach(column => {
       const valueCell = column.value_cell
       if (!columns[column.name]) {
@@ -94,11 +93,11 @@ export class InvoiceService {
       }
       timesheets.forEach(timesheet => {
         const valueReplacecell = valueCell?.replace(/@path:([\w.]+)/g, (match, p1) => {
-          if (p1 === 'invoice_number') return body.invoice_number
+          if (p1 === 'invoice_number') return `INV - ${body.invoice_number}`
           if (p1 === 'reference_week') return body.reference_week
           if (p1 === 'invoice_date') return DateTime.fromISO(body.invoice_date.toString()).toFormat('dd/MM/yyyy')
-          if (p1 === 'due_date') return DateTime.fromISO(body.due_date.toISOString()).toFormat('dd/MM/yyyy')
-          if (!p1.includes('_')) p1 = `timesheet_${p1}`
+          if (p1 === 'due_date') return DateTime.fromISO(body.due_date.toString()).toFormat('dd/MM/yyyy')
+          if (!p1.includes('_') || p1 === 'item_code') p1 = `timesheet_${p1}`
           return timesheet[p1]
         })
 

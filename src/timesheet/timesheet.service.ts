@@ -21,6 +21,7 @@ import { NormalSchedule } from '@/normal_schedule/entities/normal_schedule.entit
 import { Container } from '@/container/entities/container.entity'
 import { NormalScheduleService } from '@/normal_schedule/normal_schedule.service'
 import { OvertimesWorkerService } from '@/overtimes_worker/overtimes_worker.service'
+import { ContainerSizeService } from '@/container_size/container_size.service'
 
 @Injectable()
 export class TimesheetService {
@@ -33,6 +34,7 @@ export class TimesheetService {
     private readonly rulesWorkersService: RulesWorkersService,
     private readonly productsService: ProductsService,
     private readonly normalScheduleService: NormalScheduleService,
+    private readonly containerSizeService: ContainerSizeService,
   ) {}
 
   async create(createTimesheetDto: CreateTimesheetDto) {
@@ -79,6 +81,15 @@ export class TimesheetService {
           if (!customerUser.rules.length) throw new NotFoundException('Rules not found')
           const rules = customerUser.rules
           rate = await this.validateRules(rules, container)
+          if (rate?.ruleCode) {
+            const containerSize = await this.containerSizeService.findById(container.size)
+            const initialsClientName = `${customerUser.name} ${customerUser.last_name}`
+              .split(' ')
+              .map(name => name[0].toUpperCase())
+              .join('')
+            const ruleCode = `${initialsClientName} - ${containerSize.value}FT CONTAINER (${rate?.ruleCode?.toUpperCase()})`
+            rate.ruleCode = ruleCode
+          }
         }
       }
 
@@ -103,6 +114,7 @@ export class TimesheetService {
         base: this.calculateBase({ isValidProduct, isValidSchedule, rate, existProductsWithPricing, totalOvertimes }),
         container: createdContainer,
         customer: { id: customer_id },
+        item_code: typeof rate === 'object' ? rate?.ruleCode : '',
         extra_rates: this.calculateExtraRates({
           isValidProduct,
           isValidSchedule,
@@ -569,6 +581,7 @@ export class TimesheetService {
 
   private async validateRules(rules: Rule[], container: ContainerDto) {
     let totalExtraCharges = 0
+    let ruleCode = ''
     for (const rule of rules) {
       const listExtraCharges = []
       const conditionGroups = rule.condition_groups
@@ -596,6 +609,13 @@ export class TimesheetService {
         }
 
         if (groupIsValid) {
+          const cartons = group.conditions
+            .filter(condition => condition.field === 'cartons')
+            .map(condition => condition.value)
+            .join(' - ')
+          const skus = group.conditions.filter(condition => condition.field === 'skus').pop().value
+
+          ruleCode = `${cartons} CTNS, ${skus} SKUS`
           ruleIsValid = true
           break
         }
@@ -604,7 +624,12 @@ export class TimesheetService {
       if (ruleIsValid) {
         if (listExtraCharges.length) totalExtraCharges = listExtraCharges.reduce((acc, curr) => acc + curr.rate, 0)
         const obj = { name: rule.name, rate: rule.rate, extraCharge: listExtraCharges }
-        return { rate: Number(rule.rate) + Number(totalExtraCharges), base: Number(rule.rate), json: obj }
+        return {
+          rate: Number(rule.rate) + Number(totalExtraCharges),
+          base: Number(rule.rate),
+          json: obj,
+          ruleCode,
+        }
       }
     }
 

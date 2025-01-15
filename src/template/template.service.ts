@@ -108,19 +108,19 @@ export class TemplateService {
         },
         {
           name: '*Invoice Number',
-          value_cell: '',
+          value_cell: '@path:invoice_number',
         },
         {
           name: 'Reference',
-          value_cell: '',
+          value_cell: '@path:week',
         },
         {
           name: '*InvoiceDate',
-          value_cell: '',
+          value_cell: '@path:invoice_date',
         },
         {
           name: '*DueDate',
-          value_cell: '',
+          value_cell: '@path:due_date',
         },
         {
           name: 'InventoryItemCode',
@@ -128,7 +128,7 @@ export class TemplateService {
         },
         {
           name: '*Description',
-          value_cell: `Date: ${DateTime.now().toFormat('yyyy-MM-dd')} \n DATTS - 20FT CONTAINER (500-999 CTNS, 10 SKUS) NO DRIVER \n Container: @path:container_container_number \n Product: @path:product_name`,
+          value_cell: `Date: ${DateTime.now().toFormat('yyyy-MM-dd')} \n @path:item_code \n Container: @path:container_container_number \n Product: @path:product_name`,
         },
         {
           name: '*Quantity',
