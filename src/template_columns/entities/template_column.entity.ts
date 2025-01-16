@@ -31,6 +31,13 @@ export class TemplateColumn {
   value_cell: string
 
   @Column({
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
+  value_cell_html: string
+
+  @Column({
     type: 'int',
     nullable: true, //temporalmente
   })

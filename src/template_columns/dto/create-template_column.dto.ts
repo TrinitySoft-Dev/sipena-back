@@ -16,4 +16,11 @@ export class CreateTemplateColumnDto {
   })
   @Validate(Valuecell, { message: 'Invalid path' })
   value_cell: string
+
+  @ApiProperty({
+    type: 'string',
+    description: 'Customer name: @path:customer_name',
+  })
+  @IsString()
+  value_cell_html: string
 }
