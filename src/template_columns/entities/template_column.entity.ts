@@ -32,8 +32,7 @@ export class TemplateColumn {
 
   @Column({
     type: 'int',
-    nullable: false,
-    default: 0,
+    nullable: true, //temporalmente
   })
   order: number
 
