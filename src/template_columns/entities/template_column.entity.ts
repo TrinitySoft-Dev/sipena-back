@@ -32,7 +32,7 @@ export class TemplateColumn {
 
   @Column({
     type: 'varchar',
-    length: 255,
+    length: 500,
     nullable: true,
   })
   value_cell_html: string

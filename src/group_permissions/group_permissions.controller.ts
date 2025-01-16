@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common'
+import { Controller, Get, Post, Body, Patch, Param, Delete, Put } from '@nestjs/common'
 import { GroupPermissionsService } from './group_permissions.service'
 import { CreateGroupPermissionDto } from './dto/create-group_permission.dto'
 import { UpdateGroupPermissionDto } from './dto/update-group_permission.dto'
@@ -17,5 +17,10 @@ export class GroupPermissionsController {
   @Get()
   find() {
     return this.groupPermissionsService.find()
+  }
+
+  @Put(':id')
+  update(@Param('id') id: string, @Body() updateGroupPermissionDto: UpdateGroupPermissionDto) {
+    return this.groupPermissionsService.update(id, updateGroupPermissionDto)
   }
 }
