@@ -25,6 +25,7 @@ import { OvertimesWorkerModule } from '@/overtimes_worker/overtimes_worker.modul
     RulesWorkersModule,
     ProductsModule,
     NormalScheduleModule,
+    ContainerSizeModule,
   ],
   controllers: [TimesheetController],
   providers: [TimesheetService, AccessJwtService],

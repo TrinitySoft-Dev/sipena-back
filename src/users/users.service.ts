@@ -382,8 +382,6 @@ export class UsersService {
 
     const options = {
       where,
-      skip,
-      take: pageSize,
       order,
       relations:
         role === ROLES_CONST.WORKER ? ['infoworker', 'timesheet_workers.timesheet.container'] : ['role', 'timesheets'],
@@ -398,6 +396,8 @@ export class UsersService {
     }
 
     if (includePagination) {
+      options['skip'] = skip
+      options['take'] = pageSize
       const [result, total] = await this.userRepository.findAndCount(options)
 
       return {

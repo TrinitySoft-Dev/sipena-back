@@ -32,6 +32,19 @@ export class TemplateColumn {
 
   @Column({
     type: 'varchar',
+    length: 500,
+    nullable: true,
+  })
+  value_cell_html: string
+
+  @Column({
+    type: 'int',
+    nullable: true, //temporalmente
+  })
+  order: number
+
+  @Column({
+    type: 'varchar',
     nullable: true,
   })
   templateId: string

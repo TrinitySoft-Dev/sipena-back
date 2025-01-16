@@ -6,6 +6,7 @@ import * as excel4node from 'excel4node'
 import { Readable } from 'stream'
 import { ImagesService } from '@/images/images.service'
 import { TimesheetStatusEnum } from '@/timesheet/entities/timesheet.entity'
+import { DateTime } from 'luxon'
 
 @Injectable()
 export class InvoiceService {
@@ -19,7 +20,7 @@ export class InvoiceService {
     const { reference_week, customer, invoice_number } = createInvoiceDto
     let timesheets = await this.timesheetService.findTimesheetsByWeek(reference_week, customer, createInvoiceDto.type)
     const template = await this.templateService.findOne(createInvoiceDto.template)
-    const columns = await this.resolverColumns(template, timesheets)
+    const columns = await this.resolverColumns(template, timesheets, createInvoiceDto)
 
     const headers = Object.keys(columns)
     const wb = new excel4node.Workbook()
@@ -78,12 +79,11 @@ export class InvoiceService {
       createInvoiceDto.type,
     )
 
-    const columns = await this.resolverColumns(resultTemplate, timesheets)
+    // const columns = await this.resolverColumns(resultTemplate, timesheets)
   }
 
-  private async resolverColumns(template, timesheets) {
+  private async resolverColumns(template, timesheets, body: CreateInvoiceDto) {
     const columns = {}
-
     template.columns.forEach(column => {
       const valueCell = column.value_cell
       if (!columns[column.name]) {
@@ -93,7 +93,11 @@ export class InvoiceService {
       }
       timesheets.forEach(timesheet => {
         const valueReplacecell = valueCell?.replace(/@path:([\w.]+)/g, (match, p1) => {
-          if (!p1.includes('_')) p1 = `timesheet_${p1}`
+          if (p1 === 'invoice_number') return `INV - ${body.invoice_number}`
+          if (p1 === 'reference_week') return body.reference_week
+          if (p1 === 'invoice_date') return DateTime.fromISO(body.invoice_date.toString()).toFormat('dd/MM/yyyy')
+          if (p1 === 'due_date') return DateTime.fromISO(body.due_date.toString()).toFormat('dd/MM/yyyy')
+          if (!p1.includes('_') || p1 === 'item_code') p1 = `timesheet_${p1}`
           return timesheet[p1]
         })
 
