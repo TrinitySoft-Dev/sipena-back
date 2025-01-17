@@ -19,4 +19,12 @@ export class ContainerService {
     }
     return await this.containerRepository.save({ ...container, ...createContainerDto })
   }
+
+  async validateContainerNumber(containerNumber: string) {
+    const container = await this.containerRepository.findOne({
+      where: { container_number: containerNumber },
+      select: ['container_number'],
+    })
+    return container
+  }
 }

@@ -1,3 +1,4 @@
+import { SelectedField } from '@/common/decorators/selected-fields.decorator'
 import { Container } from '@/container/entities/container.entity'
 import { User } from '@/users/entities/user.entity'
 import {
@@ -18,6 +19,7 @@ export class Product {
   @PrimaryGeneratedColumn()
   id: number
 
+  @SelectedField()
   @Column({
     type: 'varchar',
     nullable: false,

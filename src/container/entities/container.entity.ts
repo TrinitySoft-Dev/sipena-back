@@ -41,6 +41,9 @@ export class Container {
   @ManyToOne(() => ContainerSize, container_size => container_size.container)
   size: ContainerSize
 
+  @SelectedField({
+    relation: () => Product,
+  })
   @ManyToOne(() => Product, product => product.containers, { cascade: true })
   product: Product
 
