@@ -10,12 +10,16 @@ import {
   DefaultValuePipe,
   ParseIntPipe,
   Put,
+  UseGuards,
 } from '@nestjs/common'
 import { OvertimesWorkerService } from './overtimes_worker.service'
 import { CreateOvertimesWorkerDto } from './dto/create-overtimes_worker.dto'
 import { UpdateOvertimesWorkerDto } from './dto/update-overtimes_worker.dto'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
+import { AuthGuard } from '@/common/guards/auth.guard'
 
+@ApiBearerAuth()
+@UseGuards(AuthGuard)
 @ApiTags('worker overtimes')
 @Controller('overtimes-worker')
 export class OvertimesWorkerController {

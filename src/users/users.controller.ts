@@ -88,14 +88,14 @@ export class UsersController {
     return this.usersService.resetPassword(resetPasswordDto)
   }
 
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard)
   @ApiOperation({
     summary: 'Find users by role, name, and email',
     description: 'This method returns users by role, name, and email',
   })
   @ApiQuery({ name: 'name', required: false })
   @ApiQuery({ name: 'email', required: false })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   @Get('role')
   findByRole(
     @Req() req: any,
@@ -152,6 +152,8 @@ export class UsersController {
     return this.usersService.update({ id, updateUserDto, visa, passport })
   }
 
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   @Patch(':id/avatar')
   updateAvatar(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.updateAvatar(id, updateUserDto)

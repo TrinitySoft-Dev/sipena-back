@@ -10,11 +10,15 @@ import {
   Put,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common'
 import { RolesService } from './roles.service'
 import { CreateRoleDto } from './dto/create-role.dto'
-import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
+import { AuthGuard } from '@/common/guards/auth.guard'
 
+@ApiBearerAuth()
+@UseGuards(AuthGuard)
 @ApiTags('Roles')
 @Controller('roles')
 export class RolesController {

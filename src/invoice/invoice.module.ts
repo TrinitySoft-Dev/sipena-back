@@ -4,10 +4,11 @@ import { InvoiceController } from './invoice.controller'
 import { TimesheetModule } from '@/timesheet/timesheet.module'
 import { TemplateModule } from '@/template/template.module'
 import { ImagesModule } from '@/images/images.module'
+import { AccessJwtService } from '@/common/services/access-jwt.service'
 
 @Module({
   imports: [TimesheetModule, TemplateModule, ImagesModule],
   controllers: [InvoiceController],
-  providers: [InvoiceService],
+  providers: [InvoiceService, AccessJwtService],
 })
 export class InvoiceModule {}

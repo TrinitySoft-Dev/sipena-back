@@ -20,8 +20,8 @@ import { AuthGuard } from '@/common/guards/auth.guard'
 import { UpdateProductDto } from './dto/update-product.dto'
 
 @ApiTags('Product')
-// @ApiBearerAuth()
-// @UseGuards(AuthGuard)
+@ApiBearerAuth()
+@UseGuards(AuthGuard)
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}

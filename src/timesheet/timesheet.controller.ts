@@ -20,7 +20,7 @@ import { TimesheetStatusEnum } from './entities/timesheet.entity'
 
 @ApiTags('Timesheet')
 @ApiBearerAuth()
-// @UseGuards(AuthGuard)
+@UseGuards(AuthGuard)
 @Controller('timesheet')
 export class TimesheetController {
   constructor(private readonly timesheetService: TimesheetService) {}

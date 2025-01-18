@@ -1,8 +1,11 @@
-import { Controller, Post, Body } from '@nestjs/common'
+import { Controller, Post, Body, UseGuards } from '@nestjs/common'
 import { ConditionsService } from './conditions.service'
 import { CreateConditionDto } from './dto/create-condition.dto'
-import { ApiExcludeEndpoint, ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiExcludeEndpoint, ApiTags } from '@nestjs/swagger'
+import { AuthGuard } from '@/common/guards/auth.guard'
 
+@ApiBearerAuth()
+@UseGuards(AuthGuard)
 @ApiTags('Conditions')
 @Controller('conditions')
 export class ConditionsController {

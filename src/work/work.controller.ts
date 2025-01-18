@@ -14,12 +14,13 @@ import {
 } from '@nestjs/common'
 import { WorkService } from './work.service'
 import { CreateWorkDto } from './dto/create-work.dto'
-import { ApiQuery, ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger'
 import { AuthGuard } from '@/common/guards/auth.guard'
 import { UpdateWorkDto } from './dto/update-work.dto'
 
 @ApiTags('Work')
-// @UseGuards(AuthGuard)
+@ApiBearerAuth()
+@UseGuards(AuthGuard)
 @Controller('work')
 export class WorkController {
   constructor(private readonly workService: WorkService) {}

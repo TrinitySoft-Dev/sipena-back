@@ -7,6 +7,7 @@ import { ConditionsModule } from '@/conditions/conditions.module'
 import { WorkModule } from '@/work/work.module'
 import { ContainerSizeModule } from '@/container_size/container_size.module'
 import { ExtraRulesWorkersModule } from '@/extra_rules_workers/extra_rules_workers.module'
+import { AccessJwtService } from '@/common/services/access-jwt.service'
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { ExtraRulesWorkersModule } from '@/extra_rules_workers/extra_rules_worke
     ExtraRulesWorkersModule,
   ],
   controllers: [RulesWorkersController],
-  providers: [RulesWorkersService],
+  providers: [RulesWorkersService, AccessJwtService],
   exports: [RulesWorkersService],
 })
 export class RulesWorkersModule {}

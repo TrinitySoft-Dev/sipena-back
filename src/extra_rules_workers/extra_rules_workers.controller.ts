@@ -10,12 +10,16 @@ import {
   Put,
   ParseBoolPipe,
   Delete,
+  UseGuards,
 } from '@nestjs/common'
 import { ExtraRulesWorkersService } from './extra_rules_workers.service'
 import { CreateExtraRulesWorkerDto } from './dto/create-extra_rules_worker.dto'
-import { ApiQuery, ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger'
 import { UpdateExtraRulesWorkerDto } from './dto/update-extra_rules_worker.dto'
+import { AuthGuard } from '@/common/guards/auth.guard'
 
+@ApiBearerAuth()
+@UseGuards(AuthGuard)
 @ApiTags('Extra rules workers')
 @Controller('extra-rules-workers')
 export class ExtraRulesWorkersController {

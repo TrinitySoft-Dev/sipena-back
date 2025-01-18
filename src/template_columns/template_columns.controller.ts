@@ -1,8 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common'
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common'
 import { TemplateColumnsService } from './template_columns.service'
 import { CreateTemplateColumnDto } from './dto/create-template_column.dto'
 import { UpdateTemplateColumnDto } from './dto/update-template_column.dto'
+import { AuthGuard } from '@/common/guards/auth.guard'
+import { ApiBearerAuth } from '@nestjs/swagger'
 
+@ApiBearerAuth()
+@UseGuards(AuthGuard)
 @Controller('template-columns')
 export class TemplateColumnsController {
   constructor(private readonly templateColumnsService: TemplateColumnsService) {}

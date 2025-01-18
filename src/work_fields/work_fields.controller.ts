@@ -1,9 +1,12 @@
-import { Controller, Get, Post, Body } from '@nestjs/common'
+import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common'
 import { WorkFieldsService } from './work_fields.service'
 import { CreateWorkFieldDto } from './dto/create-work_field.dto'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
+import { AuthGuard } from '@/common/guards/auth.guard'
 
 @ApiTags('Work fields')
+@ApiBearerAuth()
+@UseGuards(AuthGuard)
 @Controller('work-fields')
 export class WorkFieldsController {
   constructor(private readonly workFieldsService: WorkFieldsService) {}

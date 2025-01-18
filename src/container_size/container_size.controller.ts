@@ -18,8 +18,8 @@ import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger'
 import { AuthGuard } from '@/common/guards/auth.guard'
 
 @ApiTags('Container size')
-// @ApiBearerAuth()
-// @UseGuards(AuthGuard)
+@ApiBearerAuth()
+@UseGuards(AuthGuard)
 @Controller('container-size')
 export class ContainerSizeController {
   constructor(private readonly containerSizeService: ContainerSizeService) {}

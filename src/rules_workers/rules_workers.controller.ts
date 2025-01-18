@@ -11,12 +11,16 @@ import {
   DefaultValuePipe,
   ParseIntPipe,
   ParseBoolPipe,
+  UseGuards,
 } from '@nestjs/common'
 import { RulesWorkersService } from './rules_workers.service'
 import { CreateRulesWorkerDto } from './dto/create-rules_worker.dto'
 import { UpdateRulesWorkerDto } from './dto/update-rules_worker.dto'
-import { ApiQuery, ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger'
+import { AuthGuard } from '@/common/guards/auth.guard'
 
+@ApiBearerAuth()
+@UseGuards(AuthGuard)
 @ApiTags('Rules Workers')
 @Controller('rules-workers')
 export class RulesWorkersController {

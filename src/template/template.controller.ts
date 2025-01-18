@@ -10,12 +10,16 @@ import {
   Query,
   DefaultValuePipe,
   Put,
+  UseGuards,
 } from '@nestjs/common'
 import { TemplateService } from './template.service'
 import { CreateTemplateDto } from './dto/create-template.dto'
 import { UpdateTemplateDto } from './dto/update-template.dto'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
+import { AuthGuard } from '@/common/guards/auth.guard'
 
+@ApiBearerAuth()
+@UseGuards(AuthGuard)
 @ApiTags('Template')
 @Controller('template')
 export class TemplateController {

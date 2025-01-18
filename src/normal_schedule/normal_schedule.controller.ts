@@ -1,8 +1,23 @@
-import { Controller, Post, Body, Param, ParseIntPipe, Get, Query, DefaultValuePipe, Delete, Put } from '@nestjs/common'
+import {
+  Controller,
+  Post,
+  Body,
+  Param,
+  ParseIntPipe,
+  Get,
+  Query,
+  DefaultValuePipe,
+  Delete,
+  Put,
+  UseGuards,
+} from '@nestjs/common'
 import { NormalScheduleService } from './normal_schedule.service'
 import { CreateNormalScheduleDto } from './dto/create-normal_schedule.dto'
-import { ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
+import { AuthGuard } from '@/common/guards/auth.guard'
 
+@ApiBearerAuth()
+@UseGuards(AuthGuard)
 @ApiTags('Normal schedule')
 @Controller('normal-schedule')
 export class NormalScheduleController {

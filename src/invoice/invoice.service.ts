@@ -79,7 +79,7 @@ export class InvoiceService {
       createInvoiceDto.type,
     )
 
-    // const columns = await this.resolverColumns(resultTemplate, timesheets)
+    const columns = await this.resolverColumns(resultTemplate, timesheets, createInvoiceDto)
   }
 
   private async resolverColumns(template, timesheets, body: CreateInvoiceDto) {

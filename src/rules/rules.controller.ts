@@ -20,8 +20,8 @@ import { AuthGuard } from '@/common/guards/auth.guard'
 import { UpdateRuleDto } from './dto/update-rule.dto'
 
 @ApiTags('Rules')
-// @ApiBearerAuth()
-// @UseGuards(AuthGuard)
+@ApiBearerAuth()
+@UseGuards(AuthGuard)
 @Controller('rules')
 export class RulesController {
   constructor(private readonly rulesService: RulesService) {}

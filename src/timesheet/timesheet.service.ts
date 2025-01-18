@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { ContainerDto, CreateTimesheetDto } from './dto/create-timesheet.dto'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Timesheet } from './entities/timesheet.entity'
@@ -79,7 +79,11 @@ export class TimesheetService {
         }
 
         if (!isValidProduct && !isValidSchedule) {
-          if (!customerUser.rules.length) throw new NotFoundException('Rules not found')
+          if (!customerUser.rules.length) {
+            throw new BadRequestException(
+              'No charge type (product, schedule, rules) was found, check the customer configuaration and make sure that is has some type of charge related to it',
+            )
+          }
           const rules = customerUser.rules
           rate = await this.validateRules(rules, container)
           if (rate?.ruleCode) {
