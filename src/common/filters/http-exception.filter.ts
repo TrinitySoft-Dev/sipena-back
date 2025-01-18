@@ -2,9 +2,11 @@ import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Query
 import { Request, Response } from 'express'
 import { TypeORMError } from 'typeorm'
 import { GlobalResponseError } from '../exceptions/GlobalResponException'
-
+import { WithSentry } from '@sentry/nestjs'
+import * as Sentry from '@sentry/node'
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
+  @WithSentry()
   catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp()
     const response = ctx.getResponse<Response>()
@@ -32,6 +34,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
       message = exception.message || 'Internal server error'
       code = exception.name || 'InternalServerError'
     }
+
+    Sentry.captureException(exception)
 
     console.error(
       JSON.stringify(

@@ -14,6 +14,7 @@ import { RulesModule } from './rules/rules.module'
 import { ImagesModule } from './images/images.module'
 import { TimesheetModule } from './timesheet/timesheet.module'
 import { ContainerModule } from './container/container.module'
+import { SentryGlobalFilter, SentryModule } from '@sentry/nestjs/setup'
 
 // entities
 import { ConditionGroupsModule } from './condition_groups/condition_groups.module'
@@ -42,6 +43,7 @@ import { NormalScheduleModule } from './normal_schedule/normal_schedule.module'
 import { OvertimesModule } from './overtimes/overtimes.module'
 import { OvertimesWorkerModule } from './overtimes_worker/overtimes_worker.module'
 import { TimezoneMiddleware } from './middlewares/timezone.middleware'
+import { APP_FILTER } from '@nestjs/core'
 
 @Module({
   imports: [
@@ -82,7 +84,7 @@ import { TimezoneMiddleware } from './middlewares/timezone.middleware'
       rootPath: join(__dirname, '..', 'public'),
       serveRoot: '/public',
     }),
-    UsersModule,
+    SentryModule.forRoot(),
     InfoworkersModule,
     RolesModule,
     RulesModule,
@@ -114,7 +116,12 @@ import { TimezoneMiddleware } from './middlewares/timezone.middleware'
     OvertimesWorkerModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_FILTER,
+      useClass: SentryGlobalFilter,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
