@@ -33,7 +33,7 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: any, files: Express.Multer.File[]) {
-    let { email, password, name, last_name, role, idRole, ...rest } = createUserDto
+    let { email, password, name, last_name, role, idRole, city, state, ...rest } = createUserDto
 
     const existuser = await this.userRepository.findOne({ where: { email, active: true } })
     if (existuser) throw new UnauthorizedException('Email already exists')
@@ -57,10 +57,9 @@ export class UsersService {
         name,
         last_name,
         role: idRole ? { id: idRole } : resRole,
+        city: city ? JSON.parse(city) : null,
+        state: state ? JSON.parse(state) : null,
       }
-
-      rest.city = rest.city ? { id: rest.city } : null
-      rest.state = rest.state ? { id: rest.state } : null
 
       if (rest.create_type !== 'BASIC') {
         obj['infoworker'] = await this.infoworkerService.create({ ...rest })
@@ -110,6 +109,8 @@ export class UsersService {
       name,
       last_name,
       role,
+      city: city ? city : null,
+      state: state ? { id: state } : null,
     }
 
     if (role === ROLES_CONST.CUSTOMER) {
@@ -166,7 +167,7 @@ export class UsersService {
 
     const user = await this.userRepository.findOne({
       where: { email, active: true },
-      relations: ['infoworker', 'role', 'role.permissions', 'infoworker.state'],
+      relations: ['infoworker', 'role', 'role.permissions', 'state'],
     })
 
     if (!user) throw new UnauthorizedException('Email or password incorrect')
@@ -185,7 +186,7 @@ export class UsersService {
       lastname: user.last_name,
       avatar_url: user.avatar,
       permissions,
-      state: user.infoworker?.state?.name,
+      state: user.state?.name,
     }
 
     const token = await this.jwtService.signAsync(payload)
@@ -213,7 +214,7 @@ export class UsersService {
 
     const user = await this.userRepository.findOne({
       where: { email: validToken.email, active: true },
-      relations: ['infoworker', 'role', 'role.permissions', 'infoworker.state'],
+      relations: ['infoworker', 'role', 'role.permissions', 'state'],
     })
     if (!user) throw new UnauthorizedException('Email or password incorrect')
 
@@ -228,7 +229,7 @@ export class UsersService {
       lastname: user.last_name,
       avatar_url: user.avatar,
       permissions,
-      state: user.infoworker?.state?.name,
+      state: user?.state?.name,
     }
 
     const token = await this.jwtService.signAsync(payload)
@@ -240,7 +241,7 @@ export class UsersService {
   async findById(id: number) {
     return await this.userRepository.findOne({
       where: { id },
-      relations: ['infoworker', 'infoworker.city', 'infoworker.state'],
+      relations: ['infoworker', 'city', 'state'],
       select: ['id', 'active', 'email', 'role', 'completed', 'infoworker', 'name', 'last_name'],
     })
   }
@@ -392,7 +393,7 @@ export class UsersService {
     }
 
     if (currentUser?.role === ROLES_CONST.WORKER && role === ROLES_CONST.WORKER) {
-      options.where = { ...where, infoworker: { state: { name: currentUser?.state } } }
+      options.where = { ...where, state: { name: currentUser?.state } }
     }
 
     if (includePagination) {
@@ -457,6 +458,8 @@ export class UsersService {
       const isValid = await this.userRepository
         .createQueryBuilder('user')
         .innerJoin('user.infoworker', 'infoworker')
+        .innerJoin('user.city', 'city')
+        .innerJoin('user.state', 'state')
         .select('CASE WHEN COUNT(user.id) > 0 THEN TRUE ELSE FALSE END', 'isComplete')
         .where("infoworker.phone IS NOT NULL AND infoworker.phone != ''")
         .andWhere("infoworker.tfn IS NOT NULL AND infoworker.tfn != ''")
@@ -464,19 +467,23 @@ export class UsersService {
         .andWhere('infoworker.birthday IS NOT NULL')
         .andWhere("infoworker.passport_url IS NOT NULL AND infoworker.passport_url != ''")
         .andWhere("infoworker.address IS NOT NULL AND infoworker.address != ''")
-        .andWhere('infoworker.city IS NOT NULL')
-        .andWhere('infoworker.state IS NOT NULL')
         .andWhere("infoworker.bank_name IS NOT NULL AND infoworker.bank_name != ''")
         .andWhere("infoworker.bank_account_name IS NOT NULL AND infoworker.bank_account_name != ''")
         .andWhere("infoworker.bank_account_number IS NOT NULL AND infoworker.bank_account_number != ''")
         .andWhere("infoworker.postal_code IS NOT NULL AND infoworker.postal_code != ''")
         .andWhere("infoworker.bsb IS NOT NULL AND infoworker.bsb != ''")
         .andWhere("infoworker.visa_url IS NOT NULL AND infoworker.visa_url != ''")
+        .andWhere('city.id IS NOT NULL')
+        .andWhere('state.id IS NOT NULL')
         .getRawOne()
+
+      console.log(isValid)
 
       user.completed = isValid.isComplete
       user.name = updateUserDto?.name ?? user.name
       user.last_name = updateUserDto?.last_name ?? user.last_name
+      user.city = updateUserDto?.city ? JSON.parse(updateUserDto.city) : user.city
+      user.state = updateUserDto?.state ? JSON.parse(updateUserDto.state) : user.state
 
       await this.userRepository.save(user)
 

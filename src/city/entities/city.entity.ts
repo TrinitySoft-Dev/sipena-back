@@ -1,5 +1,6 @@
 import { Infoworker } from '@/infoworkers/entities/infoworker.entity'
 import { State } from '@/state/entities/state.entity'
+import { User } from '@/users/entities/user.entity'
 import {
   Column,
   CreateDateColumn,
@@ -31,8 +32,8 @@ export class City {
   @ManyToOne(() => State, state => state.cities)
   state: State
 
-  @OneToMany(() => Infoworker, infoworker => infoworker.city)
-  infoworkers: Infoworker[]
+  @OneToMany(() => User, user => user.city)
+  users: User[]
 
   @CreateDateColumn({
     type: 'timestamp',

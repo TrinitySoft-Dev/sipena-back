@@ -41,11 +41,6 @@ export class CreateInfoworkerDto {
   address: string
 
   @IsOptional()
-  @ValidateNested()
-  @Type(() => CityDto)
-  city: CityDto
-
-  @IsOptional()
   @IsString()
   visa: string
 

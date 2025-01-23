@@ -1,12 +1,10 @@
-import { City } from '@/city/entities/city.entity'
-import { State } from '@/state/entities/state.entity'
 import { User } from '@/users/entities/user.entity'
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  ManyToOne,
+  JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -66,12 +64,6 @@ export class Infoworker {
   })
   address: string
 
-  @ManyToOne(() => City, city => city.infoworkers)
-  city: City
-
-  @ManyToOne(() => State, state => state.infoworkers)
-  state: State
-
   @Column({
     type: 'varchar',
     nullable: false,
@@ -115,6 +107,7 @@ export class Infoworker {
   visa_url: string
 
   @OneToOne(() => User, user => user.infoworker)
+  @JoinColumn()
   user: User
 
   @Column({

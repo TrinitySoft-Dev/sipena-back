@@ -1,9 +1,11 @@
+import { City } from '@/city/entities/city.entity'
 import { SelectedField } from '@/common/decorators/selected-fields.decorator'
 import { Infoworker } from '@/infoworkers/entities/infoworker.entity'
 import { NormalSchedule } from '@/normal_schedule/entities/normal_schedule.entity'
 import { Product } from '@/products/entities/product.entity'
 import { Role } from '@/roles/entities/role.entity'
 import { Rule } from '@/rules/entities/rule.entity'
+import { State } from '@/state/entities/state.entity'
 import { Timesheet } from '@/timesheet/entities/timesheet.entity'
 import { TimesheetWorker } from '@/timesheet_workers/entities/timesheet_worker.entity'
 import {
@@ -61,8 +63,13 @@ export class User {
   last_name: string
 
   @OneToOne(() => Infoworker, infoworker => infoworker.user, { cascade: true })
-  @JoinColumn()
   infoworker: Infoworker
+
+  @ManyToOne(() => State, state => state.users)
+  state: State
+
+  @ManyToOne(() => City, city => city.users)
+  city: City
 
   @ManyToOne(() => Role, role => role.users, { cascade: true })
   role: Role

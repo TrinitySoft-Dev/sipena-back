@@ -56,6 +56,14 @@ export class UpdateUserDto {
   city: string
 
   @ApiProperty({
+    description: 'State of the user',
+    example: 'State',
+  })
+  @IsOptional()
+  @IsString()
+  state: string
+
+  @ApiProperty({
     description: 'Role of the user',
     example: 'CUSTOMER',
     required: true,
@@ -114,7 +122,6 @@ export class UpdateUserDto {
       employment_end_date: '2000-01-01',
       passport: '123456789',
       address: '123456789',
-      city: '123456789',
       visa: '123456789',
       bank_name: '123456789',
       bank_account_name: '123456789',
