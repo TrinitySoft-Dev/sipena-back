@@ -109,8 +109,8 @@ export class UsersService {
       name,
       last_name,
       role,
-      city: city ? city : null,
-      state: state ? { id: state } : null,
+      city: city ? JSON.parse(city) : null,
+      state: state ? JSON.parse(state) : null,
     }
 
     if (role === ROLES_CONST.CUSTOMER) {
@@ -396,6 +396,10 @@ export class UsersService {
       options.where = { ...where, state: { name: currentUser?.state } }
     }
 
+    if (currentUser?.role === ROLES_CONST.WORKER && role === ROLES_CONST.CUSTOMER) {
+      options.where = { ...where, state: { name: currentUser?.state } }
+    }
+
     if (includePagination) {
       options['skip'] = skip
       options['take'] = pageSize
@@ -477,8 +481,6 @@ export class UsersService {
         .andWhere('state.id IS NOT NULL')
         .getRawOne()
 
-      console.log(isValid)
-
       user.completed = isValid.isComplete
       user.name = updateUserDto?.name ?? user.name
       user.last_name = updateUserDto?.last_name ?? user.last_name
@@ -495,6 +497,8 @@ export class UsersService {
       user.last_name = updateUserDto?.last_name ?? user.last_name
       user.rules = updateUserDto?.rules
       user.normal_schedule = updateUserDto?.normal_schedule
+      user.city = updateUserDto?.city ? JSON.parse(updateUserDto.city) : user.city
+      user.state = updateUserDto?.state ? JSON.parse(updateUserDto.state) : user.state
 
       await this.userRepository.save(user)
 
