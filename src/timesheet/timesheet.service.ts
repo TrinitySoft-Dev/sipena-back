@@ -68,7 +68,7 @@ export class TimesheetService {
 
           if (validNormalSchedule?.rate) {
             isValidSchedule = true
-            rate = validNormalSchedule.rate * workers.length
+            rate = validNormalSchedule.rate
             nameSchedule = validNormalSchedule.name
             totalPayWorker = validNormalSchedule.rate_worker
 
@@ -148,7 +148,18 @@ export class TimesheetService {
       }
 
       if (isValidSchedule) {
-        payWorkers = newWorkers.map(worker => ({ ...worker, pay: totalPayWorker / workers.length }))
+        payWorkers = newWorkers.map(worker => {
+          const defaultHoursWorked = 8
+          const timeOut = DateTime.fromISO(worker.time_out.toString()).minute
+          const timeBreak = DateTime.fromISO(worker.break.toString()).minute
+
+          let hoursWorked = defaultHoursWorked - timeOut / 60
+          if (timeBreak) hoursWorked -= timeBreak / 60
+
+          const pay = totalPayWorker * hoursWorked
+
+          return { ...worker, pay }
+        })
       }
 
       await this.timesheetWorkersService.createMany(payWorkers)

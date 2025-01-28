@@ -9,7 +9,6 @@ export class TimezoneMiddleware implements NestMiddleware {
 
     if (timezoneCookie) {
       Settings.defaultZone = timezoneCookie
-      console.log(`Zona horaria configurada: ${timezoneCookie}`)
     } else {
       console.warn('No se encontró la cookie de zona horaria.')
     }

@@ -127,7 +127,20 @@ export class NormalScheduleService {
         }
       }
 
-      return { rate: schedule.rate * hoursWorked, name: schedule.name, rate_worker: schedule.rate_worker * hoursWorked }
+      const totalWorked = workers.reduce((acc, worker) => {
+        const timeOut = DateTime.fromISO(worker.time_out).minute
+        const timeBreak = DateTime.fromISO(worker.break).minute
+
+        const totalTime = hoursWorked - (timeOut - timeBreak) / 60
+        acc += totalTime
+        return acc
+      }, 0)
+
+      return {
+        rate: schedule.rate * totalWorked,
+        name: schedule.name,
+        rate_worker: schedule.rate_worker,
+      }
     }
   }
 }
