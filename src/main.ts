@@ -6,8 +6,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { config as env } from '@/common/config/config'
 import { HttpExceptionFilter } from './common/filters/http-exception.filter'
 import { ReponseInterceptor } from './common/interceptors/response.interceptor'
-import { BasicAuthMiddleware } from './middlewares/swagger-auth.middleware'
-import * as cookieParser from 'cookie-parser'
+import cookieParser from 'cookie-parser'
 import { Logger } from 'nestjs-pino'
 
 async function bootstrap() {

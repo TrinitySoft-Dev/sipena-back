@@ -32,14 +32,14 @@ export class TemplateColumn {
 
   @Column({
     type: 'varchar',
-    length: 500,
+    length: 2000,
     nullable: true,
   })
   value_cell_html: string
 
   @Column({
     type: 'int',
-    nullable: true, //temporalmente
+    nullable: true,
   })
   order: number
 

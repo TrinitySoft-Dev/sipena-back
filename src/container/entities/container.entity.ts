@@ -37,7 +37,9 @@ export class Container {
   })
   work: Work
 
-  @SelectedField()
+  @SelectedField({
+    relation: () => ContainerSize,
+  })
   @ManyToOne(() => ContainerSize, container_size => container_size.container)
   size: ContainerSize
 

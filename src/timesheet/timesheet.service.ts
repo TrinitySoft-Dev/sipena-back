@@ -11,16 +11,11 @@ import { ConditionsService } from '@/conditions/conditions.service'
 import { TimesheetWorkersService } from '@/timesheet_workers/timesheet_workers.service'
 import { ExtraRule } from '@/extra_rules/entities/extra_rule.entity'
 import { RulesWorkersService } from '@/rules_workers/rules_workers.service'
-import { randomUUID } from 'crypto'
 import { UpdateTimesheetDto } from './dto/update-timesheet.dto'
-import { FILTER_TYPE } from '@/common/enums/enums'
 import { DateTime } from 'luxon'
 import { ProductsService } from '@/products/products.service'
 import { TimesheetStatusEnum } from '@/timesheet_workers/entities/timesheet_worker.entity'
-import { NormalSchedule } from '@/normal_schedule/entities/normal_schedule.entity'
-import { Container } from '@/container/entities/container.entity'
 import { NormalScheduleService } from '@/normal_schedule/normal_schedule.service'
-import { OvertimesWorkerService } from '@/overtimes_worker/overtimes_worker.service'
 import { ContainerSizeService } from '@/container_size/container_size.service'
 
 @Injectable()
@@ -405,6 +400,7 @@ export class TimesheetService {
         .leftJoinAndSelect('container.work', 'work')
         .leftJoinAndSelect('container.product', 'product')
         .leftJoinAndSelect('timesheet.customer', 'customer')
+        .leftJoinAndSelect('container.size', 'size')
         .where('timesheet.week = :week', { week })
         .andWhere('timesheet.customer = :customerId', { customerId })
         .andWhere('timesheet.status_customer_pay = :status_customer_pay', { status_customer_pay: 'OPEN' })
@@ -421,10 +417,12 @@ export class TimesheetService {
       .leftJoinAndSelect('timesheet.customer', 'customer')
       .leftJoinAndSelect('timesheet.timesheet_workers', 'timesheet_workers')
       .leftJoinAndSelect('timesheet_workers.worker', 'worker')
+      .leftJoinAndSelect('container.size', 'size')
       .where('timesheet.week = :week', { week })
       .andWhere('worker.id = :customerId', { customerId })
-      .andWhere('timesheet.status_customer_pay = :status_customer_pay', { status_customer_pay: 'OPEN' })
-      .getRawMany()
+      .andWhere('timesheet_workers.status_worker_pay = :status_worker_pay', { status_worker_pay: 'OPEN' })
+      .loadRelationCountAndMap('timesheet.number_of_workers', 'timesheet.timesheet_workers')
+      .getRawAndEntities()
 
     return result
   }
@@ -574,6 +572,7 @@ export class TimesheetService {
         })
         .getMany()
     }
+
     return this.timesheetRepository
       .createQueryBuilder('timesheet')
       .innerJoinAndSelect(

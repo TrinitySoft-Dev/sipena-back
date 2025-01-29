@@ -23,4 +23,11 @@ export class CreateTemplateColumnDto {
   })
   @IsString()
   value_cell_html: string
+
+  @ApiProperty({
+    type: 'number',
+    description: 'The order of the template_column',
+  })
+  @IsNumber()
+  order: number
 }

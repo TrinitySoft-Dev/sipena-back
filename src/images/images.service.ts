@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 import { config } from '@/common/config/config'
-import * as sharp from 'sharp'
+import sharp from 'sharp'
 import { Readable } from 'typeorm/platform/PlatformTools'
 
 @Injectable()

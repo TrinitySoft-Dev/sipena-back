@@ -57,6 +57,7 @@ export class TemplateService {
       { label: 'reference_week', path: 'reference_week' },
       { label: 'invoice_date', path: 'invoice_date' },
       { label: 'due_date', path: 'due_date' },
+      { label: 'number_of_workers', path: 'number_of_workers' },
     ]
     const fields = getSelectedFieldsWithPaths(Timesheet).concat(otherEntities)
     return fields

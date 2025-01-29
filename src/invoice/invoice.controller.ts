@@ -6,8 +6,8 @@ import { Response } from 'express'
 import { AuthGuard } from '@/common/guards/auth.guard'
 
 @ApiBearerAuth()
-@UseGuards(AuthGuard)
-@ApiTags('Invoice')
+// @UseGuards(AuthGuard)
+// @ApiTags('Invoice')
 @Controller('invoice')
 export class InvoiceController {
   constructor(private readonly invoiceService: InvoiceService) {}
@@ -18,7 +18,7 @@ export class InvoiceController {
   }
 
   @Post('pdf')
-  generatePDF(@Body() createInvoiceDTO: CreateInvoiceDto) {
+  async generatePDF(@Body() createInvoiceDTO: CreateInvoiceDto): Promise<string> {
     return this.invoiceService.generatePDF(createInvoiceDTO)
   }
 }

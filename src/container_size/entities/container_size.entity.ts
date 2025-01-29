@@ -1,3 +1,4 @@
+import { SelectedField } from '@/common/decorators/selected-fields.decorator'
 import { Container } from '@/container/entities/container.entity'
 import { Rule } from '@/rules/entities/rule.entity'
 import { RulesWorker } from '@/rules_workers/entities/rules_worker.entity'
@@ -18,6 +19,7 @@ export class ContainerSize {
   @PrimaryGeneratedColumn()
   id: number
 
+  @SelectedField()
   @Column({
     type: 'varchar',
     nullable: false,

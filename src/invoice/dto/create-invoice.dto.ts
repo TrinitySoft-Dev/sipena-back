@@ -25,6 +25,14 @@ export class CreateInvoiceDto {
   customer: number
 
   @ApiProperty({
+    example: 1,
+    description: 'The worker id',
+  })
+  @IsNumber()
+  @IsOptional()
+  user: number
+
+  @ApiProperty({
     example: '2021-01-01',
     description: 'The invoice date',
   })

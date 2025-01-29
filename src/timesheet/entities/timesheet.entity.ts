@@ -97,6 +97,8 @@ export class Timesheet {
   })
   extra_rates: any
 
+  number_of_workers?: number
+
   @CreateDateColumn({
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP',
