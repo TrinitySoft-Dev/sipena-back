@@ -11,9 +11,8 @@ import * as path from 'node:path'
 import PdfPrinter from 'pdfmake'
 import { UsersService } from '@/users/users.service'
 
-function mp(relFontPath) {
-  const __currentDirname = path.resolve()
-  return path.join(__currentDirname, relFontPath)
+function mp(fontPath) {
+  return path.join(process.cwd(), 'public', 'fonts', fontPath)
 }
 @Injectable()
 export class InvoiceService {
@@ -125,8 +124,8 @@ export class InvoiceService {
 
     const fonts = {
       Roboto: {
-        normal: mp('./src/fonts/Poppins-Regular.ttf'),
-        bold: mp('./src/fonts/Poppins-Bold.ttf'),
+        normal: mp('Poppins-Regular.ttf'),
+        bold: mp('Poppins-Bold.ttf'),
       },
     }
 
@@ -161,7 +160,7 @@ export class InvoiceService {
       header: {
         columns: [
           {
-            image: mp('./public/logo-black.jpg'),
+            image: mp('logo-black.jpg'),
             width: 100,
             margin: [30, 0, 20, 60],
           },
@@ -324,8 +323,6 @@ export class InvoiceService {
         },
       },
     }
-
-    console.log(timesheets.raw)
 
     const pdfDoc = printer.createPdfKitDocument(docDefinition)
 
