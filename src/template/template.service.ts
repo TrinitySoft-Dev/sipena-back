@@ -58,6 +58,11 @@ export class TemplateService {
       { label: 'invoice_date', path: 'invoice_date' },
       { label: 'due_date', path: 'due_date' },
       { label: 'number_of_workers', path: 'number_of_workers' },
+      { label: 'timesheet_workers_break', path: 'timesheet_workers_break' },
+      { label: 'timesheet_workers_waiting_time', path: 'timesheet_workers_waiting_time' },
+      { label: 'timesheet_workers_time', path: 'timesheet_workers_time' },
+      { label: 'timesheet_workers_time_out', path: 'timesheet_workers_time_out' },
+      { label: 'timesheet_workers_pay', path: 'timesheet_workers_pay' },
     ]
     const fields = getSelectedFieldsWithPaths(Timesheet).concat(otherEntities)
     return fields

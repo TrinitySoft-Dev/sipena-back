@@ -417,6 +417,7 @@ export class TimesheetService {
       .leftJoinAndSelect('timesheet.customer', 'customer')
       .leftJoinAndSelect('timesheet.timesheet_workers', 'timesheet_workers')
       .leftJoinAndSelect('timesheet_workers.worker', 'worker')
+      .leftJoinAndSelect('worker.infoworker', 'infoworker')
       .leftJoinAndSelect('container.size', 'size')
       .where('timesheet.week = :week', { week })
       .andWhere('worker.id = :customerId', { customerId })

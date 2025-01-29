@@ -113,6 +113,14 @@ export class InvoiceService {
       }
     })
 
+    const total = newTimesheets.reduce((acc, timesheet) => {
+      if (type === 'WORKER') {
+        return acc + timesheet.timesheet_workers_pay
+      } else {
+        return acc + timesheet.rate
+      }
+    }, 0)
+
     const columns = await this.resolverColumns(resultTemplate, newTimesheets, createInvoiceDto)
 
     const fonts = {
@@ -241,7 +249,7 @@ export class InvoiceService {
         {
           style: 'tableExample',
           table: {
-            widths: keys.map(() => '*'),
+            widths: keys.map((_, index) => (index === 0 ? 'auto' : '*')),
             headerRows: 1,
             body: [headerDefinitions, ...valuesDefinitions],
           },
@@ -260,20 +268,8 @@ export class InvoiceService {
               table: {
                 body: [
                   [
-                    { text: 'Total HT:', bold: true },
-                    { text: '€ 7036.99', alignment: 'right' },
-                  ],
-                  [
-                    { text: 'Total VAT:', bold: true },
-                    { text: '€ 1547.324569', alignment: 'right' },
-                  ],
-                  [
-                    { text: 'VAT(21.3%):', bold: true },
-                    { text: '€ 1231.79', alignment: 'right' },
-                  ],
-                  [
-                    { text: 'Total:', bold: true },
-                    { text: '€ 8276.78', alignment: 'right' },
+                    { text: '$AUD Total:', bold: true, fontSize: 12 },
+                    { text: `${total}`, alignment: 'right', fontSize: 12 },
                   ],
                 ],
               },
@@ -284,12 +280,7 @@ export class InvoiceService {
         },
 
         {
-          text: 'Date: 03/03/2023',
-          style: 'footerInfo',
-        },
-
-        {
-          text: 'Drongo, Capital 1000, SIRET: 901062320001\nVAT: FR901023202, Activity Type: 58.29C\nRCS: 90106222 Paris 8',
+          text: `Bank Transfer: (yours details),\n Bank name: ${timesheets.raw[0]?.infoworker_bank_name}\nAccount name: ${timesheets.raw[0]?.infoworker_bank_account_name},\nBSB: ${timesheets.raw[0]?.infoworker_bsb}\nAccount number: ${timesheets.raw[0]?.infoworker_bank_account_number}`,
           style: 'footerInfo',
           margin: [0, 20, 0, 0],
         },
@@ -334,6 +325,8 @@ export class InvoiceService {
       },
     }
 
+    console.log(timesheets.raw)
+
     const pdfDoc = printer.createPdfKitDocument(docDefinition)
 
     const buffer = await new Promise<Buffer>((resolve, reject) => {
@@ -371,39 +364,30 @@ export class InvoiceService {
         }
       }
 
+      const formatHours = [
+        'timesheet_workers_break',
+        'timesheet_workers_waiting_time',
+        'timesheet_workers_time',
+        'timesheet_workers_time_out',
+        'container_start',
+        'container_finish',
+      ]
+      const formatDates = ['timesheet_day', 'invoice_date', 'due_date']
+
       timesheets.forEach(timesheet => {
         let valueReplacecell = valueCell?.replace(/@path:([\w.]+)/g, (match, p1) => {
-          if (p1 === 'invoice_number') {
-            return `INV - ${body.invoice_number}`
-          }
-          if (p1 === 'reference_week') {
-            return body.reference_week
-          }
-          if (p1 === 'invoice_date') {
-            return DateTime.fromISO(body.invoice_date.toString()).toFormat('dd/MM/yyyy')
-          }
-          if (p1 === 'due_date') {
-            return DateTime.fromISO(body.due_date.toString()).toFormat('dd/MM/yyyy')
-          }
-          if (p1.includes('container_work')) {
-            p1 = p1.replace('container_work', 'work')
-          }
-
           const value = timesheet[p1]
 
-          if (p1.includes('timesheet_day') && value) {
-            return DateTime.fromJSDate(value).toFormat('dd/MM/yyyy')
-          }
+          if (p1 === 'invoice_number') return `INV - ${body.invoice_number}`
+          if (p1 === 'reference_week') return body.reference_week
 
-          if ((p1.includes('container_start') || p1.includes('container_end')) && value) {
-            return DateTime.fromJSDate(value).toFormat('HH:mm')
-          }
+          if (p1.includes('container_work')) p1 = p1.replace('container_work', 'work')
+          if (p1 === 'number_of_workers') return timesheet?.number_of_workers
 
-          if (p1 === 'number_of_workers') {
-            return timesheet?.number_of_workers
-          }
+          if (formatHours.includes(p1)) return DateTime.fromJSDate(value).toFormat('HH:mm')
+          if (formatDates.includes(p1)) return DateTime.fromJSDate(value).toFormat('dd/MM/yyyy')
 
-          if (value === null || value === undefined || value === '' || value.trim() === 'null') {
+          if (value === null || value === undefined || value === '' || value === 'null ') {
             if (forceZeroFields.includes(p1)) {
               return '0'
             }
