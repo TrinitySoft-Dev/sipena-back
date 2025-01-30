@@ -25,6 +25,6 @@ export class ContainerService {
       where: { container_number: containerNumber },
       select: ['container_number'],
     })
-    return container
+    return container ? true : false
   }
 }

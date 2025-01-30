@@ -6,8 +6,8 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { AuthGuard } from '@/common/guards/auth.guard'
 
 @ApiTags('Container')
-@ApiBearerAuth()
-@UseGuards(AuthGuard)
+// @ApiBearerAuth()
+// @UseGuards(AuthGuard)
 @Controller('container')
 export class ContainerController {
   constructor(private readonly containerService: ContainerService) {}
