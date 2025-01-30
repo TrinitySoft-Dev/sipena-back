@@ -83,7 +83,9 @@ export class TimesheetService {
           rate = await this.validateRules(rules, container)
           if (rate?.ruleCode) {
             const containerSize = await this.containerSizeService.findById(container.size)
+
             const initialsClientName = `${customerUser.name} ${customerUser.last_name}`
+              .replace(/\s+/g, ' ')
               .split(' ')
               .map(name => name[0].toUpperCase())
               .join('')
