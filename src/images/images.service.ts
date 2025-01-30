@@ -26,11 +26,15 @@ export class ImagesService {
 
       let key = folder ? `sipena/${folder}/${shortId}` : `sipena/${shortId}`
 
+      const fileExtension = file.originalname.split('.').pop()
+      const fileName = `invoice-${shortId}.${fileExtension}`
+
       const command = new PutObjectCommand({
         Bucket: config.AWS.S3_BUCKET_NAME,
         Key: key,
         Body: file.buffer,
         ContentType: file.mimetype,
+        ContentDisposition: `attachment; filename="${fileName}"`,
       })
 
       await this.s3Client.send(command)
@@ -43,19 +47,38 @@ export class ImagesService {
   }
 
   async uploadOtherFiles(file: Buffer, folder?: string, mimetype?: string) {
-    const shortId = Math.random().toString(36).substring(2, 15)
-    const key = folder ? `sipena/${folder}/${shortId}` : `sipena/${shortId}`
+    try {
+      const shortId = Math.random().toString(36).substring(2, 15)
 
-    const command = new PutObjectCommand({
-      Bucket: config.AWS.S3_BUCKET_NAME,
-      Key: key,
-      Body: file,
-      ContentType: mimetype,
-    })
+      let key = folder ? `sipena/${folder}/${shortId}` : `sipena/${shortId}`
 
-    await this.s3Client.send(command)
+      const mimeToExtension: { [key: string]: string } = {
+        'application/pdf': 'pdf',
+        'text/csv': 'csv',
+        'image/jpeg': 'jpg',
+        'image/png': 'png',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx',
+      }
 
-    return `${config.SIPENA_FILES}/${folder ? `${folder}/` : ''}${shortId}`
+      const extension = mimeToExtension[mimetype || ''] || 'bin'
+
+      const fileName = `${shortId}.${extension}`
+
+      const command = new PutObjectCommand({
+        Bucket: config.AWS.S3_BUCKET_NAME,
+        Key: key,
+        Body: file,
+        ContentType: mimetype,
+        ContentDisposition: `attachment; filename="${fileName}"`,
+      })
+
+      await this.s3Client.send(command)
+
+      return `${config.SIPENA_FILES}/${folder ? `${folder}/` : ''}${shortId}`
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
   }
 
   async uploadMultiple(files: Express.Multer.File[], folder?: string) {
