@@ -38,7 +38,8 @@ export class RulesWorkersService {
       .leftJoinAndSelect('extra_rules_worker.condition_groups', 'extra_condition_groups')
       .leftJoinAndSelect('extra_condition_groups.conditions', 'extra_conditions')
       .where('work.id = :work', { work })
-      .where('rules_worker.active = :active', { active: true })
+      .andWhere('rules_worker.active = :active', { active: true })
+      .andWhere('rules_worker.container_size = :container_size', { container_size: container.size })
       .getMany()
 
     for (const rule of rules) {
@@ -72,6 +73,7 @@ export class RulesWorkersService {
       }
 
       if (ruleIsValid) {
+        console.log({ rule })
         return this.calculateOverUnitsOverLimit(rule, container, rule.payment_type, workers)
       }
     }
