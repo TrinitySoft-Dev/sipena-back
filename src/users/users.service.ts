@@ -166,7 +166,7 @@ export class UsersService {
     const { email, password } = loginUserDto
 
     const user = await this.userRepository.findOne({
-      where: { email, active: true },
+      where: { email: email.toLowerCase(), active: true },
       relations: ['infoworker', 'role', 'role.permissions', 'state'],
     })
 
