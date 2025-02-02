@@ -106,7 +106,16 @@ export class NormalScheduleService {
         return acc + totalMinutes
       }, 0)
 
-      const hoursWorked = finish.diff(start, 'hours').hours - totalBreak / 60
+      const totalTimeOut = workers.reduce((acc, worker) => {
+        const workerTimeOut = DateTime.fromISO(worker.time_out)
+        if (!workerTimeOut.isValid) {
+          return acc
+        }
+        const totalMinutes = workerTimeOut.hour * 60 + workerTimeOut.minute
+        return acc + totalMinutes
+      }, 0)
+
+      const hoursWorked = finish.diff(start, 'hours').hours - (totalBreak - totalTimeOut) / 60
 
       if (hoursWorked > schedule.up_hours) {
         const appliedOvertime = this.overtimeService.validateOvertimes(
@@ -127,17 +136,8 @@ export class NormalScheduleService {
         }
       }
 
-      const totalWorked = workers.reduce((acc, worker) => {
-        const timeOut = DateTime.fromISO(worker.time_out).minute
-        const timeBreak = DateTime.fromISO(worker.break).minute
-
-        const totalTime = hoursWorked - (timeOut - timeBreak) / 60
-        acc += totalTime
-        return acc
-      }, 0)
-
       return {
-        rate: schedule.rate * totalWorked,
+        rate: schedule.rate * hoursWorked,
         name: schedule.name,
         rate_worker: schedule.rate_worker,
       }
