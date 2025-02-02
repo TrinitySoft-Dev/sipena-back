@@ -403,10 +403,13 @@ export class TimesheetService {
         .leftJoinAndSelect('container.product', 'product')
         .leftJoinAndSelect('timesheet.customer', 'customer')
         .leftJoinAndSelect('container.size', 'size')
+        .leftJoinAndSelect('timesheet.timesheet_workers', 'timesheet_workers')
+        .leftJoinAndSelect('timesheet_workers.worker', 'worker')
         .where('timesheet.week = :week', { week })
         .andWhere('timesheet.customer = :customerId', { customerId })
         .andWhere('timesheet.status_customer_pay = :status_customer_pay', { status_customer_pay: 'OPEN' })
-        .getRawMany()
+        .loadRelationCountAndMap('timesheet.number_of_workers', 'timesheet.timesheet_workers')
+        .getRawAndEntities()
 
       return result
     }

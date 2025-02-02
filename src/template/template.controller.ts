@@ -44,8 +44,8 @@ export class TemplateController {
   }
 
   @Get('select')
-  findSelect() {
-    return this.templateService.findSelect()
+  findSelect(@Query('type', new DefaultValuePipe('CUSTOMER')) type: string) {
+    return this.templateService.findSelect(type)
   }
 
   @Get('fields')

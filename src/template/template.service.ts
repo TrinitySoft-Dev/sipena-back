@@ -47,8 +47,8 @@ export class TemplateService {
     return { result, pagination: { page, pageSize, total } }
   }
 
-  async findSelect() {
-    return this.templateRepository.find({ select: ['id', 'name'] })
+  async findSelect(type: string) {
+    return this.templateRepository.find({ select: ['id', 'name'], where: { type } })
   }
 
   fields() {

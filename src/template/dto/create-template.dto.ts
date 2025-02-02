@@ -30,4 +30,12 @@ export class CreateTemplateDto {
   @ValidateNested({ each: true })
   @Type(() => CreateTemplateColumnDto)
   columns: CreateTemplateColumnDto[]
+
+  @ApiProperty({
+    type: 'string',
+    description: 'The type of the template',
+    example: 'CUSTOMER',
+  })
+  @IsString()
+  type: string
 }

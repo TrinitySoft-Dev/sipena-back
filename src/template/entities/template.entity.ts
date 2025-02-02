@@ -26,6 +26,14 @@ export class Template {
   @OneToMany(() => TemplateColumn, templateColumn => templateColumn.template, { cascade: true })
   columns: TemplateColumn[]
 
+  @Column({
+    type: 'varchar',
+    length: 100,
+    nullable: false,
+    enum: ['CUSTOMER', 'WORKER'],
+  })
+  type: string
+
   @CreateDateColumn({
     type: 'timestamp',
     nullable: false,
