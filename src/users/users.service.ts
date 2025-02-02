@@ -33,10 +33,15 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: any, files: Express.Multer.File[]) {
-    let { email, password, name, last_name, role, idRole, city, state, ...rest } = createUserDto
+    let { email, password, name, last_name, role, idRole, city, state, abn, ...rest } = createUserDto
 
-    const existuser = await this.userRepository.findOne({ where: { email, active: true } })
-    if (existuser) throw new UnauthorizedException('Email already exists')
+    email = email.toLowerCase().trim()
+
+    const existuser = await this.userRepository
+      .createQueryBuilder('user')
+      .where('(user.email = :email OR user.abn = :abn) AND user.active = :active', { email, abn, active: true })
+      .getOne()
+    if (existuser) throw new UnauthorizedException('Abn or email already exists')
 
     password = password ? createUserDto.password : Math.random().toString(36).substring(2, 15)
     const hashPassword = await this.encryptPassword(password)
@@ -178,7 +183,7 @@ export class UsersService {
     const permissions = user.role.permissions.map(permission => permission.name)
 
     const payload = {
-      email: user.email,
+      email: user.email.toLowerCase(),
       role: user.role.name,
       id: user.id,
       completedInfoworker: user.completed,
@@ -221,7 +226,7 @@ export class UsersService {
     const permissions = user.role.permissions.map(permission => permission.name)
 
     const payload = {
-      email: user.email,
+      email: user.email.toLowerCase(),
       role: user.role.name,
       id: user.id,
       completedInfoworker: user.completed,
@@ -247,6 +252,7 @@ export class UsersService {
   }
 
   async forgotPasssword(email: string) {
+    email = email.toLowerCase().trim()
     const user = await this.userRepository.findOne({ where: { email } })
     if (!user) throw new NotFoundException('User not found')
 
@@ -277,7 +283,6 @@ export class UsersService {
 
   async resetPassword(resetPasswordDto: ResetPasswordDto) {
     const hashedToken = this.passwordHashService.hastToken(resetPasswordDto.token)
-
     const token = await this.passwordHashService.findByHash(hashedToken)
     if (!token || token.expires < new Date()) throw new BadRequestException('Invalid token')
 
