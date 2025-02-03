@@ -73,7 +73,6 @@ export class RulesWorkersService {
       }
 
       if (ruleIsValid) {
-        console.log({ rule })
         return this.calculateOverUnitsOverLimit(rule, container, rule.payment_type, workers)
       }
     }

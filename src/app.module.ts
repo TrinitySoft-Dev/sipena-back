@@ -79,6 +79,7 @@ import { APP_FILTER } from '@nestjs/core'
       autoLoadEntities: true,
       synchronize: false,
       ssl: true,
+      // logging: true
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),

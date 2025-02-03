@@ -35,219 +35,195 @@ export class TimesheetService {
   async create(createTimesheetDto: CreateTimesheetDto) {
     try {
       const { timesheet, container } = createTimesheetDto
-      let { customer_id, workers, work_id, ...restTimesheet } = timesheet
 
-      let isValidProduct = false
-      let isValidSchedule = false
-      let nameSchedule = null
-      let totalOvertimes = 0
-      let totalPayWorker = 0
-      let rate = null
-      const existProductsWithPricing = await this.productsService.findById(container.product)
-      const appliedPriceProduct = existProductsWithPricing?.price > 0 ? true : false
-
-      if (existProductsWithPricing && existProductsWithPricing.price > 0) {
-        isValidProduct = true
-      }
-
-      if (!appliedPriceProduct) {
-        const customerUser = await this.usersService.findByWorks(customer_id, work_id, container.size)
-        if (customerUser.normal_schedule?.length) {
-          const validNormalSchedule: any = await this.normalScheduleService.validateNormalSchedule(
-            customerUser.normal_schedule,
-            work_id,
-            container,
-            timesheet.day.toString(),
-            workers,
-          )
-
-          if (validNormalSchedule?.rate) {
-            isValidSchedule = true
-            rate = validNormalSchedule.rate
-            nameSchedule = validNormalSchedule.name
-            totalPayWorker = validNormalSchedule.rate_worker
-
-            if (validNormalSchedule?.overtime) {
-              totalOvertimes = validNormalSchedule.overtime
-            }
-          }
-        }
-
-        if (!isValidProduct && !isValidSchedule) {
-          if (!customerUser.rules.length) {
-            throw new BadRequestException(
-              'No charge type (product, schedule, rules) was found, check the customer configuaration and make sure that is has some type of charge related to it',
-            )
-          }
-          const rules = customerUser.rules
-          rate = await this.validateRules(rules, container)
-          if (rate?.ruleCode) {
-            const containerSize = await this.containerSizeService.findById(container.size)
-
-            const initialsClientName = `${customerUser.name} ${customerUser.last_name}`
-              .replace(/\s+/g, ' ')
-              .split(' ')
-              .map(name => name[0].toUpperCase())
-              .join('')
-            const ruleCode = `${initialsClientName} - ${containerSize.value}FT CONTAINER (${rate?.ruleCode?.toUpperCase()})`
-            rate.ruleCode = ruleCode
-          }
-        }
-      }
-
-      const objContainer = {
-        ...container,
-      }
-      if (container.product) {
-        objContainer['product'] = container.product
-      }
-      const createdContainer = await this.containerService.create(objContainer)
-
-      restTimesheet = {
-        day: restTimesheet.day,
-        week: restTimesheet.week,
-        comment: restTimesheet.comment,
-        images: restTimesheet.images,
-      }
-
-      const timesheetRes = this.timesheetRepository.create({
-        ...restTimesheet,
-        rate: this.calculateRate({ isValidProduct, isValidSchedule, rate, existProductsWithPricing, totalOvertimes }),
-        base: this.calculateBase({ isValidProduct, isValidSchedule, rate, existProductsWithPricing, totalOvertimes }),
-        container: createdContainer,
-        customer: { id: customer_id },
-        item_code: typeof rate === 'object' ? rate?.ruleCode : '',
-        extra_rates: this.calculateExtraRates({
-          isValidProduct,
-          isValidSchedule,
-          rate,
-          existProductsWithPricing,
-          totalOvertimes,
-          nameSchedule,
-        }),
+      const preparedData = await this.prepareTimesheetData({
+        timesheet,
+        container,
       })
 
-      await this.timesheetRepository.save(timesheetRes)
+      const createdContainer = await this.containerService.create(preparedData.containerData)
 
-      const newWorkers = workers.map(worker => ({
-        ...worker,
-        worker: worker.worker,
-        timesheet: timesheetRes.id,
-      }))
+      const timesheetEntity = this.timesheetRepository.create({
+        ...preparedData.timesheetData,
+        container: createdContainer,
+        customer: { id: timesheet.customer_id },
+      })
 
-      let payWorkers = []
-      if (!isValidProduct && !isValidSchedule) {
-        payWorkers = await this.rulesWorkersService.validateRules(container, String(work_id), newWorkers)
-      }
+      await this.timesheetRepository.save(timesheetEntity)
 
-      if (isValidProduct) {
-        payWorkers = newWorkers.map(worker => ({ ...worker, pay: existProductsWithPricing.price / workers.length }))
-      }
+      const workersPayload = await this.processWorkersPayments({
+        workers: timesheet.workers,
+        container: container,
+        configuration: preparedData.configuration,
+      })
 
-      if (isValidSchedule) {
-        payWorkers = newWorkers.map(worker => {
-          const defaultHoursWorked = 8
-          const timeOut = DateTime.fromISO(worker.time_out.toString()).minute
-          const timeBreak = DateTime.fromISO(worker.break.toString()).minute
+      workersPayload.forEach(worker => {
+        worker.timesheet = timesheetEntity.id
+      })
 
-          let hoursWorked = defaultHoursWorked - timeOut / 60
-          if (timeBreak) hoursWorked -= timeBreak / 60
+      console.log(workersPayload)
 
-          const pay = totalPayWorker * hoursWorked
+      await this.timesheetWorkersService.createMany(workersPayload)
 
-          return { ...worker, pay }
-        })
-      }
-
-      await this.timesheetWorkersService.createMany(payWorkers)
-
-      return { message: 'Timesheet create successfully' }
+      return { message: 'Timesheet created successfully' }
     } catch (error) {
       throw error
     }
   }
 
   async update(id: number, updateTimesheetDto: UpdateTimesheetDto) {
-    const { timesheet, container } = updateTimesheetDto
+    try {
+      const existingTimesheet = await this.timesheetRepository.findOne({
+        where: { id },
+        relations: ['container', 'timesheet_workers', 'customer'],
+      })
+      if (!existingTimesheet) throw new NotFoundException('Timesheet not found')
 
-    if (container?.trash) container.trash = (container.trash as unknown as string) === 'true'
-    if (container?.mixed) container.mixed = (container.mixed as unknown as string) === 'true'
-    if (container?.forklift_driver) container.forklift_driver = Boolean(container.forklift_driver)
+      const { timesheet, container } = updateTimesheetDto
 
-    const existingTimesheet = await this.timesheetRepository.findOne({
-      where: { id },
-      relations: ['container', 'timesheet_workers', 'customer', 'container.work', 'container.size'],
+      const preparedData = await this.prepareTimesheetData({
+        timesheet,
+        container,
+      })
+
+      Object.assign(container, preparedData.containerData)
+
+      await this.containerService.update(existingTimesheet.container.id, container)
+
+      Object.assign(existingTimesheet, preparedData.timesheetData)
+      await this.timesheetRepository.save(existingTimesheet)
+
+      const workersPayload = await this.processWorkersPayments({
+        workers: timesheet.workers,
+        container: container,
+        configuration: preparedData.configuration,
+      })
+      await this.timesheetWorkersService.updateMany(workersPayload)
+
+      return { message: 'Timesheet updated successfully' }
+    } catch (error) {
+      throw error
+    }
+  }
+
+  private async prepareTimesheetData(params: { timesheet: any; container: any }): Promise<{
+    timesheetData: Partial<Timesheet>
+    containerData: any
+    configuration: {
+      isValidProduct: boolean
+      rate: any
+      totalPayWorker: number
+    }
+  }> {
+    let { timesheet, container } = params
+
+    Object.keys(container).forEach(key => {
+      if (container[key] === '') container[key] = null
     })
-
-    if (!existingTimesheet) throw new NotFoundException('Timesheet not found')
-
-    const idWorkers = timesheet.workers.map(worker => worker.id)
-    const workers = existingTimesheet.timesheet_workers
-
-    const workerUpdate = workers.filter(worker => idWorkers.includes(worker.id))
-    Object.assign(workerUpdate, timesheet.workers)
-
-    existingTimesheet.timesheet_workers = workerUpdate
-
-    // update container
-    Object.assign(existingTimesheet.container, container)
-    const customerId = existingTimesheet.customer.id
 
     let isValidProduct = false
     let rate = null
+    let totalOvertimes = 0
+    let nameSchedule = null
+    let isValidSchedule = false
+    let totalPayWorker = 0
 
-    const existProductsWithPricing = await this.productsService.getProductsCustomerWithPrice(customerId)
-
-    if (existProductsWithPricing) {
+    const existProductsWithPricing = await this.productsService.findById(container.product)
+    if (existProductsWithPricing && existProductsWithPricing.price > 0) {
       isValidProduct = true
     }
 
-    if (!existProductsWithPricing) {
-      const customerUser = await this.usersService.findByWorks(
-        customerId,
-        Number(existingTimesheet.container.work),
-        Number(existingTimesheet.container.size),
-      )
-      if (!customerUser.rules.length) throw new NotFoundException('Rules not found')
-
-      const rules = customerUser.rules
-      rate = await this.validateRules(rules, container)
-    }
-
-    existingTimesheet.rate = isValidProduct ? existProductsWithPricing.price : typeof rate === 'object' ? rate.rate : 0
-    existingTimesheet.base = isValidProduct ? existProductsWithPricing.price : typeof rate === 'object' ? rate.base : 0
-
-    existingTimesheet.extra_rates = isValidProduct
-      ? JSON.stringify({
-          name: existProductsWithPricing.name,
-          rate: existProductsWithPricing.price,
-        })
-      : typeof rate === 'object'
-        ? JSON.stringify(rate.json)
-        : null
-
-    await this.timesheetRepository.save(existingTimesheet)
-
-    let payWorkers = []
-
     if (!isValidProduct) {
-      payWorkers = await this.rulesWorkersService.validateRules(
-        container,
-        String(existingTimesheet.container.work),
-        workerUpdate,
-      )
+      const customerUser = await this.usersService.findByWorks(timesheet.customer_id, timesheet.work_id, container.size)
+      if (customerUser.normal_schedule?.length) {
+        const validNormalSchedule: any = await this.normalScheduleService.validateNormalSchedule(
+          customerUser.normal_schedule,
+          timesheet.work_id,
+          container,
+          timesheet.day.toString(),
+          timesheet.workers,
+        )
+        if (validNormalSchedule?.rate) {
+          isValidSchedule = true
+          nameSchedule = validNormalSchedule.name
+          totalPayWorker = validNormalSchedule.rate_worker
+          if (validNormalSchedule?.overtime) totalOvertimes = validNormalSchedule.overtime
+          rate = validNormalSchedule.rate
+        }
+      }
+
+      if (!isValidProduct && !rate) {
+        if (!customerUser.rules.length) {
+          throw new BadRequestException(
+            'No se encontró ningún tipo de cobro (producto, horario, reglas), revise la configuración del cliente',
+          )
+        }
+        rate = await this.validateRules(customerUser.rules, container)
+      }
     }
+
+    const timesheetData: Partial<Timesheet> = {
+      day: timesheet.day,
+      week: timesheet.week,
+      images: timesheet.images,
+      rate: this.calculateRate({ isValidProduct, isValidSchedule, rate, existProductsWithPricing, totalOvertimes }),
+      base: this.calculateBase({ isValidProduct, isValidSchedule, rate, existProductsWithPricing, totalOvertimes }),
+      extra_rates: this.calculateExtraRates({
+        isValidProduct,
+        rate,
+        existProductsWithPricing,
+        totalOvertimes,
+        nameSchedule,
+      }),
+    }
+
+    const containerData = { ...container }
+    if (container.product) {
+      containerData.product = container.product
+    }
+
+    return {
+      timesheetData,
+      containerData,
+      configuration: { isValidProduct, rate, totalPayWorker },
+    }
+  }
+
+  private async processWorkersPayments(params: {
+    workers: any[]
+    container: any
+    configuration: {
+      isValidProduct: boolean
+      rate: any
+      totalPayWorker?: number
+    }
+  }): Promise<any[]> {
+    const { workers, container, configuration } = params
+    let payWorkers = []
+    const { isValidProduct, rate, totalPayWorker } = configuration
 
     if (isValidProduct) {
-      payWorkers = workerUpdate.map(worker => ({
+      payWorkers = workers.map(worker => ({
         ...worker,
-        pay: existProductsWithPricing.price / workerUpdate.length,
+        pay: rate.price / workers.length,
       }))
+    } else if (totalPayWorker) {
+      payWorkers = workers.map(worker => {
+        const defaultHoursWorked = 8
+        const timeOut = DateTime.fromISO(worker.time_out.toString()).minute
+        const timeBreak = DateTime.fromISO(worker.break.toString()).minute
+        let hoursWorked = defaultHoursWorked - timeOut / 60
+        if (timeBreak) hoursWorked -= timeBreak / 60
+        return {
+          ...worker,
+          pay: totalPayWorker * hoursWorked,
+        }
+      })
+    } else {
+      payWorkers = await this.rulesWorkersService.validateRules(container, String(container.work), workers)
     }
 
-    await this.timesheetWorkersService.updateMany(payWorkers)
-
-    return { message: 'Timesheet updated successfully' }
+    return payWorkers
   }
 
   async closeTimesheet(id: number) {

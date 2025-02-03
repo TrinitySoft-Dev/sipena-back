@@ -78,6 +78,7 @@ export class ProductsService {
   }
 
   async findById(id: number): Promise<Product> {
+    if (!id) return null
     return await this.productRepository.findOne({ where: { id } })
   }
 
