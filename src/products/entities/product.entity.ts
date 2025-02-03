@@ -34,6 +34,12 @@ export class Product {
   price: number
 
   @Column({
+    nullable: false,
+    type: 'decimal',
+  })
+  pay_worker: number
+
+  @Column({
     type: 'varchar',
     nullable: true,
     length: 255,

@@ -55,13 +55,12 @@ export class TimesheetService {
         workers: timesheet.workers,
         container: container,
         configuration: preparedData.configuration,
+        payWorker: preparedData.payWorker,
       })
 
       workersPayload.forEach(worker => {
         worker.timesheet = timesheetEntity.id
       })
-
-      console.log(workersPayload)
 
       await this.timesheetWorkersService.createMany(workersPayload)
 
@@ -114,6 +113,7 @@ export class TimesheetService {
       rate: any
       totalPayWorker: number
     }
+    payWorker?: number
   }> {
     let { timesheet, container } = params
 
@@ -186,6 +186,7 @@ export class TimesheetService {
       timesheetData,
       containerData,
       configuration: { isValidProduct, rate, totalPayWorker },
+      payWorker: existProductsWithPricing?.pay_worker || 0,
     }
   }
 
@@ -197,15 +198,17 @@ export class TimesheetService {
       rate: any
       totalPayWorker?: number
     }
+    payWorker?: number
   }): Promise<any[]> {
     const { workers, container, configuration } = params
     let payWorkers = []
     const { isValidProduct, rate, totalPayWorker } = configuration
 
     if (isValidProduct) {
+      const payPerWorker = params.payWorker / workers.length
       payWorkers = workers.map(worker => ({
         ...worker,
-        pay: rate.price / workers.length,
+        pay: payPerWorker,
       }))
     } else if (totalPayWorker) {
       payWorkers = workers.map(worker => {

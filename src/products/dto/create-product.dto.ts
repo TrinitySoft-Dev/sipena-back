@@ -36,6 +36,13 @@ export class CreateProductDto {
   customers: CustomerArray[]
 
   @ApiProperty({
+    description: 'Pago al trabajador',
+    example: 10.0,
+  })
+  @IsNumber()
+  pay_worker: number
+
+  @ApiProperty({
     description: 'Estado del producto, si está activo o no',
     example: true,
   })
