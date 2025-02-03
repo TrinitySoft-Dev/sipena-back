@@ -375,7 +375,7 @@ export class TimesheetService {
 
   async findTimesheetsByWeek(week: string, customerId: number, type: string) {
     if (type === ROLES_CONST.CUSTOMER) {
-      const result = await this.timesheetRepository
+      const { raw, entities } = await this.timesheetRepository
         .createQueryBuilder('timesheet')
         .leftJoinAndSelect('timesheet.container', 'container')
         .leftJoinAndSelect('container.work', 'work')
@@ -390,10 +390,27 @@ export class TimesheetService {
         .loadRelationCountAndMap('timesheet.number_of_workers', 'timesheet.timesheet_workers')
         .getRawAndEntities()
 
-      return result
+      const uniqueRaw = []
+      const seenRawIds = new Set()
+      raw.forEach(r => {
+        const timesheetId = r.timesheet_id || r['timesheet.id']
+        if (!seenRawIds.has(timesheetId)) {
+          seenRawIds.add(timesheetId)
+          uniqueRaw.push(r)
+        }
+      })
+
+      const uniqueEntities = entities.reduce((acc, timesheet) => {
+        if (!acc.some(ts => ts.id === timesheet.id)) {
+          acc.push(timesheet)
+        }
+        return acc
+      }, [])
+
+      return { raw: uniqueRaw, entities: uniqueEntities }
     }
 
-    const result = await this.timesheetRepository
+    const { raw, entities } = await this.timesheetRepository
       .createQueryBuilder('timesheet')
       .leftJoinAndSelect('timesheet.container', 'container')
       .leftJoinAndSelect('container.work', 'work')
@@ -409,7 +426,24 @@ export class TimesheetService {
       .loadRelationCountAndMap('timesheet.number_of_workers', 'timesheet.timesheet_workers')
       .getRawAndEntities()
 
-    return result
+    const uniqueRaw = []
+    const seenRawIds = new Set()
+    raw.forEach(r => {
+      const timesheetId = r.timesheet_id || r['timesheet.id']
+      if (!seenRawIds.has(timesheetId)) {
+        seenRawIds.add(timesheetId)
+        uniqueRaw.push(r)
+      }
+    })
+
+    const uniqueEntities = entities.reduce((acc, timesheet) => {
+      if (!acc.some(ts => ts.id === timesheet.id)) {
+        acc.push(timesheet)
+      }
+      return acc
+    }, [])
+
+    return { raw: uniqueRaw, entities: uniqueEntities }
   }
 
   async findWeekByOpenTimesheet() {
