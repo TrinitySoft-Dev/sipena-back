@@ -371,17 +371,23 @@ export class InvoiceService {
 
       timesheets.forEach(timesheet => {
         let valueReplacecell = valueCell?.replace(/@path:([\w.]+)/g, (match, p1) => {
+          if (!p1.includes('_')) p1 = `timesheet_${p1}`
+
           const value = timesheet[p1]
 
           if (p1 === 'invoice_number') return `INV - ${body.invoice_number}`
           if (p1 === 'reference_week') return body.reference_week
 
           if (p1.includes('container_work')) p1 = p1.replace('container_work', 'work')
+
           if (p1 === 'container_size_value') return timesheet?.size_value || '0'
           if (p1 === 'number_of_workers') return timesheet?.number_of_workers
+          if (p1 === 'container_product_name') return timesheet?.product_name || 'N/A'
 
           if (formatHours.includes(p1)) return DateTime.fromJSDate(value).toFormat('HH:mm')
-          if (formatDates.includes(p1)) return DateTime.fromJSDate(value).toFormat('dd/MM/yyyy')
+          if (formatDates.includes(p1)) {
+            return DateTime.fromJSDate(value).toFormat('dd/MM/yyyy')
+          }
 
           if (value === null || value === undefined || value === '' || value === 'null ') {
             if (forceZeroFields.includes(p1)) {
