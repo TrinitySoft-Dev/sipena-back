@@ -52,18 +52,24 @@ export class RulesWorkersService {
 
         for (const condition of conditions) {
           const conditionResult = this.conditionSerce.evalutedConditions(condition, container)
+
           if (!conditionResult) {
-            const extraRules: ExtraRulesWorker[] = rule.extra_rules_worker
-            const validateExtraRules = await this.extraRulesWorkersService.validateExtraRules(
-              extraRules,
-              container,
-              workers,
-            )
-            if (!validateExtraRules || !extraRules.length) {
-              groupIsValid = false
-              break
-            }
+            groupIsValid = false
+            break
           }
+
+          // if (!conditionResult) {
+          //   const extraRules: ExtraRulesWorker[] = rule.extra_rules_worker
+          //   const validateExtraRules = await this.extraRulesWorkersService.validateExtraRules(
+          //     extraRules,
+          //     container,
+          //     workers,
+          //   )
+          //   if (!validateExtraRules || !extraRules.length) {
+          //     groupIsValid = false
+          //     break
+          //   }
+          // }
         }
 
         if (groupIsValid) {
@@ -73,16 +79,30 @@ export class RulesWorkersService {
       }
 
       if (ruleIsValid) {
+        const extraRules: ExtraRulesWorker[] = rule.extra_rules_worker
+        const validateExtraRules = await this.extraRulesWorkersService.validateExtraRules(
+          extraRules,
+          container,
+          workers,
+        )
+
+        console.log(validateExtraRules)
+
         return this.calculateOverUnitsOverLimit(rule, container, rule.payment_type, workers)
       }
     }
   }
 
   findById(id: number) {
-    return this.rulesWorkerRepository.findOne({
-      where: { id },
-      relations: ['condition_groups', 'condition_groups.conditions', 'container_size', 'work'],
-    })
+    return this.rulesWorkerRepository
+      .createQueryBuilder('rules_worker')
+      .where('rules_worker.id = :id', { id })
+      .leftJoinAndSelect('rules_worker.work', 'work')
+      .leftJoinAndSelect('rules_worker.condition_groups', 'condition_groups')
+      .leftJoinAndSelect('condition_groups.conditions', 'conditions')
+      .leftJoinAndSelect('rules_worker.container_size', 'container_size')
+      .orderBy('conditions.created_at', 'ASC')
+      .getOne()
   }
 
   async find({ page, pageSize, includePagination }: { page: number; pageSize: number; includePagination: boolean }) {
