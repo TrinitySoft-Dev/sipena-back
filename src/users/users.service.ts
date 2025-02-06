@@ -534,6 +534,17 @@ export class UsersService {
     return this.userRepository.update(id, { password: hashedPassword })
   }
 
+  async findByNormalSchedule(id: number, day: string): Promise<User> {
+    return this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.normal_schedule', 'normal_schedule')
+      .leftJoinAndSelect('normal_schedule.work', 'work')
+      .where('user.id = :id', { id })
+      .andWhere('normal_schedule.days @> ARRAY[:day]', { day })
+      .andWhere('work.name = :name', { name: 'General labour' })
+      .getOne()
+  }
+
   updateAvatar(id: number, updateUserDto: UpdateUserDto) {
     return this.userRepository.update(id, { avatar: updateUserDto.avatar })
   }

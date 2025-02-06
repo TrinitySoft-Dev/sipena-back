@@ -14,9 +14,10 @@ import { RulesWorkersService } from '@/rules_workers/rules_workers.service'
 import { UpdateTimesheetDto } from './dto/update-timesheet.dto'
 import { DateTime } from 'luxon'
 import { ProductsService } from '@/products/products.service'
-import { TimesheetStatusEnum } from '@/timesheet_workers/entities/timesheet_worker.entity'
+import { TimesheetStatusEnum, TimesheetWorker } from '@/timesheet_workers/entities/timesheet_worker.entity'
 import { NormalScheduleService } from '@/normal_schedule/normal_schedule.service'
-import { ContainerSizeService } from '@/container_size/container_size.service'
+import { User } from '@/users/entities/user.entity'
+import { ITimesheetWorker } from '@/common/interfaces/timesheet.interfaces'
 
 @Injectable()
 export class TimesheetService {
@@ -29,7 +30,6 @@ export class TimesheetService {
     private readonly rulesWorkersService: RulesWorkersService,
     private readonly productsService: ProductsService,
     private readonly normalScheduleService: NormalScheduleService,
-    private readonly containerSizeService: ContainerSizeService,
   ) {}
 
   async create(createTimesheetDto: CreateTimesheetDto) {
@@ -49,14 +49,22 @@ export class TimesheetService {
         customer: { id: timesheet.customer_id },
       })
 
-      await this.timesheetRepository.save(timesheetEntity)
-
       const workersPayload = await this.processWorkersPayments({
         workers: timesheet.workers,
         container: container,
         configuration: preparedData.configuration,
         payWorker: preparedData.payWorker,
       })
+
+      const rateWaitingTime = await this.calculateWaitingTime(workersPayload, timesheetEntity)
+      if (rateWaitingTime > 0) {
+        const extraCharges = JSON.parse(timesheetEntity.extra_rates)
+        extraCharges.extraCharge.push({ name: 'Waiting time', rate: rateWaitingTime })
+        timesheetEntity.extra_rates = JSON.stringify(extraCharges)
+        timesheetEntity.rate += rateWaitingTime
+      }
+
+      await this.timesheetRepository.save(timesheetEntity)
 
       workersPayload.forEach(worker => {
         worker.timesheet = timesheetEntity.id
@@ -103,6 +111,32 @@ export class TimesheetService {
     } catch (error) {
       throw error
     }
+  }
+
+  private async calculateWaitingTime(workers: ITimesheetWorker[], timesheet: Timesheet) {
+    let totalHours = 0
+
+    const customerId = timesheet.customer.id
+    const day = DateTime.fromISO(timesheet.day.toString()).toFormat('EEEE')
+    const normalSchedule: User = await this.usersService.findByNormalSchedule(customerId, day)
+    const [dataNormalSchedule] = normalSchedule.normal_schedule
+
+    for (const worker of workers) {
+      const time = DateTime.fromISO(worker.waiting_time.toString())
+      const convertTime = time.hour + time.minute / 60
+      totalHours += convertTime
+
+      if (convertTime > 0) {
+        if (!normalSchedule) return 0
+
+        const extraRules = JSON.parse(worker.extra_rules)
+        extraRules.push({ name: 'Waiting time', rate: dataNormalSchedule.rate_worker * convertTime })
+
+        worker.extra_rules = JSON.stringify(extraRules)
+      }
+    }
+
+    return dataNormalSchedule.rate * totalHours
   }
 
   private async prepareTimesheetData(params: { timesheet: any; container: any }): Promise<{

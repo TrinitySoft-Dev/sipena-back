@@ -189,19 +189,23 @@ export class ExtraRulesWorkersService {
       const payPerWorker = calculatePay(rule.rate_type, rule.rate) / numberOfWorkers
 
       workers.forEach(worker => {
-        worker.extra_rules = JSON.stringify({
-          name: rule.name,
-          rate: payPerWorker,
-        })
+        worker.extra_rules = JSON.stringify([
+          {
+            name: rule.name,
+            rate: payPerWorker,
+          },
+        ])
       })
     }
 
     if (payment_type === 'per_person') {
       workers.forEach(worker => {
-        worker.extra_rules = JSON.stringify({
-          name: rule.name,
-          rate: calculatePay(rule.rate_type, rule.rate),
-        })
+        worker.extra_rules = JSON.stringify([
+          {
+            name: rule.name,
+            rate: calculatePay(rule.rate_type, rule.rate),
+          },
+        ])
       })
     }
 
