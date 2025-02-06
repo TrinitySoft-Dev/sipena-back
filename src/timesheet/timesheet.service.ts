@@ -119,6 +119,8 @@ export class TimesheetService {
     const customerId = timesheet.customer.id
     const day = DateTime.fromISO(timesheet.day.toString()).toFormat('EEEE')
     const normalSchedule: User = await this.usersService.findByNormalSchedule(customerId, day)
+
+    if (!normalSchedule) return 0
     const [dataNormalSchedule] = normalSchedule.normal_schedule
 
     for (const worker of workers) {
