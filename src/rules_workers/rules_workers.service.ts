@@ -57,19 +57,6 @@ export class RulesWorkersService {
             groupIsValid = false
             break
           }
-
-          // if (!conditionResult) {
-          //   const extraRules: ExtraRulesWorker[] = rule.extra_rules_worker
-          //   const validateExtraRules = await this.extraRulesWorkersService.validateExtraRules(
-          //     extraRules,
-          //     container,
-          //     workers,
-          //   )
-          //   if (!validateExtraRules || !extraRules.length) {
-          //     groupIsValid = false
-          //     break
-          //   }
-          // }
         }
 
         if (groupIsValid) {
@@ -80,13 +67,7 @@ export class RulesWorkersService {
 
       if (ruleIsValid) {
         const extraRules: ExtraRulesWorker[] = rule.extra_rules_worker
-        const validateExtraRules = await this.extraRulesWorkersService.validateExtraRules(
-          extraRules,
-          container,
-          workers,
-        )
-
-        console.log(validateExtraRules)
+        await this.extraRulesWorkersService.validateExtraRules(extraRules, container, workers)
 
         return this.calculateOverUnitsOverLimit(rule, container, rule.payment_type, workers)
       }
