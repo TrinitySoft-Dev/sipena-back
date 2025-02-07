@@ -23,6 +23,7 @@ export class InvoiceService {
 
   async create(createInvoiceDto: CreateInvoiceDto) {
     const { reference_week, customer, invoice_number } = createInvoiceDto
+
     let timesheets: any = await this.timesheetService.findTimesheetsByWeek(
       reference_week,
       customer,
@@ -41,47 +42,44 @@ export class InvoiceService {
     const columns = await this.resolverColumns(template, newTimesheets, createInvoiceDto)
 
     const headers = Object.keys(columns)
-    const wb = new excel4node.Workbook()
-    const ws = wb.addWorksheet(`Invoice - ${invoice_number}`)
 
-    const cellStyle = wb.createStyle({
-      alignment: {
-        horizontal: 'left',
-        wrapText: true,
-      },
-    })
+    const csvRows: string[][] = []
 
-    headers.forEach((header, colIndex) => {
-      const rows = columns[header].rows
-      const maxWidth = Math.max(header?.length, ...rows.map(row => row?.length || 10))
-      ws.column(colIndex + 1).setWidth(maxWidth)
+    csvRows.push(headers)
 
-      ws.cell(1, colIndex + 1).string(header)
+    const numRows = Math.max(...headers.map(header => columns[header].rows.length))
 
-      rows.forEach((row, rowIndex) => {
-        const type = typeof row === 'undefined' ? 'string' : typeof row
+    for (let i = 0; i < numRows; i++) {
+      const rowData = headers.map(header => {
+        let cell = columns[header].rows[i]
 
-        const cellValue =
-          typeof row === 'string'
-            ? row
-                .replace(/\\n/g, '\n')
-                .split('\n')
-                .map(line => line.trim())
-                .join('\n')
-            : row
+        if (typeof cell === 'string') {
+          cell = cell
+            .replace(/\\n/g, '\n')
+            .split('\n')
+            .map(line => line.trim())
+            .join('\n')
+        }
+        if (cell === undefined || cell === null) cell = ''
 
-        ws.cell(rowIndex + 2, colIndex + 1)
-          [type](cellValue)
-          .style(cellStyle)
+        let cellStr = String(cell)
+        if (cellStr.includes('"')) {
+          cellStr = cellStr.replace(/"/g, '""')
+        }
+
+        if (cellStr.includes(',') || cellStr.includes('\n') || cellStr.includes('"')) {
+          cellStr = `"${cellStr}"`
+        }
+        return cellStr
       })
-    })
+      csvRows.push(rowData)
+    }
 
-    const buffer = await wb.writeToBuffer()
-    const downloadURL = await this.imageService.uploadOtherFiles(
-      buffer,
-      'invoices',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    )
+    const csvContent = csvRows.map(row => row.join(',')).join('\n')
+
+    const buffer = Buffer.from(csvContent, 'utf-8')
+
+    const downloadURL = await this.imageService.uploadOtherFiles(buffer, 'invoices', 'text/csv')
 
     return downloadURL
   }
