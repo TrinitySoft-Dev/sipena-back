@@ -22,13 +22,15 @@ export class InvoiceService {
   ) {}
 
   async create(createInvoiceDto: CreateInvoiceDto) {
-    const { reference_week, customer, invoice_number } = createInvoiceDto
+    const { reference_week, customer } = createInvoiceDto
 
     let timesheets: any = await this.timesheetService.findTimesheetsByWeek(
       reference_week,
       customer,
       createInvoiceDto.type,
     )
+
+    const ids = timesheets.raw.map(timesheet => timesheet.timesheet_id)
 
     const newTimesheets = timesheets?.raw.map((timesheet: any) => {
       const countWorkers = timesheets.entities.find(entity => entity.id === timesheet.timesheet_id)
@@ -76,10 +78,10 @@ export class InvoiceService {
     }
 
     const csvContent = csvRows.map(row => row.join(',')).join('\n')
-
     const buffer = Buffer.from(csvContent, 'utf-8')
 
     const downloadURL = await this.imageService.uploadOtherFiles(buffer, 'invoices', 'text/csv')
+    this.timesheetService.closeTimesheet(ids)
 
     return downloadURL
   }
@@ -404,7 +406,7 @@ export class InvoiceService {
 
         columns[column.name].rows.push(valueReplacecell)
 
-        this.timesheetService.closeTimesheet(timesheet.id)
+        // this.timesheetService.closeTimesheet(timesheet.id)
       })
     })
 

@@ -265,12 +265,8 @@ export class TimesheetService {
     return payWorkers
   }
 
-  async closeTimesheet(id: number) {
-    const timesheet = await this.timesheetRepository.findOne({ where: { id } })
-    if (!timesheet) throw new NotFoundException('Timesheet not found')
-
-    timesheet.status_customer_pay = TimesheetStatusEnum.CLOSED
-    await this.timesheetRepository.save(timesheet)
+  async closeTimesheet(ids: number[]) {
+    await this.timesheetRepository.update(ids, { status_customer_pay: TimesheetStatusEnum.CLOSED })
   }
 
   async getMetricsTimesheet(startDate: string, endDate: string) {
