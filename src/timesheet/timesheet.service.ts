@@ -94,10 +94,9 @@ export class TimesheetService {
       })
 
       Object.assign(container, preparedData.containerData)
+      Object.assign(existingTimesheet, preparedData.timesheetData)
 
       await this.containerService.update(existingTimesheet.container.id, container)
-
-      Object.assign(existingTimesheet, preparedData.timesheetData)
       await this.timesheetRepository.save(existingTimesheet)
 
       const workersPayload = await this.processWorkersPayments({
@@ -105,6 +104,7 @@ export class TimesheetService {
         container: container,
         configuration: preparedData.configuration,
       })
+
       await this.timesheetWorkersService.updateMany(workersPayload)
 
       return { message: 'Timesheet updated successfully' }
@@ -179,6 +179,7 @@ export class TimesheetService {
           timesheet.day.toString(),
           timesheet.workers,
         )
+
         if (validNormalSchedule?.rate) {
           isValidSchedule = true
           nameSchedule = validNormalSchedule.name

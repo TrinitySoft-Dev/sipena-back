@@ -25,7 +25,7 @@ export class OvertimesWorkerService {
     if (hoursWorkerd > up_hours) {
       for (const overtime of overtimes) {
         if (diff <= overtime.hours) {
-          const payOvertimeWorker = overtime.rate * hoursWorkerd
+          const payOvertimeWorker = diff * overtime.rate
           return payOvertimeWorker
         }
       }

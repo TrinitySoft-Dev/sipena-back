@@ -366,8 +366,6 @@ export class InvoiceService {
       ]
       const formatDates = ['timesheet_day', 'invoice_date', 'due_date']
 
-      // console.log(timesheets)
-
       timesheets.forEach(timesheet => {
         let valueReplacecell = valueCell?.replace(/@path:([\w.]+)/g, (match, p1) => {
           if (!p1.includes('_')) p1 = `timesheet_${p1}`
