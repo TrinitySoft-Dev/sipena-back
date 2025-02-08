@@ -22,7 +22,7 @@ export class InvoiceService {
   ) {}
 
   async create(createInvoiceDto: CreateInvoiceDto) {
-    const { reference_week, customer } = createInvoiceDto
+    const { reference_week, customer, invoice_date, due_date, invoice_number } = createInvoiceDto
 
     let timesheets: any = await this.timesheetService.findTimesheetsByWeek(
       reference_week,
@@ -37,6 +37,8 @@ export class InvoiceService {
       return {
         ...timesheet,
         number_of_workers: countWorkers?.number_of_workers || 0,
+        invoice_date,
+        due_date,
       }
     })
 
@@ -44,9 +46,7 @@ export class InvoiceService {
     const columns = await this.resolverColumns(template, newTimesheets, createInvoiceDto)
 
     const headers = Object.keys(columns)
-
     const csvRows: string[][] = []
-
     csvRows.push(headers)
 
     const numRows = Math.max(...headers.map(header => columns[header].rows.length))
@@ -56,11 +56,8 @@ export class InvoiceService {
         let cell = columns[header].rows[i]
 
         if (typeof cell === 'string') {
-          cell = cell
-            .replace(/\\n/g, '\n')
-            .split('\n')
-            .map(line => line.trim())
-            .join('\n')
+          cell = cell.replace(/\\n/g, '\r\n')
+          cell = cell.replace(/\r?\n/g, '\r\n')
         }
         if (cell === undefined || cell === null) cell = ''
 
@@ -77,11 +74,11 @@ export class InvoiceService {
       csvRows.push(rowData)
     }
 
-    const csvContent = csvRows.map(row => row.join(',')).join('\n')
+    const csvContent = csvRows.map(row => row.join(',')).join('\r\n')
     const buffer = Buffer.from(csvContent, 'utf-8')
 
     const downloadURL = await this.imageService.uploadOtherFiles(buffer, 'invoices', 'text/csv')
-    this.timesheetService.closeTimesheet(ids)
+    // this.timesheetService.closeTimesheet(ids)
 
     return downloadURL
   }
@@ -369,6 +366,8 @@ export class InvoiceService {
       ]
       const formatDates = ['timesheet_day', 'invoice_date', 'due_date']
 
+      // console.log(timesheets)
+
       timesheets.forEach(timesheet => {
         let valueReplacecell = valueCell?.replace(/@path:([\w.]+)/g, (match, p1) => {
           if (!p1.includes('_')) p1 = `timesheet_${p1}`
@@ -386,7 +385,10 @@ export class InvoiceService {
 
           if (formatHours.includes(p1)) return DateTime.fromJSDate(value).toFormat('HH:mm')
           if (formatDates.includes(p1)) {
-            return DateTime.fromJSDate(value).toFormat('dd/MM/yyyy')
+            if (DateTime.fromJSDate(value).isValid) {
+              return DateTime.fromJSDate(value).toFormat('HH:mm')
+            }
+            return DateTime.fromISO(value).toFormat('dd/MM/yyyy')
           }
 
           if (value === null || value === undefined || value === '' || value === 'null ') {

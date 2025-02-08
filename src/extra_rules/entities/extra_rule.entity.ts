@@ -1,3 +1,4 @@
+import { SelectedField } from '@/common/decorators/selected-fields.decorator'
 import { ConditionGroup } from '@/condition_groups/entities/condition_group.entity'
 import { Rule } from '@/rules/entities/rule.entity'
 import {
@@ -18,6 +19,7 @@ export class ExtraRule {
   @PrimaryGeneratedColumn()
   id: number
 
+  @SelectedField()
   @Column({
     type: 'varchar',
     nullable: false,
@@ -31,6 +33,7 @@ export class ExtraRule {
   @ManyToMany(() => Rule, rule => rule.extra_rules)
   rules: Rule[]
 
+  @SelectedField()
   @Column({
     type: 'decimal',
     nullable: false,

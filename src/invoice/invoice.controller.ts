@@ -2,12 +2,11 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Res, UseGuards } fro
 import { InvoiceService } from './invoice.service'
 import { CreateInvoiceDto } from './dto/create-invoice.dto'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { Response } from 'express'
 import { AuthGuard } from '@/common/guards/auth.guard'
 
 @ApiBearerAuth()
-// @UseGuards(AuthGuard)
-// @ApiTags('Invoice')
+@UseGuards(AuthGuard)
+@ApiTags('Invoice')
 @Controller('invoice')
 export class InvoiceController {
   constructor(private readonly invoiceService: InvoiceService) {}
