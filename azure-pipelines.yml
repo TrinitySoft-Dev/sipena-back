@@ -1,0 +1,26 @@
+trigger:
+- main
+
+pool:
+  name: Default
+  demands: agent.name -equals JHONATAN
+
+steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '14.x'  
+    displayName: 'Instalar Node.js'
+
+  - script: npm install
+    displayName: 'Instalar dependencias'
+
+  - script: npm run build
+    displayName: 'Construir proyecto'
+
+  - task: vercel-deployment-task@1
+    inputs:
+      vercelProjectId: 'prj_OdWAdCFMFGJEpKLqMMpPaZ2vYn6n'
+      vercelOrgId: 'team_JWekpGlW3fXCpEY22RCS5QHh'
+      vercelToken: oAu9amtIL0B5ZquCY518lm92
+      production: true
+    displayName: 'Desplegar en Vercel'
